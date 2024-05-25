@@ -8,8 +8,8 @@ import {
   import { Request } from 'express';
   import { Reflector } from '@nestjs/core';
   import { IS_PUBLIC_KEY } from './decorator/public.decorator';
-  import { jwtConstants } from './constants';
-  
+  import * as dotenv from 'dotenv';
+  dotenv.config();
   @Injectable()
   export class AuthGuard implements CanActivate {
     constructor(
@@ -33,7 +33,7 @@ import {
       }
       try {
         const payload = await this.jwtService.verifyAsync(token, {
-          secret: jwtConstants.secret,
+          secret: process.env.JWT_AT_SECRET,
         });
         // 💡 We're assigning the payload to the request object here
         // so that we can access it in our route handlers

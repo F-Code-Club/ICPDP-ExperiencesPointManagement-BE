@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { UsersDto } from 'src/dto/users.dto';
 import { AuthGuard } from './auth.guard';
+import { RefreshToken } from 'src/dto/refreshToken.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -13,15 +14,20 @@ export class AuthController {
     @Public()
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    signIn(@Body(new ValidationPipe()) userDto: UsersDto) {
+    async signIn(@Body(new ValidationPipe()) userDto: UsersDto) {
         return this.authService.signIn(userDto.username, userDto.password);
     }
 
     @UseGuards(AuthGuard)
     @Get('profile')
     @ApiBearerAuth()
-    getProfile(@Request() req) {
+    async getProfile(@Request() req) {
         return req.user;
     }
 
+    @Public()
+    @Post('refresh')
+    async refreshToken(@Body(new ValidationPipe()) refreshTokenDto: RefreshToken) {
+        return await this.authService.refreshToken(refreshTokenDto.refreshToken);
+    }
 }
