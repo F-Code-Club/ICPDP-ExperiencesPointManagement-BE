@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   epm-backend:
-    image: be-epm-api:latest
+    image: docker-registry-ops.f-code.tech/be-epm-api
     container_name: epm-api
     environment:
       - JWT_AT_SECRET=${JWT_AT_SECRET}
