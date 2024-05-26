@@ -1,0 +1,77 @@
+name: Build and Deploy BE to Server
+on:
+  push:
+    branches:
+      - main
+      - japao/cicd
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DOCKER_IMAGE_NAME: be-epm-api
+  DOCKER_TAG: latest
+
+jobs:
+  be-build:
+    runs-on: [self-hosted, Linux, X64, fcode-japao-runner]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube Code Quality
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to F-Code Registry
+        run: |
+          echo "${{ secrets.F_CODE_DOCKER_PASS }}" | docker login ${{ secrets.F_CODE_DOCKER_REGISTRY_URL}} -u ${{ secrets.F_CODE_DOCKER_USER }} --password-stdin
+          docker info
+
+      - name: Build and push the image to F-Code Registry
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.F_CODE_DOCKER_REGISTRY_URL}}/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }}
+
+      - name: List Docker images
+        run: docker images
+
+  staging-deploy:
+    name: Deploy BE to F-Code Server
+    runs-on: fcode-japao-runner
+    needs: be-build
+    env:
+      JWT_AT_SECRET: ${{secrets.JWT_AT_SECRET}}
+      JWT_RT_SECRET: ${{secrets.JWT_RT_SECRET}}
+      DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+      DB_DATABASE: ${{secrets.DB_DATABASE}}
+      BE_EXPOSED_PORT: ${{secrets.BE_EXPOSED_PORT}}
+    steps:
+      - name: Checkout Develop
+        uses: actions/checkout@v3
+
+      - name: Log in to F-Code Registry
+        run: |
+          echo ${{ secrets.F_CODE_DOCKER_PASS }} | docker login ${{ secrets.F_CODE_DOCKER_REGISTRY_URL}} -u ${{ secrets.F_CODE_DOCKER_USER }} --password-stdin
+          docker info
+
+      - name: Clean Container, Image And Prepare For Deploy
+        run: docker compose -f docker-compose.yaml -p ${{ env.DOCKER_IMAGE_NAME }} down --rmi all -v
+
+      - name: Deploy FE
+        run: docker compose -f docker-compose.yaml -p ${{ env.DOCKER_IMAGE_NAME }} up -d

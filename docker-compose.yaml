@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  epm-backend:
+    image: be-epm-api:latest
+    container_name: epm-api
+    environment:
+      - JWT_AT_SECRET=${JWT_AT_SECRET}
+      - JWT_RT_SECRET=${JWT_RT_SECRET}
+      - DB_HOST=epm-mysql
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+    ports:
+      - ${BE_EXPOSED_PORT}:3000
+    depends_on:
+      - mysql
+    networks: 
+      - epm-networks
+
+  epm-mysql:
+    image: mysql:8.0
+    container_name: epm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - epm-networks
+
+volumes:
+  mysql_data:
+networks:
+  epm-networks:
