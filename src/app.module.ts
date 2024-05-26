@@ -25,16 +25,19 @@ import { Events } from './models/event/event.entity';
 import { EventHttpModule } from './models/event/event-http.module';
 import { EventStudent } from './models/eventStudent/event-student.entity';
 import { EventStudentHttpModule } from './models/eventStudent/event-student-http.module';
+import { AuthModule } from './auth/auth.module';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.DB_HOST,
       port: 3306,
-      username: 'root',
-      password: '13022014',
-      database: 'experimentpointmanagement',
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       entities: [Users, 
                  RoleClbs, 
                  RoleDepartments, 
@@ -58,7 +61,8 @@ import { EventStudentHttpModule } from './models/eventStudent/event-student-http
     ClbsHttpModule,
     DepartmentsHttpModule,
     EventHttpModule,
-    EventStudentHttpModule
+    EventStudentHttpModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
