@@ -25,7 +25,7 @@ export class UsersDto {
    @MaxLength(25, {
     message: 'This password is too long',
    })
-   password: string;
+   password?: string;
 
    avt?: string;
 
