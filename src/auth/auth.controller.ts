@@ -29,7 +29,7 @@ export class AuthController {
 
     @Public()
     @Post('refresh')
-    async refreshToken(@Body(new ValidationPipe()) refreshTokenDto: RefreshToken) {
-        return await this.authService.refreshToken(refreshTokenDto.refreshToken);
+    async refreshToken(@Body(new ValidationPipe()) refreshTokenDto: RefreshToken, @Res() res: Response) {
+        return res.status(200).json(new ApiResponseDto(await this.authService.refreshToken(refreshTokenDto.refreshToken), 'Refresh successfully'));
     }
 }
