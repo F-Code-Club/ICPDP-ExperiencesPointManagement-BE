@@ -23,7 +23,7 @@ export class ValidationPipe implements PipeTransform {
         const constraintsArray = Object.keys(constraints).map(key => ({ [key]: constraints[key] }));
         return { [error.property]: constraintsArray };
       });
-      throw new BadRequestException({ data: null, message: 'Wrong username or password!' }); // response the error of the request
+      throw new BadRequestException({ data: null, message: 'Username or password is incorrect' }); // response the error of the request
     }
 
     return value;
