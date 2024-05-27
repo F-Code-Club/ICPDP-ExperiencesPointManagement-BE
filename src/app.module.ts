@@ -27,9 +27,6 @@ import { EventStudent } from './models/eventStudent/event-student.entity';
 import { EventStudentHttpModule } from './models/eventStudent/event-student-http.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { MyExceptionFilter } from './utils/my-exception.filter';
-import { ValidationPipe } from './utils/validation.pipe';
 dotenv.config();
 
 @Module({
@@ -68,16 +65,7 @@ dotenv.config();
     AuthModule
   ],
   controllers: [AppController],
-  providers: [AppService,
-    {
-      provide: APP_FILTER,
-      useClass: MyExceptionFilter
-    }, 
-    {
-      provide: APP_PIPE,
-      useClass: ValidationPipe
-    }
-  ],
+  providers: [AppService],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {};
