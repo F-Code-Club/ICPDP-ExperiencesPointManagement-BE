@@ -24,7 +24,7 @@ export class AuthController {
     @Get('profile')
     @ApiBearerAuth()
     async getProfile(@Request() req) {
-        return req.user;
+        return new ApiResponseDto(req.user, 'Get profile successfully');
     }
 
     @Public()
