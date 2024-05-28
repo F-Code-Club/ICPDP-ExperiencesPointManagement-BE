@@ -45,8 +45,7 @@ export class UsersService {
         const responseUser: Users = await this.userRepository.save(userDto);
         const responseData: UsersDto = {
             username: responseUser.username,
-            password: responseUser.password,
-            role: responseUser.role === 'admin' ? Role.Admin : Role.User
+            role: responseUser.role === 'admin' ? Role.Admin : Role.User,
         };
         return responseData;
     }
