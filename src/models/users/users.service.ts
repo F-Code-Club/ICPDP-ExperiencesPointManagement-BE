@@ -34,9 +34,9 @@ export class UsersService {
             return null;
         }
 
-        if (!userDto.role) {
+        if (!userDto.role || (userDto.role !== "admin" && userDto.role !== "user")) {
             userDto.role = Role.User;
-        }
+        }        
 
         if (!userDto.avt) {
             userDto.avt = 'not have avt yet';
