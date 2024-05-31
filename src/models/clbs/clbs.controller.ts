@@ -18,6 +18,9 @@ export class ClbsController {
     @Post('/create-clbs')
     @ApiBearerAuth()
     async createClub(@Body() clbsDto: ClbsDto, @Res() res: Response) {
+        if (await this.clbsService.isExistName(clbsDto.name)) {
+            return res.status(403).json(new ApiResponseDto(null, 'This name was taken'));
+        }
         const responseClbs = await this.clbsService.createClbs(clbsDto);
         if (responseClbs === null) {
             return res.status(403).json(new ApiResponseDto(responseClbs, 'Create clb fail'));

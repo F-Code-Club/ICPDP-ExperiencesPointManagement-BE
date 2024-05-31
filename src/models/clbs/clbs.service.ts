@@ -32,4 +32,17 @@ export class ClbsService {
             avt: savedClbs.avt,
         }
     }
+
+    async isExistName(name: string): Promise<boolean> {
+        let check: boolean = false;
+        const existClb = await this.clbsRepository.findOne({
+            where: {
+                name: name,
+            }
+        });
+        if (existClb) {
+            check = true;
+        }
+        return check;
+    }
 }
