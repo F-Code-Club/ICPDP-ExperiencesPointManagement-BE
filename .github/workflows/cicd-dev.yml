@@ -3,12 +3,13 @@ on:
   push:
     branches:
       - develop
+      - japao/cicd
   workflow_dispatch:
     
 #Global Envs
 env:
   DOCKER_IMAGE_NAME: epm-api-be
-  DOCKER_IMAGE_TAG: prod
+  DOCKER_IMAGE_TAG: dev
 
 jobs:
   build:
