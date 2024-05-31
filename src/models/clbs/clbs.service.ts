@@ -15,6 +15,10 @@ export class ClbsService {
     [POST]: create-clbs
     */
     async createClbs(clbsDto: ClbsDto): Promise<ClbsDto | null> {
+        if (!clbsDto.name || clbsDto.name === "") {
+            return null;
+        }
+
         const newClbs = this.clbsRepository.create(clbsDto);
 
         if (!newClbs.avt) {
