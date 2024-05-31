@@ -14,7 +14,7 @@ services:
     ports:
       - ${BE_EXPOSED_PORT}:3000
     depends_on:
-      - epm-mysql
+      - epm-mysql-prod
     networks: 
       - epm-network-prod
     restart: unless-stopped
