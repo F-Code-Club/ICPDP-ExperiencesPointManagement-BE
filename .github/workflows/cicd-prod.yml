@@ -5,26 +5,10 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  #Docker
-  DOCKER_IMAGE_NAME: epm-api-be
-  DOCKER_IMAGE_TAG: prod
-  DOCKER_REGISTRY_URL: ${{secrets.F_CODE_DOCKER_REGISTRY_URL}}
-  DOCKER_DB_MOUNTPOINT: ${{secrets.DOCKER_DB_MOUNT_POINT_PROD}}
-  BE_EXPOSED_PORT: ${{secrets.BE_EXPOSED_PORT_PROD}}
-  DB_EXPOSED_PORT: ${{secrets.DB_EXPOSED_PORT_PROD}}
-  #Sonar
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-  #JWT
-  JWT_AT_SECRET: ${{secrets.JWT_AT_SECRET_PROD}}
-  JWT_RT_SECRET: ${{secrets.JWT_RT_SECRET_PROD}}
-  #Database
-  DB_PASSWORD: ${{secrets.DB_PASSWORD_PROD}}
-  DB_DATABASE: ${{secrets.DB_DATABASE_PROD}}
+
 jobs:
   build:
-    runs-on: fcode-japao-runner
+    runs-on: ubuntu-22.04
     
     steps:
       - name: Checkout repository
@@ -33,6 +17,9 @@ jobs:
       #Initialize code scanning on F-Code SonarQube Server
       - name: SonarQube Code Scan
         uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       # SonarQube will check if the code is ready for image build and push. 
       # If the code exists awful codes or vulnerabilities, this workflow will fail instantly.
@@ -57,6 +44,20 @@ jobs:
           tags: ${{ secrets.F_CODE_DOCKER_REGISTRY_URL}}/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
   deploy:
     runs-on: fcode-japao-runner
+    env:
+    #Docker
+      DOCKER_IMAGE_NAME: epm-api-be
+      DOCKER_IMAGE_TAG: prod
+      DOCKER_REGISTRY_URL: ${{secrets.F_CODE_DOCKER_REGISTRY_URL}}
+      DOCKER_DB_MOUNTPOINT: ${{secrets.DOCKER_DB_MOUNT_POINT_PROD}}
+      BE_EXPOSED_PORT: ${{secrets.BE_EXPOSED_PORT_PROD}}
+      DB_EXPOSED_PORT: ${{secrets.DB_EXPOSED_PORT_PROD}}
+      #JWT
+      JWT_AT_SECRET: ${{secrets.JWT_AT_SECRET_PROD}}
+      JWT_RT_SECRET: ${{secrets.JWT_RT_SECRET_PROD}}
+      #Database
+      DB_PASSWORD: ${{secrets.DB_PASSWORD_PROD}}
+      DB_DATABASE: ${{secrets.DB_DATABASE_PROD}}
     needs: build
 
     steps:
