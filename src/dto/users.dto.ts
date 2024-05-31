@@ -31,8 +31,5 @@ export class UsersDto {
 
    iv?: string;
 
-   @ApiProperty({
-      example: 'user'
-   })
    role?: string;
 };
