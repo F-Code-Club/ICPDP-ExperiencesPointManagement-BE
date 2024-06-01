@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClbsService } from './clbs.service';
 import { ClbsDto } from 'src/dto/clbs.dto';
@@ -33,8 +33,8 @@ export class ClbsController {
 
     @Roles(Role.Admin, Role.Clb)
     @Put('/:id')
-    async updateClb(@Body() clbsDto: ClbsDto, @Param('id') id: string, @Res() res: Response) {
-        const responseClbs = await this.clbsService.updateClbs(clbsDto, id);
+    async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('id') id: string, @Res() res: Response) {
+        const responseClbs = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.sub);
         if (!responseClbs) {
             return res.status(404).json(new ApiResponseDto(responseClbs, 'Clb Not Found'));
         } else {
