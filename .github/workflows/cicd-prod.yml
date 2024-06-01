@@ -75,7 +75,7 @@ jobs:
         run: docker compose -f "docker-compose-${{env.DOCKER_IMAGE_TAG}}.yaml" -p "${{ env.DOCKER_IMAGE_NAME }}-${{env.DOCKER_IMAGE_TAG}}" down --rmi all -v
 
       - name: Deploy FE
-        run: docker compose -f "docker-compose-${{env.DOCKER_IMAGE_TAG}}.yaml" -p "${{ env.DOCKER_IMAGE_NAME }}" up -d
+        run: docker compose -f "docker-compose-${{env.DOCKER_IMAGE_TAG}}.yaml" -p "${{ env.DOCKER_IMAGE_NAME }}-${{env.DOCKER_IMAGE_TAG}}" up -d
 
         
 
