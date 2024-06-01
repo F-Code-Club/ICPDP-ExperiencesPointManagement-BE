@@ -8,19 +8,22 @@ export class Clbs {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @Column()
     avt: string;
 
+    @Column()
+    userId: string;
+
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.clb)
-    pointBoard: PointBoard[]
+    pointBoard?: PointBoard[]
 
     @ManyToMany(() => Students)
     @JoinTable()
-    students: Students[]
+    students?: Students[]
 
     @OneToMany(() => Events, (event) => event.clb)
-    event: Events[]
+    event?: Events[]
 }

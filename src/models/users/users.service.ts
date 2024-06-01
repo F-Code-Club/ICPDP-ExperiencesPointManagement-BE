@@ -33,10 +33,7 @@ export class UsersService {
         if (checkUser) {
             return null;
         }
-
-        if (!userDto.role) {
-            userDto.role = Role.User;
-        }
+      
 
         if (!userDto.avt) {
             userDto.avt = 'not have avt yet';
@@ -45,8 +42,7 @@ export class UsersService {
         const responseUser: Users = await this.userRepository.save(userDto);
         const responseData: UsersDto = {
             username: responseUser.username,
-            password: responseUser.password,
-            role: responseUser.role === 'admin' ? Role.Admin : Role.User
+            role: responseUser.role,
         };
         return responseData;
     }
