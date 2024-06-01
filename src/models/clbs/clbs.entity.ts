@@ -14,6 +14,9 @@ export class Clbs {
     @Column()
     avt: string;
 
+    @Column()
+    userId: string;
+
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.clb)
     pointBoard?: PointBoard[]
 
