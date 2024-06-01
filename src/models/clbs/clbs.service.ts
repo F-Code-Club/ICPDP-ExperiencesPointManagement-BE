@@ -14,7 +14,7 @@ export class ClbsService {
     /*
     [POST]: create-clbs
     */
-    async createClbs(clbsDto: ClbsDto): Promise<ClbsDto | null> {
+    async createClbs(clbsDto: ClbsDto): Promise<Clbs | null> {
         if (!clbsDto.name || clbsDto.name === "") {
             return null;
         }
@@ -28,21 +28,46 @@ export class ClbsService {
         const savedClbs = await this.clbsRepository.save(newClbs);
 
         return {
+            id: savedClbs.id,
             name: savedClbs.name,
             avt: savedClbs.avt,
         }
     }
 
-    async isExistName(name: string): Promise<boolean> {
-        let check: boolean = false;
+    async updateClbs(clbsDto: ClbsDto, id: string): Promise<Clbs | null> {
+        const clb = await this.findById(id);
+        
+        if (!clb) {
+            return null;
+        }
+
+        clb.avt = clbsDto.avt || clb.avt;
+        clb.name = clbsDto.name || clb.name;
+
+        const updatedClb = await this.clbsRepository.save(clb);
+
+        return {
+            id: updatedClb.id,
+            name: updatedClb.name,
+            avt: updatedClb.avt
+        };
+    }
+
+    async findByName(name: string): Promise<Clbs | null> {
         const existClb = await this.clbsRepository.findOne({
             where: {
                 name: name,
             }
         });
-        if (existClb) {
-            check = true;
-        }
-        return check;
+        return existClb;
+    }
+
+    async findById(id: string): Promise<Clbs | null> {
+        const existClb = await this.clbsRepository.findOne({
+            where: {
+                id: id,
+            }
+        });
+        return existClb;
     }
 }

@@ -12,7 +12,7 @@ export class UnauthorizedExceptionFilter implements ExceptionFilter {
       .status(HttpStatus.UNAUTHORIZED)
       .json({
         data: null,
-        message: 'Unauthorized'
+        message: exception.message
       });
   }
 }
