@@ -61,7 +61,7 @@ export class ClbsService {
                 userId: updatedClb.userId,
             };
         } else {
-            throw new ForbiddenException('Your have no right to update');
+            throw new ForbiddenException('You have no right to update');
         }
     }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClbsService } from './clbs.service';
 import { ClbsDto } from 'src/dto/clbs.dto';
@@ -7,11 +7,13 @@ import { Response } from 'express';
 import { Role } from 'src/enum/roles/role.enum';
 import { Roles } from 'src/enum/roles/role.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';
 
 @ApiTags('Clbs')
 @Controller('clbs')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
+@UseFilters(ForbiddenExceptionFilter)
 export class ClbsController {
     constructor (
         private readonly clbsService: ClbsService
