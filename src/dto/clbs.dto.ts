@@ -1,12 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
 
 export class ClbsDto {
     @ApiProperty({
         example: 'F-Code'
     })
-    @IsNotEmpty()
     name: string;
 
     avt?: string;
+
+    @ApiProperty({
+        example: '4269e440-fd43-4c8c-b227-1d769bdea093'
+    })
+    userId: string;
 }

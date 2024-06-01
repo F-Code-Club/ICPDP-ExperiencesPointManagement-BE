@@ -1,9 +1,11 @@
 import { Body, Controller, Post, Res, ValidationPipe } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UsersDto } from 'src/dto/users.dto';
-import { ResponseData } from 'src/global/globalClass';
 import { Public } from 'src/auth/decorator/public.decorator';
+import { Response } from 'express';
+import { ApiResponseDto, SwaggerApiResponse } from 'src/utils/api-response.dto';
+import { ResponseRegisterUserDto } from './response/response.dto';
 
 @ApiTags('User')
 @Controller('users')
@@ -14,12 +16,17 @@ export class UsersController {
 
     @Public()
     @Post('/register')
-    async register(@Body(new ValidationPipe) userDto: UsersDto): Promise<ResponseData<UsersDto>> {
+    @ApiResponse({
+        status: 201,
+        description: 'Register successfully',
+        type: ResponseRegisterUserDto
+    })
+    async register(@Body(new ValidationPipe) userDto: UsersDto, @Res() res: Response){
         const checkUser = await this.usersService.createUser(userDto);
         if (checkUser === null) {
-            return new ResponseData<UsersDto>(null, 403, 'This username was taken!!!');
+            return res.status(403).json(new ApiResponseDto(checkUser, 'This username was taken'));
         } else {
-            return new ResponseData<UsersDto>(checkUser, 201, 'Register successfully');
+            return res.status(201).json(new ApiResponseDto(checkUser, 'Register successfully'));
         }
     }
 }

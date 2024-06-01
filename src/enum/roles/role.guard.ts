@@ -3,6 +3,8 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './role.decorator';
 import { Role } from './role.enum';
 import { JwtService } from '@nestjs/jwt';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -12,7 +14,7 @@ export class RolesGuard implements CanActivate {
   ) {}
 
     canActivate(context: ExecutionContext): boolean {
-        const requiredRoles = this.reflector.getAllAndOverride<Role>(ROLES_KEY, [
+        const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
         context.getHandler(),
         context.getClass(),
         ]);
@@ -27,7 +29,9 @@ export class RolesGuard implements CanActivate {
         }
 
         try {
-            const decodedToken = this.jwtService.verify(token);
+            const decodedToken = this.jwtService.verify(token, {
+                secret: process.env.JWT_AT_SECRET,
+            });
             request.user = decodedToken;
         } catch (error) {
             throw new UnauthorizedException('Invalid JWT token');
@@ -36,7 +40,7 @@ export class RolesGuard implements CanActivate {
         if (!user || !user.role) { 
             return false; 
         }
-        return user.role === 'admin'; 
+        return requiredRoles.some(role => role === user.role);
     }
 
     private extractTokenFromHeader(request: Request): string | undefined {

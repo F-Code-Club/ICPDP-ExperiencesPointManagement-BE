@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, MaxLength, MinLength } from "class-validator";
 
-export class UsersDto {
+export class SignInDto {
    @ApiProperty({
     example: 'test123',
     description: 'Username must be unique'
@@ -31,8 +31,5 @@ export class UsersDto {
 
    iv?: string;
 
-   @ApiProperty({
-      example: 'admin'
-   })
-   role: string;
+   role?: string;
 };
