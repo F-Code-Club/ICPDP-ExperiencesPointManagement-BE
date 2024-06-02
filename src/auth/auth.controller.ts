@@ -32,4 +32,10 @@ export class AuthController {
     async refreshToken(@Body(new ValidationPipe()) refreshTokenDto: RefreshToken, @Res() res: Response) {
         return res.status(200).json(new ApiResponseDto(await this.authService.refreshToken(refreshTokenDto.refreshToken), 'Refresh successfully'));
     }
+
+    @Get('logout')
+    @ApiBearerAuth()
+    async logOut(@Request() req, @Res() res: Response) {
+        return res.status(200).json(new ApiResponseDto(await this.authService.logOut(req.user.sub), 'Log out successfully'));
+    }
 }
