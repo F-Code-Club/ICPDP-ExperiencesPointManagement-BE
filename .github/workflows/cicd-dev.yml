@@ -52,15 +52,15 @@ jobs:
     env:
         #Docker
         DOCKER_REGISTRY_URL: ${{secrets.F_CODE_DOCKER_REGISTRY_URL}}
-        DOCKER_DB_MOUNTPOINT: ${{secrets.DOCKER_DB_MOUNT_POINT_PROD}}
-        BE_EXPOSED_PORT: ${{secrets.BE_EXPOSED_PORT_PROD}}
-        DB_EXPOSED_PORT: ${{secrets.DB_EXPOSED_PORT_PROD}}
+        DOCKER_DB_MOUNTPOINT: ${{secrets.DOCKER_DB_MOUNT_POINT_DEV}}
+        BE_EXPOSED_PORT: ${{secrets.BE_EXPOSED_PORT_DEV}}
+        DB_EXPOSED_PORT: ${{secrets.DB_EXPOSED_PORT_DEV}}
         #JWT
-        JWT_AT_SECRET: ${{secrets.JWT_AT_SECRET_PROD}}
-        JWT_RT_SECRET: ${{secrets.JWT_RT_SECRET_PROD}}
+        JWT_AT_SECRET: ${{secrets.JWT_AT_SECRET_DEV}}
+        JWT_RT_SECRET: ${{secrets.JWT_RT_SECRET_DEV}}
         #Database
-        DB_PASSWORD: ${{secrets.DB_PASSWORD_PROD}}
-        DB_DATABASE: ${{secrets.DB_DATABASE_PROD}}
+        DB_PASSWORD: ${{secrets.DB_PASSWORD_DEV}}
+        DB_DATABASE: ${{secrets.DB_DATABASE_DEV}}
     needs: build
 
     steps:
