@@ -20,7 +20,7 @@ export class ClbsController {
     ) {};
 
     @Roles(Role.Admin)
-    @Post('/create-clubs')
+    @Post()
     async createClub(@Body() clbsDto: ClbsDto, @Res() res: Response) {
         if (await this.clbsService.findByName(clbsDto.name)) {
             return res.status(403).json(new ApiResponseDto(null, 'This name was taken'));
