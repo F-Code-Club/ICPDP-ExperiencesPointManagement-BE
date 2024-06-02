@@ -33,10 +33,7 @@ export class UsersService {
         if (checkUser) {
             return null;
         }
-
-        if (!userDto.role) {
-            userDto.role = Role.User;
-        }
+      
 
         if (!userDto.avt) {
             userDto.avt = 'not have avt yet';
@@ -45,7 +42,7 @@ export class UsersService {
         const responseUser: Users = await this.userRepository.save(userDto);
         const responseData: UsersDto = {
             username: responseUser.username,
-            role: responseUser.role === 'admin' ? Role.Admin : Role.User,
+            role: responseUser.role,
         };
         return responseData;
     }
@@ -67,6 +64,30 @@ export class UsersService {
             }
         }
         return null;
+    }
+
+    async saveRefreshToken(userId: string, refreshToken: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        checkUser.refreshToken = refreshToken;
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
+    async deleteRefreshToken(userId: string) {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        checkUser.refreshToken = "";
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
     }
 
     async findById(userId: string): Promise<Users | null> {

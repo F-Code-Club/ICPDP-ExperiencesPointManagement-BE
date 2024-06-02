@@ -19,7 +19,15 @@ export class AuthService {
             throw new  UnauthorizedException();
         }
         const token: Tokens = await this.getTokens(user.id, user.username, user.role);
+
+        const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, token.refresh_token);
+
         return token;
+    }
+
+    async logOut(userId: string) {
+        const responseUser = await this.usersService.deleteRefreshToken(userId);
+        return null;
     }
 
     async getTokens(userId: string, username: string, role: string): Promise<Tokens> {
@@ -32,7 +40,7 @@ export class AuthService {
         const [at, rt] = await Promise.all([
             this.jwtService.signAsync(payload, {
                 secret: process.env.JWT_AT_SECRET,
-                expiresIn: '30s',
+                expiresIn: '30m',
             }),
             this.jwtService.signAsync(payload, {
                 secret: process.env.JWT_RT_SECRET,
@@ -57,6 +65,8 @@ export class AuthService {
                 throw new UnauthorizedException();
             }
             const tokens = await this.getTokens(user.id, user.username, user.role);
+
+            const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, tokens.refresh_token);
 
             return tokens;
         } catch(e) {
