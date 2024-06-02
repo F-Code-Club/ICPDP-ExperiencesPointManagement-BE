@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, Put, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClbsService } from './clbs.service';
 import { ClbsDto } from 'src/dto/clbs.dto';
@@ -18,6 +18,17 @@ export class ClbsController {
     constructor (
         private readonly clbsService: ClbsService
     ) {};
+
+    @Roles(Role.Admin, Role.Clb)
+    @Get('/:id')
+    async getClubById(@Request() req, id: string, @Res() res: Response) {
+        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.sub);        
+        if (!responseClb) {
+            return res.status(404).json(new ApiResponseDto(responseClb, 'Clb Not Found'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseClb, 'Get club successfully'));
+        }
+    }
 
     @Roles(Role.Admin)
     @Post()
