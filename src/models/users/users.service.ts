@@ -66,6 +66,30 @@ export class UsersService {
         return null;
     }
 
+    async saveRefreshToken(userId: string, refreshToken: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        checkUser.refreshToken = refreshToken;
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
+    async deleteRefreshToken(userId: string) {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        checkUser.refreshToken = "";
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
     async findById(userId: string): Promise<Users | null> {
         const res = await this.userRepository.findOne({
             where:  {
