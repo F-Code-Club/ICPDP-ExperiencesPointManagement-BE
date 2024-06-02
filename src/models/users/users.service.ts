@@ -39,9 +39,12 @@ export class UsersService {
             userDto.avt = 'not have avt yet';
         }
 
+        userDto.refreshToken = "";
+
         const responseUser: Users = await this.userRepository.save(userDto);
         const responseData: UsersDto = {
             username: responseUser.username,
+            email: responseUser.email,
             role: responseUser.role,
         };
         return responseData;

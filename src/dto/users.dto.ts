@@ -14,6 +14,12 @@ export class UsersDto {
     message: 'This username is too long',
    })
    username: string;
+
+   @ApiProperty({
+      example: 'test123@gmail.com',
+      description: 'Email must be unique'
+   })
+   email: string;
    
    @ApiProperty({
     example: 'password123',
@@ -35,4 +41,6 @@ export class UsersDto {
       example: 'admin'
    })
    role: string;
+
+   refreshToken?: string;
 };
