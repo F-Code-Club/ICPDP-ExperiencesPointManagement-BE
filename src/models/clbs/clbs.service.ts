@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
 
 @Injectable()
@@ -63,6 +63,15 @@ export class ClbsService {
         } else {
             throw new ForbiddenException('You have no right to update');
         }
+    }
+
+    async deleteClbs(id: string): Promise<Number | null> {
+        const checkClb = await this.findById(id);
+        if (!checkClb) {
+            return null;
+        }
+        const res = await this.clbsRepository.delete(id);
+        return res.affected;
     }
 
     async findByName(name: string): Promise<Clbs | null> {
