@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  epm-backend-prod:
+    image: "${DOCKER_REGISTRY_URL}/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+    container_name: epm-api-be-prod
+    environment:
+      - JWT_AT_SECRET=${JWT_AT_SECRET}
+      - JWT_RT_SECRET=${JWT_RT_SECRET}
+      - DB_HOST=epm-mysql-prod
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+    ports:
+      - ${BE_EXPOSED_PORT}:3000
+    depends_on:
+      - epm-mysql-prod
+    networks: 
+      - epm-network-prod
+    restart: unless-stopped
+
+  epm-mysql-prod:
+    image: mysql:8.0
+    container_name: epm-mysql-prod
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - "${DB_EXPOSED_PORT}:3306"
+    volumes:
+      - ${DOCKER_DB_MOUNTPOINT}:/var/lib/mysql
+    networks:
+      - epm-network-prod
+    restart: unless-stopped
+
+networks:
+  epm-network-prod:
