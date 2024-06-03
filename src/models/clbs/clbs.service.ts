@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
 
 @Injectable()
@@ -59,7 +59,7 @@ export class ClbsService {
         const savedClbs = await this.clbsRepository.save(newClbs);
 
         return {
-            id: savedClbs.id,
+            clubId: savedClbs.clubId,
             name: savedClbs.name,
             avt: savedClbs.avt,
             userId: savedClbs.userId
@@ -89,7 +89,7 @@ export class ClbsService {
             const updatedClb = await this.clbsRepository.save(clb);
 
             return {
-                id: updatedClb.id,
+                clubId: updatedClb.clubId,
                 name: updatedClb.name,
                 avt: updatedClb.avt,
                 userId: updatedClb.userId,
@@ -123,7 +123,7 @@ export class ClbsService {
     async findById(id: string): Promise<Clbs | null> {
         const existClb = await this.clbsRepository.findOne({
             where: {
-                id: id,
+                clubId: id,
             }
         });
         return existClb;

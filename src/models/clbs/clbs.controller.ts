@@ -67,7 +67,7 @@ export class ClbsController {
             return;
         }
         const responseUser = await this.usersService.createUser(usersDto);
-        const responseClbs = await this.clbsService.createClbs(clbsDto, responseUser.id);
+        const responseClbs = await this.clbsService.createClbs(clbsDto, responseUser.userId);
         if (responseClbs === null) {
             return res.status(400).json(new ApiResponseDto([responseUser, responseClbs], 'Create clb fail'));
         } else {

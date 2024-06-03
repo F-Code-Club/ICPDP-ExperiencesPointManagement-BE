@@ -18,9 +18,9 @@ export class AuthService {
         if (user == null) {
             throw new  ForbiddenException('Incorrect username or password');
         }
-        const token: Tokens = await this.getTokens(user.id, user.username, user.role);
+        const token: Tokens = await this.getTokens(user.userId, user.username, user.role);
 
-        const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, token.refreshToken);
+        const saveRefreshToken = await this.usersService.saveRefreshToken(user.userId, token.refreshToken);
 
         return token;
     }
@@ -64,9 +64,9 @@ export class AuthService {
             if (!user) {
                 throw new UnauthorizedException();
             }
-            const tokens = await this.getTokens(user.id, user.username, user.role);
+            const tokens = await this.getTokens(user.userId, user.username, user.role);
 
-            const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, tokens.refreshToken);
+            const saveRefreshToken = await this.usersService.saveRefreshToken(user.userId, tokens.refreshToken);
 
             return tokens;
         } catch(e) {

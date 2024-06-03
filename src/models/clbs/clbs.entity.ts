@@ -6,7 +6,7 @@ import { Events } from "../event/event.entity";
 @Entity()
 export class Clbs {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    clubId: string;
 
     @Column({ unique: true })
     name: string;

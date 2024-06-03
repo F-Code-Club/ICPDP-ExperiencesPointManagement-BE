@@ -42,7 +42,7 @@ export class UsersService {
 
         const responseUser: Users = await this.userRepository.save(userDto);
         const responseData: Users = {
-            id: responseUser.id,
+            userId: responseUser.userId,
             username: responseUser.username,
             email: responseUser.email,
             role: responseUser.role,
@@ -112,7 +112,7 @@ export class UsersService {
     async findById(userId: string): Promise<Users | null> {
         const res = await this.userRepository.findOne({
             where:  {
-                id: userId
+                userId: userId
             }
         });
 
