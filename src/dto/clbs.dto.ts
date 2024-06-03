@@ -8,8 +8,5 @@ export class ClbsDto {
 
     avt?: string;
 
-    @ApiProperty({
-        example: '4269e440-fd43-4c8c-b227-1d769bdea093'
-    })
-    userId: string;
+    userId?: string;
 }

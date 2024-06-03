@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/models/users/users.service';
 import { Tokens } from './type/Tokens.type';
@@ -16,7 +16,7 @@ export class AuthService {
     async signIn(username: string, password: string): Promise<Tokens> {
         const user = await this.usersService.checkLogin(username, password);
         if (user == null) {
-            throw new  UnauthorizedException();
+            throw new  ForbiddenException('Incorrect username or password');
         }
         const token: Tokens = await this.getTokens(user.id, user.username, user.role);
 
