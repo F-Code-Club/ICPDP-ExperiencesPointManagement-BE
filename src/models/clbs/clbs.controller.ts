@@ -68,10 +68,21 @@ export class ClbsController {
         }
         const responseUser = await this.usersService.createUser(usersDto);
         const responseClbs = await this.clbsService.createClbs(clbsDto, responseUser.userId);
+
+        const responseData = {
+            userId: responseUser.userId,
+            username: responseUser.username,
+            email: responseUser.email,
+            role: responseUser.role,
+            clubId: responseClbs.clubId,
+            clubName: responseClbs.name,
+            avt: responseClbs.avt
+        };
+
         if (responseClbs === null) {
-            return res.status(400).json(new ApiResponseDto([responseUser, responseClbs], 'Create clb fail'));
+            return res.status(400).json(new ApiResponseDto(null, 'Create clb fail'));
         } else {
-            return res.status(201).json(new ApiResponseDto([responseUser, responseClbs], 'Create clb successfully'));
+            return res.status(201).json(new ApiResponseDto(responseData, 'Create clb successfully'));
         }
     }
 
