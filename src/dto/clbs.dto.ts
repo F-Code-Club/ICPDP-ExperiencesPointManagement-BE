@@ -9,5 +9,5 @@ export class ClbsDto {
 
     avt?: string;
 
-    user?: Users;
+    userId?: Users;
 }
