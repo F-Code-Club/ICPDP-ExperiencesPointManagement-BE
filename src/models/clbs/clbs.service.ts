@@ -32,7 +32,7 @@ export class ClbsService {
         }
 
         let checkRight = false;
-        if ((userRole === 'clb' && checkClub.userId.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'clb' && checkClub.user.userId === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
@@ -40,7 +40,11 @@ export class ClbsService {
             throw new ForbiddenException('You have no right');
         }
 
-        return checkClub;
+        return {
+            clubId: checkClub.clubId,
+            name: checkClub.name,
+            avt: checkClub.avt
+        };
     }
 
     /*
@@ -51,7 +55,7 @@ export class ClbsService {
             return null;
         }
 
-        clbsDto.userId = users;
+        clbsDto.user = users;
 
         const newClbs = this.clbsRepository.create(clbsDto);
 
@@ -64,8 +68,7 @@ export class ClbsService {
         return {
             clubId: savedClbs.clubId,
             name: savedClbs.name,
-            avt: savedClbs.avt,
-            userId: savedClbs.userId
+            avt: savedClbs.avt
         }
     }
 
@@ -81,7 +84,7 @@ export class ClbsService {
 
         let checkRight = false;
 
-        if ((userRole === 'clb' && clb.userId.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'clb' && clb.user.userId === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
@@ -94,8 +97,7 @@ export class ClbsService {
             return {
                 clubId: updatedClb.clubId,
                 name: updatedClb.name,
-                avt: updatedClb.avt,
-                userId: updatedClb.userId,
+                avt: updatedClb.avt
             };
         } else {
             throw new ForbiddenException('You have no right to update');
@@ -111,7 +113,7 @@ export class ClbsService {
             return null;
         }
         const resClub = await this.clbsRepository.delete(id);
-        const resUser = await this.usersService.deleteUser(checkClb.userId.userId);
+        const resUser = await this.usersService.deleteUser(checkClb.user.userId);
         return resUser;
     }
 
@@ -129,7 +131,7 @@ export class ClbsService {
             where: {
                 clubId: id,
             },
-            relations: ['userId']
+            relations: ['user']
         });
         return existClb;
     }

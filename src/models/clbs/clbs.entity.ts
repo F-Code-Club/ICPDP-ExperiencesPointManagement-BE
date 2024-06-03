@@ -17,7 +17,7 @@ export class Clbs {
 
     @OneToOne(() => Users)
     @JoinColumn({ name: "userId" })
-    userId: Users;
+    user?: Users;
 
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.clb)
     pointBoard?: PointBoard[]
