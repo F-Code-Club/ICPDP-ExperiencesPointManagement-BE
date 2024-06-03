@@ -67,7 +67,7 @@ export class ClbsController {
             return;
         }
         const responseUser = await this.usersService.createUser(usersDto);
-        const responseClbs = await this.clbsService.createClbs(clbsDto, responseUser.userId);
+        const responseClbs = await this.clbsService.createClbs(clbsDto, responseUser);
 
         const responseData = {
             userId: responseUser.userId,

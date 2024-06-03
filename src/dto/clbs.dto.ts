@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Users } from "src/models/users/users.entity";
 
 export class ClbsDto {
     @ApiProperty({
@@ -8,5 +9,5 @@ export class ClbsDto {
 
     avt?: string;
 
-    userId?: string;
+    userId?: Users;
 }

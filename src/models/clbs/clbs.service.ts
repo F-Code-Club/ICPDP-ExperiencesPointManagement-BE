@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
 import { Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
+import { Users } from '../users/users.entity';
 
 @Injectable()
 export class ClbsService {
@@ -29,7 +30,7 @@ export class ClbsService {
         }
 
         let checkRight = false;
-        if ((userRole === 'clb' && checkClub.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'clb' && checkClub.userId.userId === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
@@ -43,12 +44,12 @@ export class ClbsService {
     /*
     [POST]: /clubs/
     */
-    async createClbs(clbsDto: ClbsDto, userId: string): Promise<Clbs | null> {
+    async createClbs(clbsDto: ClbsDto, users: Users): Promise<Clbs | null> {
         if (!clbsDto.name || clbsDto.name === "") {
             return null;
         }
 
-        clbsDto.userId = userId;
+        clbsDto.userId = users;
 
         const newClbs = this.clbsRepository.create(clbsDto);
 
@@ -78,7 +79,7 @@ export class ClbsService {
 
         let checkRight = false;
 
-        if ((userRole === 'clb' && clb.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'clb' && clb.userId.userId === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
