@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Users } from './users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { UsersDto } from 'src/dto/users.dto';
-import { Role } from 'src/enum/roles/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +16,7 @@ export class UsersService {
     /*
     [POST]: Register
     */
-    async createUser(userDto: UsersDto): Promise<UsersDto | null> {
+    async createUser(userDto: UsersDto): Promise<Users | null> {
         const iv = randomBytes(16);
         const key = (await promisify(scrypt)(userDto.password, 'salt', 32)) as Buffer;
         const cipher = createCipheriv('aes-256-ctr', key, iv);
@@ -39,10 +38,15 @@ export class UsersService {
             userDto.avt = 'not have avt yet';
         }
 
+        userDto.refreshToken = "";
+
         const responseUser: Users = await this.userRepository.save(userDto);
-        const responseData: UsersDto = {
+        const responseData: Users = {
+            id: responseUser.id,
             username: responseUser.username,
+            email: responseUser.email,
             role: responseUser.role,
+            avt: responseUser.avt
         };
         return responseData;
     }
@@ -90,10 +94,45 @@ export class UsersService {
         return responseUser;
     }
 
+    async checkExist(userName: string, email: string): Promise<boolean> {
+        let check = false;
+        const checkUserName = await this.findByUserName(userName);
+        const checkEmail = await this.findByEmail(email);
+
+        if (checkUserName) {
+            throw new ForbiddenException('This username was taken');
+            check = true;
+        } else if (checkEmail) {
+            throw new ForbiddenException('This email was taken');
+            check = true;
+        }
+        return check;
+    }
+
     async findById(userId: string): Promise<Users | null> {
         const res = await this.userRepository.findOne({
             where:  {
                 id: userId
+            }
+        });
+
+        return res;
+    }
+
+    async findByUserName(userName: string): Promise<Users | null> {
+        const res = await this.userRepository.findOne({
+            where:  {
+                username: userName
+            }
+        });
+
+        return res;
+    }
+
+    async findByEmail(email: string): Promise<Users | null> {
+        const res = await this.userRepository.findOne({
+            where:  {
+                email: email
             }
         });
 

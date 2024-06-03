@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/models/users/users.service';
 import { Tokens } from './type/Tokens.type';
@@ -16,11 +16,11 @@ export class AuthService {
     async signIn(username: string, password: string): Promise<Tokens> {
         const user = await this.usersService.checkLogin(username, password);
         if (user == null) {
-            throw new  UnauthorizedException();
+            throw new  ForbiddenException('Incorrect username or password');
         }
         const token: Tokens = await this.getTokens(user.id, user.username, user.role);
 
-        const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, token.refresh_token);
+        const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, token.refreshToken);
 
         return token;
     }
@@ -49,8 +49,8 @@ export class AuthService {
         ]);
 
         return {
-            access_token: at,
-            refresh_token: rt
+            accessToken: at,
+            refreshToken: rt
         };
     }
 
@@ -66,7 +66,7 @@ export class AuthService {
             }
             const tokens = await this.getTokens(user.id, user.username, user.role);
 
-            const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, tokens.refresh_token);
+            const saveRefreshToken = await this.usersService.saveRefreshToken(user.id, tokens.refreshToken);
 
             return tokens;
         } catch(e) {

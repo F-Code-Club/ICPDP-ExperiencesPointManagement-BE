@@ -13,7 +13,7 @@ export class ApiResponseDto<T = any> {
     pagination?: PaginationDto;
 
     constructor(
-        data?: T,
+        data?: T | T[],
         message?: string | string[],
         pagination?: PaginationDto,
     ) {

@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
 
 @Injectable()
@@ -11,13 +11,34 @@ export class ClbsService {
         private clbsRepository: Repository<Clbs>,
     ) {};
 
+    async getClubById(id: string, userRole: string, userId: string): Promise<Clbs | null> {
+        const checkClub = await this.findById(id);
+
+        if (!checkClub) {
+            return null;
+        }
+
+        let checkRight = false;
+        if ((userRole === 'clb' && checkClub.userId === userId) || userRole === 'admin') {
+            checkRight = true;
+        }
+
+        if (!checkRight) {
+            throw new ForbiddenException('You have no right');
+        }
+
+        return checkClub;
+    }
+
     /*
-    [POST]: create-clbs
+    [POST]: /clubs/
     */
-    async createClbs(clbsDto: ClbsDto): Promise<Clbs | null> {
+    async createClbs(clbsDto: ClbsDto, userId: string): Promise<Clbs | null> {
         if (!clbsDto.name || clbsDto.name === "") {
             return null;
         }
+
+        clbsDto.userId = userId;
 
         const newClbs = this.clbsRepository.create(clbsDto);
 
@@ -35,6 +56,9 @@ export class ClbsService {
         }
     }
 
+    /*
+    [PUT]: /clubs/{id}
+    */
     async updateClbs(clbsDto: ClbsDto, id: string, userRole: string, userId: string): Promise<Clbs | null> {
         const clb = await this.findById(id);
         
@@ -63,6 +87,18 @@ export class ClbsService {
         } else {
             throw new ForbiddenException('You have no right to update');
         }
+    }
+
+    /*
+    [DELETE]: /clubs/{id}
+    */
+    async deleteClbs(id: string): Promise<Number | null> {
+        const checkClb = await this.findById(id);
+        if (!checkClb) {
+            return null;
+        }
+        const res = await this.clbsRepository.delete(id);
+        return res.affected;
     }
 
     async findByName(name: string): Promise<Clbs | null> {

@@ -6,9 +6,10 @@ import { Clbs } from './clbs.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/enum/roles/role.guard';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UsersHttpModule } from '../users/users-http.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Clbs])],
+  imports: [TypeOrmModule.forFeature([Clbs]), UsersHttpModule],
   exports: [TypeOrmModule],
   controllers: [ClbsController],
   providers: [ClbsService,
