@@ -7,7 +7,9 @@ import { Response } from 'express';
 import { Role } from 'src/enum/roles/role.enum';
 import { Roles } from 'src/enum/roles/role.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';
+import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';    
+import { UsersService } from '../users/users.service';
+import { CreateClubRequestDto } from './dto/club-request.dto';
 
 @ApiTags('Clubs')
 @Controller('clubs')
@@ -16,7 +18,8 @@ import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';
 @UseFilters(ForbiddenExceptionFilter)
 export class ClbsController {
     constructor (
-        private readonly clbsService: ClbsService
+        private readonly clbsService: ClbsService,
+        private readonly usersService: UsersService,
     ) {};
 
     @Roles(Role.Admin, Role.Clb)
@@ -32,15 +35,25 @@ export class ClbsController {
 
     @Roles(Role.Admin)
     @Post()
-    async createClub(@Body() clbsDto: ClbsDto, @Res() res: Response) {
+    async createClub(@Body() createClubRequestDto: CreateClubRequestDto, @Res() res: Response) {
+        const { usersDto, clbsDto } = createClubRequestDto;
+        console.log(usersDto);
+        console.log(clbsDto);
+        if (usersDto.role !== Role.Clb) {
+            return res.status(403).json(new ApiResponseDto(null, 'This account role is incorrect'));
+        }
         if (await this.clbsService.findByName(clbsDto.name)) {
             return res.status(403).json(new ApiResponseDto(null, 'This name was taken'));
         }
-        const responseClbs = await this.clbsService.createClbs(clbsDto);
+        if (await this.usersService.checkExist(usersDto.username, usersDto.email)) {
+            return;
+        }
+        const responseUser = await this.usersService.createUser(usersDto);
+        const responseClbs = await this.clbsService.createClbs(clbsDto, responseUser.id);
         if (responseClbs === null) {
-            return res.status(400).json(new ApiResponseDto(responseClbs, 'Create clb fail'));
+            return res.status(400).json(new ApiResponseDto([responseUser, responseClbs], 'Create clb fail'));
         } else {
-            return res.status(201).json(new ApiResponseDto(responseClbs, 'Create clb successfully'));
+            return res.status(201).json(new ApiResponseDto([responseUser, responseClbs], 'Create clb successfully'));
         }
     }
 

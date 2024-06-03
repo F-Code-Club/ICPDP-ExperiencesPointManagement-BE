@@ -33,10 +33,12 @@ export class ClbsService {
     /*
     [POST]: /clubs/
     */
-    async createClbs(clbsDto: ClbsDto): Promise<Clbs | null> {
+    async createClbs(clbsDto: ClbsDto, userId: string): Promise<Clbs | null> {
         if (!clbsDto.name || clbsDto.name === "") {
             return null;
         }
+
+        clbsDto.userId = userId;
 
         const newClbs = this.clbsRepository.create(clbsDto);
 

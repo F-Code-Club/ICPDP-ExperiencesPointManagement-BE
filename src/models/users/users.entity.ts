@@ -9,7 +9,7 @@ export class Users {
     username: string;
 
     @Column()
-    password: string;
+    password?: string;
 
     @Column({ unique: true })
     email: string;
@@ -18,11 +18,11 @@ export class Users {
     avt: string;
 
     @Column()
-    iv: string;  //code to encode and decode password
+    iv?: string;  //code to encode and decode password
 
     @Column()
     role: string;
 
     @Column()
-    refreshToken: string;
+    refreshToken?: string;
 };
