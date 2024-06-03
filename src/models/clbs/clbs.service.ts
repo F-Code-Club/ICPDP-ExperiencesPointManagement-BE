@@ -4,12 +4,14 @@ import { Clbs } from './clbs.entity';
 import { Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class ClbsService {
     constructor (
         @InjectRepository(Clbs)
         private clbsRepository: Repository<Clbs>,
+        private readonly usersService: UsersService,
     ) {};
 
     /*
@@ -108,8 +110,9 @@ export class ClbsService {
         if (!checkClb) {
             return null;
         }
-        const res = await this.clbsRepository.delete(id);
-        return res.affected;
+        const resClub = await this.clbsRepository.delete(id);
+        const resUser = await this.usersService.deleteUser(checkClb.userId.userId);
+        return resUser;
     }
 
     async findByName(name: string): Promise<Clbs | null> {
@@ -125,7 +128,8 @@ export class ClbsService {
         const existClb = await this.clbsRepository.findOne({
             where: {
                 clubId: id,
-            }
+            },
+            relations: ['userId']
         });
         return existClb;
     }

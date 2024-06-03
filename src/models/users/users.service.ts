@@ -139,4 +139,13 @@ export class UsersService {
         return res;
     }
 
+    async deleteUser(userId: string): Promise<Number | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        const res = await this.userRepository.delete(userId);
+        return res.affected;
+    }
+
 }

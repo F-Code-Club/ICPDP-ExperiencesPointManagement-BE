@@ -103,7 +103,7 @@ export class ClbsController {
         const resultDelete = await this.clbsService.deleteClbs(id);
         if (resultDelete === null) {
             return res.status(404).json(new ApiResponseDto(null, 'Club not found'));
-        } else if (null === 0) {
+        } else if (resultDelete === 0) {
             return res.status(400).json(new ApiResponseDto(null, 'Delete fail'));
         } else {
             return res.status(201).json(new ApiResponseDto(null, 'Delete successfully'));
