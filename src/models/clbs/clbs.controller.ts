@@ -10,6 +10,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';    
 import { UsersService } from '../users/users.service';
 import { CreateClubRequestDto } from './dto/club-request.dto';
+import { UsersDto } from 'src/dto/users.dto';
 
 @ApiTags('Clubs')
 @Controller('clubs')
@@ -36,9 +37,15 @@ export class ClbsController {
     @Roles(Role.Admin)
     @Post()
     async createClub(@Body() createClubRequestDto: CreateClubRequestDto, @Res() res: Response) {
-        const { usersDto, clbsDto } = createClubRequestDto;
-        console.log(usersDto);
-        console.log(clbsDto);
+        let usersDto: UsersDto = new UsersDto();
+        usersDto.username = createClubRequestDto.username;
+        usersDto.email = createClubRequestDto.email;
+        usersDto.password = createClubRequestDto.password;
+        usersDto.role = createClubRequestDto.role;
+
+        let clbsDto: ClbsDto = new ClbsDto();
+        clbsDto.name = createClubRequestDto.name;
+
         if (usersDto.role !== Role.Clb) {
             return res.status(403).json(new ApiResponseDto(null, 'This account role is incorrect'));
         }
