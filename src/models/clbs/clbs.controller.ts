@@ -23,6 +23,17 @@ export class ClbsController {
         private readonly usersService: UsersService,
     ) {};
 
+    @Roles(Role.Admin)
+    @Get()
+    async getAllClubs(@Res() res: Response) {
+        const responseClbs = await this.clbsService.getAllClubs();
+        if (!responseClbs) {
+            return res.status(404).json(new ApiResponseDto(responseClbs, 'Clb Not Found'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseClbs, 'Get clubs successfully'));
+        }
+    }
+
     @Roles(Role.Admin, Role.Clb)
     @Get('/:id')
     async getClubById(@Request() req, id: string, @Res() res: Response) {

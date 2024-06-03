@@ -11,6 +11,16 @@ export class ClbsService {
         private clbsRepository: Repository<Clbs>,
     ) {};
 
+    /*
+    [GET]: /clubs/
+    */
+    async getAllClubs() {
+        return this.clbsRepository.find();
+    }
+
+    /*
+    [GET]: /clubs/{id}
+    */
     async getClubById(id: string, userRole: string, userId: string): Promise<Clbs | null> {
         const checkClub = await this.findById(id);
 
