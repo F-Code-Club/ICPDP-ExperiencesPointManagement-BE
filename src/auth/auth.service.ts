@@ -32,7 +32,7 @@ export class AuthService {
 
     async getTokens(userId: string, username: string, role: string): Promise<Tokens> {
         const payload: JwtPayload = {
-            sub: userId,
+            userId: userId,
             username: username,
             role: role
         };
@@ -59,7 +59,7 @@ export class AuthService {
             const payload: JwtPayload = this.jwtService.verify(refreshToken, {
                 secret: process.env.JWT_RT_SECRET,
             });
-            const user = await this.usersService.findById(payload.sub);
+            const user = await this.usersService.findById(payload.userId);
 
             if (!user) {
                 throw new UnauthorizedException();
