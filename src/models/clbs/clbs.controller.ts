@@ -44,7 +44,7 @@ export class ClbsController {
     @Roles(Role.Admin, Role.Clb)
     @Get('/:id')
     async getClubById(@Request() req, @Param('id') id: string, @Res() res: Response) {
-        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userID);
+        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.sub);        
         if (!responseClb) {
             return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
         }
