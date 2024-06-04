@@ -1,15 +1,15 @@
 import { BaseFilterDto } from "./base-filter.dto";
 
 export class PaginationDto<T> {
-    page: number;
-    take: number;
-    totalRecord: number;
-    totalPage: number;
+    page?: number;
+    take?: number;
+    totalRecord?: number;
+    totalPage?: number;
     nextPage?: number;
     prevPage?: number;
     data: T[];
 
-    static from<T>(data: T[], filter: BaseFilterDto, totalRecord: number) {
+    static from<T>(data: T[], filter: BaseFilterDto, totalRecord: number, message: string) {
         const dto = new PaginationDto<T>();
         dto.page = +filter.page;
         dto.take = +filter.take;
@@ -22,6 +22,13 @@ export class PaginationDto<T> {
         if (dto.page > 1) {
             dto.prevPage = dto.page-1;
         }
-        return dto;
+        if (dto.data.length === 0) {
+            dto.data = null;
+            message = 'Empty page';
+        }
+        return {
+            data: dto.data,
+            message: message,
+        };
     }
 }

@@ -34,7 +34,11 @@ export class ClbsController {
             throw new BadRequestException('Lacked of request param');
         }
         const [clubs, count] = await this.clbsService.getClubs(filter);
-        return PaginationDto.from(DtoMapper.mapMany(clubs, ClbsResponseDto), filter, count);
+        let message = 'Get clubs successfully';
+        if (!clubs || !count) {
+            message = 'Get clubs fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(clubs, ClbsResponseDto), filter, count, 'Get clubs successfully');
     }
 
     @Roles(Role.Admin, Role.Clb)

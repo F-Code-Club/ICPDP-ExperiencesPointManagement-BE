@@ -19,6 +19,9 @@ export class ClbsService {
     [GET]: /clubs/page?&&take?
     */
     async getClubs(dto: ClbsFilterDto) {
+        if(dto.page < 1) {
+            dto.page = 1;
+        }
         return await this.clbsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
     }
 
