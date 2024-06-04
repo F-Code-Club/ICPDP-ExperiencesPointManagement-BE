@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClbsService } from './clbs.service';
 import { ClbsDto } from 'src/dto/clbs.dto';
@@ -11,6 +11,10 @@ import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';
 import { UsersService } from '../users/users.service';
 import { CreateClubRequestDto } from './dto/club-request.dto';
 import { UsersDto } from 'src/dto/users.dto';
+import { ClbsFilterDto } from './dto/club-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { ClbsResponseDto } from './dto/club-response.dto';
 
 @ApiTags('Clubs')
 @Controller('clubs')
@@ -25,18 +29,17 @@ export class ClbsController {
 
     @Roles(Role.Admin)
     @Get()
-    async getAllClubs(@Res() res: Response) {
-        const responseClbs = await this.clbsService.getAllClubs();
-        if (!responseClbs) {
-            return res.status(404).json(new ApiResponseDto(responseClbs, 'Clb Not Found'));
-        } else {
-            return res.status(200).json(new ApiResponseDto(responseClbs, 'Get clubs successfully'));
+    async getClubs(@Query() filter: ClbsFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
         }
+        const [clubs, count] = await this.clbsService.getClubs(filter);
+        return PaginationDto.from(DtoMapper.mapMany(clubs, ClbsResponseDto), filter, count);
     }
 
     @Roles(Role.Admin, Role.Clb)
     @Get('/:id')
-    async getClubById(@Request() req, id: string, @Res() res: Response) {
+    async getClubById(@Request() req, @Param('id') id: string, @Res() res: Response) {
         const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.sub);        
         if (!responseClb) {
             return res.status(404).json(new ApiResponseDto(responseClb, 'Clb Not Found'));

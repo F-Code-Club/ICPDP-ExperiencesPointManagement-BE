@@ -1,10 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
 import { Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
+import { ClbsFilterDto } from './dto/club-filter.dto';
 
 @Injectable()
 export class ClbsService {
@@ -15,11 +16,12 @@ export class ClbsService {
     ) {};
 
     /*
-    [GET]: /clubs/
+    [GET]: /clubs/page?&&take?
     */
-    async getAllClubs() {
-        return this.clbsRepository.find();
+    async getClubs(dto: ClbsFilterDto) {
+        return await this.clbsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
     }
+
 
     /*
     [GET]: /clubs/{id}
@@ -43,7 +45,8 @@ export class ClbsService {
         return {
             clubId: checkClub.clubId,
             name: checkClub.name,
-            avt: checkClub.avt
+            avt: checkClub.avt,
+            user: checkClub.user
         };
     }
 
@@ -68,7 +71,8 @@ export class ClbsService {
         return {
             clubId: savedClbs.clubId,
             name: savedClbs.name,
-            avt: savedClbs.avt
+            avt: savedClbs.avt,
+            user: savedClbs.user
         }
     }
 
@@ -97,7 +101,8 @@ export class ClbsService {
             return {
                 clubId: updatedClb.clubId,
                 name: updatedClb.name,
-                avt: updatedClb.avt
+                avt: updatedClb.avt,
+                user: updatedClb.user
             };
         } else {
             throw new ForbiddenException('You have no right to update');
