@@ -6,6 +6,7 @@ import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
 import { ClbsFilterDto } from './dto/club-filter.dto';
+import { emitWarning } from 'process';
 
 @Injectable()
 export class ClbsService {
@@ -35,7 +36,7 @@ export class ClbsService {
         if (!checkClub) {
             return null;
         }
-
+        
         let checkRight = false;
         if ((userRole === 'club' && checkClub.user.userID === userId) || userRole === 'admin') {
             checkRight = true;
@@ -44,7 +45,6 @@ export class ClbsService {
         if (!checkRight) {
             throw new ForbiddenException('You have no right');
         }
-
         const checkUser = checkClub.user;
         const responseUser = {
             userId: checkUser.userID,
@@ -52,7 +52,7 @@ export class ClbsService {
             email: checkUser.email,
             role: checkUser.role
         }
-
+        
         return {
             clubId: checkClub.clubId,
             name: checkClub.name,
