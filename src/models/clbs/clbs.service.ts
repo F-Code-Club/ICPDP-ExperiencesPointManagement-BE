@@ -6,6 +6,7 @@ import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
 import { ClbsFilterDto } from './dto/club-filter.dto';
+import { emitWarning } from 'process';
 
 @Injectable()
 export class ClbsService {
@@ -29,15 +30,15 @@ export class ClbsService {
     /*
     [GET]: /clubs/{id}
     */
-    async getClubById(id: string, userRole: string, userId: string): Promise<Clbs | null> {
+    async getClubById(id: string, userRole: string, userId: string): Promise<any> {
         const checkClub = await this.findById(id);
 
         if (!checkClub) {
             return null;
         }
-
+        
         let checkRight = false;
-        if ((userRole === 'clb' && checkClub.user.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'club' && checkClub.user.userId === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
@@ -45,11 +46,19 @@ export class ClbsService {
             throw new ForbiddenException('You have no right');
         }
 
+        const checkUser = checkClub.user;
+        const responseUser = {
+            userId: checkUser.userId,
+            username: checkUser.username,
+            email: checkUser.email,
+            role: checkUser.role
+        }
+
         return {
             clubId: checkClub.clubId,
             name: checkClub.name,
             avt: checkClub.avt,
-            user: checkClub.user
+            user: responseUser
         };
     }
 
