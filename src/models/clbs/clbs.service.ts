@@ -36,7 +36,7 @@ export class ClbsService {
         if (!checkClub) {
             return null;
         }
-        
+
         let checkRight = false;
         if ((userRole === 'club' && checkClub.user.userId === userId) || userRole === 'admin') {
             checkRight = true;
@@ -91,7 +91,7 @@ export class ClbsService {
     /*
     [PUT]: /clubs/{id}
     */
-    async updateClbs(clbsDto: ClbsDto, id: string, userRole: string, userId: string): Promise<Clbs | null> {
+    async updateClbs(clbsDto: ClbsDto, id: string, userRole: string, userId: string): Promise<any> {
         const clb = await this.findById(id);
         
         if (!clb) {
@@ -110,11 +110,19 @@ export class ClbsService {
 
             const updatedClb = await this.clbsRepository.save(clb);
 
+            const checkUser = updatedClb.user;
+            const responseUser = {
+                userId: checkUser.userId,
+                username: checkUser.username,
+                email: checkUser.email,
+                role: checkUser.role
+            }
+
             return {
                 clubId: updatedClb.clubId,
                 name: updatedClb.name,
                 avt: updatedClb.avt,
-                user: updatedClb.user
+                user: responseUser
             };
         } else {
             throw new ForbiddenException('You have no right to update');

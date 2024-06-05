@@ -35,21 +35,29 @@ export class ClbsController {
         }
         const [clubs, count] = await this.clbsService.getClubs(filter);
         let message = 'Get clubs successfully';
-        if (!clubs || !count) {
+        if (!clubs || count === 0) {
             message = 'Get clubs fail';
         }
-        return PaginationDto.from(DtoMapper.mapMany(clubs, ClbsResponseDto), filter, count, 'Get clubs successfully');
+        return PaginationDto.from(DtoMapper.mapMany(clubs, ClbsResponseDto), filter, count, message);
     }
 
     @Roles(Role.Admin, Role.Clb)
     @Get('/:id')
     async getClubById(@Request() req, @Param('id') id: string, @Res() res: Response) {
-        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userId);        
+        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userId);
         if (!responseClb) {
-            return res.status(404).json(new ApiResponseDto(responseClb, 'Clb Not Found'));
-        } else {
-            return res.status(200).json(new ApiResponseDto(responseClb, 'Get club successfully'));
+            return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
         }
+        const responseData = {
+            userId: responseClb.user.userId,
+            username: responseClb.user.username,
+            email: responseClb.user.email,
+            role: responseClb.user.role,
+            clubId: responseClb.clubId,
+            name: responseClb.name,
+            avt: responseClb.avt,
+        }      
+        return res.status(200).json(new ApiResponseDto(responseData, 'Get club successfully'));
     }
 
     @Roles(Role.Admin)
@@ -82,7 +90,7 @@ export class ClbsController {
             email: responseUser.email,
             role: responseUser.role,
             clubId: responseClbs.clubId,
-            clubName: responseClbs.name,
+            name: responseClbs.name,
             avt: responseClbs.avt
         };
 
@@ -96,12 +104,20 @@ export class ClbsController {
     @Roles(Role.Admin, Role.Clb)
     @Put('/:id')
     async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('id') id: string, @Res() res: Response) {
-        const responseClbs = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.sub);
-        if (!responseClbs) {
-            return res.status(404).json(new ApiResponseDto(responseClbs, 'Clb Not Found'));
-        } else {
-            return res.status(201).json(new ApiResponseDto(responseClbs, 'Update clb successfully'));
+        const responseClb = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.sub);
+        if (!responseClb) {
+            return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
         }
+        const responseData = {
+            userId: responseClb.user.userId,
+            username: responseClb.user.username,
+            email: responseClb.user.email,
+            role: responseClb.user.role,
+            clubId: responseClb.clubId,
+            name: responseClb.name,
+            avt: responseClb.avt,
+        } 
+        return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
     }
 
     @Roles(Role.Admin)

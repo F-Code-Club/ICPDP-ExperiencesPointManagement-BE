@@ -1,7 +1,18 @@
 import { Expose, Type } from "class-transformer";
-import { ClbUsersResponseDto } from "./club-user-response.dto";
 
 export class ClbsResponseDto {
+    @Expose()
+    userId: string;
+
+    @Expose()
+    username: string;
+
+    @Expose()
+    email: string;
+
+    @Expose()
+    role: string;
+
     @Expose()
     clubId: string;
 
@@ -10,8 +21,4 @@ export class ClbsResponseDto {
 
     @Expose()
     avt: string;
-
-    @Expose()
-    @Type(() => ClbUsersResponseDto)
-    user: ClbUsersResponseDto
 }
