@@ -36,7 +36,7 @@ export class ClbsService {
         if (!checkClub) {
             return null;
         }
-        
+
         let checkRight = false;
         if ((userRole === 'club' && checkClub.user.userID === userId) || userRole === 'admin') {
             checkRight = true;
@@ -135,7 +135,7 @@ export class ClbsService {
                 email: checkUser.email,
                 role: checkUser.role
             }
-
+            
             return {
                 clubId: updatedClb.clubId,
                 name: updatedClb.name,
