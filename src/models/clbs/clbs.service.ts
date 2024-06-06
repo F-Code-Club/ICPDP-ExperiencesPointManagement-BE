@@ -104,15 +104,27 @@ export class ClbsService {
         }
 
         if (checkRight) {
-            clb.avt = clbsDto.avt || clb.avt;
+            let isChanged = false;
             
             const checkExist = await this.findByName(clbsDto.name);
 
-            if (checkExist.clubId !== id) {
+            if (checkExist !== null && checkExist.clubId !== id) {
                 throw new ForbiddenException('This name was taken');
             }
 
-            clb.name = clbsDto.name;
+            if (clbsDto.avt && clbsDto.avt !== clb.avt) {
+                clb.avt = clbsDto.avt;
+                isChanged = true;
+            }
+
+            if (clbsDto.name && clbsDto.name !== clb.name) {
+                clb.name = clbsDto.name;
+                isChanged = true;
+            }
+
+            if (!isChanged) {
+                return 'Nothing changed';
+            }
 
             const updatedClb = await this.clbsRepository.save(clb);
 
