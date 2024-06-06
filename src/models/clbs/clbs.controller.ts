@@ -105,6 +105,9 @@ export class ClbsController {
     @Put('/:id')
     async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('id') id: string, @Res() res: Response) {
         const responseClb = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.sub);
+        if (responseClb === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        }
         if (!responseClb) {
             return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
         }
