@@ -105,7 +105,14 @@ export class ClbsService {
 
         if (checkRight) {
             clb.avt = clbsDto.avt || clb.avt;
-            clb.name = clbsDto.name || clb.name;
+            
+            const checkExist = await this.findByName(clbsDto.name);
+
+            if (checkExist.clubId !== id) {
+                throw new ForbiddenException('This name was taken');
+            }
+
+            clb.name = clbsDto.name;
 
             const updatedClb = await this.clbsRepository.save(clb);
 
