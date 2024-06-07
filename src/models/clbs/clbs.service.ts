@@ -37,7 +37,7 @@ export class ClbsService {
         }
 
         let checkRight = false;
-        if ((userRole === 'club' && checkClub.user.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'club' && checkClub.user.userID === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
@@ -47,7 +47,7 @@ export class ClbsService {
 
         const checkUser = checkClub.user;
         const responseUser = {
-            userId: checkUser.userId,
+            userId: checkUser.userID,
             username: checkUser.username,
             email: checkUser.email,
             role: checkUser.role
@@ -99,7 +99,7 @@ export class ClbsService {
 
         let checkRight = false;
 
-        if ((userRole === 'clb' && clb.user.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'club' && clb.user.userID === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
@@ -130,7 +130,7 @@ export class ClbsService {
 
             const checkUser = updatedClb.user;
             const responseUser = {
-                userId: checkUser.userId,
+                userId: checkUser.userID,
                 username: checkUser.username,
                 email: checkUser.email,
                 role: checkUser.role
@@ -156,7 +156,7 @@ export class ClbsService {
             return null;
         }
         const resClub = await this.clbsRepository.delete(id);
-        const resUser = await this.usersService.deleteUser(checkClb.user.userId);
+        const resUser = await this.usersService.deleteUser(checkClb.user.userID);
         return resUser;
     }
 
