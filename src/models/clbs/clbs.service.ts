@@ -20,8 +20,11 @@ export class ClbsService {
     [GET]: /clubs/page?&&take?
     */
     async getClubs(dto: ClbsFilterDto) {
-        if (dto.page < 1 || dto.take < 1) {
-            throw new ForbiddenException('page and take must greater than or equal to 1');
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
         }
         return await this.clbsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
     }
