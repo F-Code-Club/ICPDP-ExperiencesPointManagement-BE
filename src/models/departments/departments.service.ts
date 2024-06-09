@@ -90,6 +90,66 @@ export class DepartmentsService {
     }
 
     /* 
+    [PUT]: /departments/{ID}
+    */
+    async updateDepts(deptsDto: DepartmentsDto, id: string, userRole: string, userId: string): Promise<any> {
+        const dept = await this.findById(id);
+        
+        if (!dept) {
+            return null;
+        }
+
+        let checkRight = false;
+
+        if ((userRole === Role.Dept && dept.user.userID === userId) || userRole === 'admin') {
+            checkRight = true;
+        }
+
+        if (checkRight) {
+            let isChanged = false;
+            
+            const checkExist = await this.findByName(deptsDto.name);
+
+            if (checkExist !== null && checkExist.departmentID !== id) {
+                throw new ForbiddenException('This name was taken');
+            }
+
+            if (deptsDto.avt && deptsDto.avt !== dept.avt) {
+                dept.avt = deptsDto.avt;
+                isChanged = true;
+            }
+
+            if (deptsDto.name && deptsDto.name !== dept.name) {
+                dept.name = deptsDto.name;
+                isChanged = true;
+            }
+
+            if (!isChanged) {
+                return 'Nothing changed';
+            }
+
+            const updatedDept = await this.deptsRepository.save(dept);
+
+            const checkUser = updatedDept.user;
+            const responseUser = {
+                userID: checkUser.userID,
+                username: checkUser.username,
+                email: checkUser.email,
+                role: checkUser.role
+            }
+            
+            return {
+                departmentID: updatedDept.departmentID,
+                name: updatedDept.name,
+                avt: updatedDept.avt,
+                user: responseUser
+            };
+        } else {
+            throw new ForbiddenException('You have no right to update');
+        }
+    }
+
+    /* 
     [DELETE]: /departments/{ID}
     */
     async deleteDepts(id: string): Promise<Number | null> {

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentsService } from './departments.service';
@@ -97,6 +97,28 @@ export class DepartmentsController {
         } else {
             return res.status(201).json(new ApiResponseDto(responseData, 'Create department successfully'));
         }
+    }
+
+    @Roles(Role.Admin, Role.Dept)
+    @Put('/:ID')
+    async updateClb(@Request() req, @Body() deptDto: DepartmentsDto, @Param('ID') id: string, @Res() res: Response) {
+        const responseDept = await this.deptService.updateDepts(deptDto, id, req.user.role, req.user.userID);
+        if (responseDept === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        }
+        if (!responseDept) {
+            return res.status(404).json(new ApiResponseDto(null, 'Department Not Found'));
+        }
+        const responseData = {
+            userID: responseDept.user.userID,
+            username: responseDept.user.username,
+            email: responseDept.user.email,
+            role: responseDept.user.role,
+            departmentID: responseDept.departmentID,
+            name: responseDept.name,
+            avt: responseDept.avt,
+        } 
+        return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
     }
 
     @Roles(Role.Admin)
