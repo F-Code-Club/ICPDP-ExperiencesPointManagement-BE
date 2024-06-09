@@ -14,7 +14,7 @@ export class ClbsResponseDto {
     role: string;
 
     @Expose()
-    clubId: string;
+    clubID: string;
 
     @Expose()
     name: string;

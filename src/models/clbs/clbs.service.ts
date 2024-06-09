@@ -50,14 +50,14 @@ export class ClbsService {
         }
         const checkUser = checkClub.user;
         const responseUser = {
-            userId: checkUser.userID,
+            userID: checkUser.userID,
             username: checkUser.username,
             email: checkUser.email,
             role: checkUser.role
         }
         
         return {
-            clubId: checkClub.clubId,
+            clubID: checkClub.clubID,
             name: checkClub.name,
             avt: checkClub.avt,
             user: responseUser
@@ -83,7 +83,7 @@ export class ClbsService {
         const savedClbs = await this.clbsRepository.save(newClbs);
 
         return {
-            clubId: savedClbs.clubId,
+            clubID: savedClbs.clubID,
             name: savedClbs.name,
             avt: savedClbs.avt,
             user: savedClbs.user
@@ -111,7 +111,7 @@ export class ClbsService {
             
             const checkExist = await this.findByName(clbsDto.name);
 
-            if (checkExist !== null && checkExist.clubId !== id) {
+            if (checkExist !== null && checkExist.clubID !== id) {
                 throw new ForbiddenException('This name was taken');
             }
 
@@ -140,7 +140,7 @@ export class ClbsService {
             }
             
             return {
-                clubId: updatedClb.clubId,
+                clubID: updatedClb.clubID,
                 name: updatedClb.name,
                 avt: updatedClb.avt,
                 user: responseUser
@@ -175,7 +175,7 @@ export class ClbsService {
     async findById(id: string): Promise<Clbs | null> {
         const existClb = await this.clbsRepository.findOne({
             where: {
-                clubId: id,
+                clubID: id,
             },
             relations: ['user']
         });

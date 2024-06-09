@@ -42,18 +42,18 @@ export class ClbsController {
     }
 
     @Roles(Role.Admin, Role.Clb)
-    @Get('/:id')
-    async getClubById(@Request() req, @Param('id') id: string, @Res() res: Response) {
-        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userId);
+    @Get('/:ID')
+    async getClubById(@Request() req, @Param('ID') id: string, @Res() res: Response) {
+        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userID);
         if (!responseClb) {
             return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
         }
         const responseData = {
-            userID: responseClb.user.userId,
+            userID: responseClb.user.userID,
             username: responseClb.user.username,
             email: responseClb.user.email,
             role: responseClb.user.role,
-            clubId: responseClb.clubId,
+            clubID: responseClb.clubID,
             name: responseClb.name,
             avt: responseClb.avt,
         }      
@@ -89,7 +89,7 @@ export class ClbsController {
             username: responseUser.username,
             email: responseUser.email,
             role: responseUser.role,
-            clubId: responseClbs.clubId,
+            clubID: responseClbs.clubID,
             name: responseClbs.name,
             avt: responseClbs.avt
         };
@@ -102,8 +102,8 @@ export class ClbsController {
     }
 
     @Roles(Role.Admin, Role.Clb)
-    @Put('/:id')
-    async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('id') id: string, @Res() res: Response) {
+    @Put('/:ID')
+    async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('ID') id: string, @Res() res: Response) {
         const responseClb = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.userID);
         if (responseClb === 'Nothing changed') {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
@@ -116,7 +116,7 @@ export class ClbsController {
             username: responseClb.user.username,
             email: responseClb.user.email,
             role: responseClb.user.role,
-            clubId: responseClb.clubId,
+            clubID: responseClb.clubID,
             name: responseClb.name,
             avt: responseClb.avt,
         } 
@@ -124,8 +124,8 @@ export class ClbsController {
     }
 
     @Roles(Role.Admin)
-    @Delete('/:id')
-    async deleteClb(@Param('id') id: string, @Res() res: Response) {
+    @Delete('/:ID')
+    async deleteClb(@Param('ID') id: string, @Res() res: Response) {
         const resultDelete = await this.clbsService.deleteClbs(id);
         if (resultDelete === null) {
             return res.status(404).json(new ApiResponseDto(null, 'Club not found'));
