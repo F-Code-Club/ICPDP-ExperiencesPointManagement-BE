@@ -7,16 +7,27 @@ declare const module: any;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const header = [
+    'Accept',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Methods',
+    'Access-Control-Allow-Origin',
+    'Authorization',
+    'Content-Type',
+    'Origin',
+    'X-Requested-With',
+  ];
+
   app.enableCors({
     origin: [
       "http://localhost:5173",
       "http://localhost:5173/",
     ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     // allowed headers
-    allowedHeaders: ['Content-Type', 'Origin', 'X-Requested-With', 'Accept', 'Authorization'],
+    allowedHeaders: header,
     // headers exposed to the client
-    exposedHeaders: ['Authorization'],
+    exposedHeaders: header,
     credentials: true, // Enable credentials (cookies, authorization headers) cross-origin
   });
 
