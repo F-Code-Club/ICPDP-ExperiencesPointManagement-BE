@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentsService } from './departments.service';
@@ -100,7 +100,7 @@ export class DepartmentsController {
     }
 
     @Roles(Role.Admin, Role.Dept)
-    @Put('/:ID')
+    @Patch('/:ID')
     async updateClb(@Request() req, @Body() deptDto: DepartmentsDto, @Param('ID') id: string, @Res() res: Response) {
         const responseDept = await this.deptService.updateDepts(deptDto, id, req.user.role, req.user.userID);
         if (responseDept === 'Nothing changed') {
