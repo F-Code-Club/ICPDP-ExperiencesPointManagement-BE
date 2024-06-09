@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PointBoard } from "../point-board/pointBoard.entity";
 import { Students } from "../students/students.entity";
 import { Events } from "../event/event.entity";
@@ -18,6 +18,9 @@ export class Clbs {
     @OneToOne(() => Users)
     @JoinColumn({ name: "userId" })
     user: Users;
+
+    @CreateDateColumn()
+    createdAt?: Date;
 
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.clb)
     pointBoard?: PointBoard[]

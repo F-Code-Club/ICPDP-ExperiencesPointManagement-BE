@@ -1,4 +1,4 @@
-import { Expose, Type } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
 
 export class ClbsResponseDto {
     @Expose()
@@ -21,4 +21,7 @@ export class ClbsResponseDto {
 
     @Expose()
     avt: string;
+
+    @Exclude()
+    createdAt?: Date;
 }

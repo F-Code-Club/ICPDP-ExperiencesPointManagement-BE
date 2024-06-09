@@ -21,7 +21,7 @@ export class DtoMapper {
 
             // Map the properties from entity to DTO
             Object.keys(entity).forEach(key => {
-                if (key !== 'user' && entity.hasOwnProperty(key)) {
+                if (key !== 'user' && key !=='createdAt' && entity.hasOwnProperty(key)) {
                     dto[key] = entity[key];
                 }
             });
