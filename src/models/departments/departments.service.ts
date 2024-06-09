@@ -89,6 +89,19 @@ export class DepartmentsService {
         };
     }
 
+    /* 
+    [DELETE]: /departments/{ID}
+    */
+    async deleteDepts(id: string): Promise<Number | null> {
+        const checkDept = await this.findById(id);
+        if (!checkDept) {
+            return null;
+        }
+        const resDept = await this.deptsRepository.delete(id);
+        const resUser = await this.usersService.deleteUser(checkDept.user.userID);
+        return resUser;
+    }
+
     async findByName(name: string): Promise<Departments | null> {
         const existDepts = await this.deptsRepository.findOne({
             where: {

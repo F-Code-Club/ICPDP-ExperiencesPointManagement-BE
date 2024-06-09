@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentsService } from './departments.service';
@@ -32,9 +32,9 @@ export class DepartmentsController {
             throw new BadRequestException('Lacked of request param');
         }
         const [clubs, count] = await this.deptService.getDepts(filter);
-        let message = 'Get clubs successfully';
+        let message = 'Get departments successfully';
         if (!clubs || count === 0) {
-            message = 'Get clubs fail';
+            message = 'Get departments fail';
         }
         return PaginationDto.from(DtoMapper.mapMany(clubs, DeptsResponseDto), filter, count, message);
     }
@@ -44,7 +44,7 @@ export class DepartmentsController {
     async getDeptById(@Request() req, @Param('ID') id: string, @Res() res: Response) {
         const responseDept = await this.deptService.getDeptById(id, req.user.role, req.user.userId);
         if (!responseDept) {
-            return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
+            return res.status(404).json(new ApiResponseDto(null, 'Department Not Found'));
         }
         const responseData = {
             userID: responseDept.user.userId,
@@ -55,7 +55,7 @@ export class DepartmentsController {
             name: responseDept.name,
             avt: responseDept.avt,
         }      
-        return res.status(200).json(new ApiResponseDto(responseData, 'Get club successfully'));
+        return res.status(200).json(new ApiResponseDto(responseData, 'Get department successfully'));
     }
 
     @Roles(Role.Admin)
@@ -96,6 +96,19 @@ export class DepartmentsController {
             return res.status(400).json(new ApiResponseDto(null, 'Create department fail'));
         } else {
             return res.status(201).json(new ApiResponseDto(responseData, 'Create department successfully'));
+        }
+    }
+
+    @Roles(Role.Admin)
+    @Delete('/:ID')
+    async deleteDept(@Param('ID') id: string, @Res() res: Response) {
+        const resultDelete = await this.deptService.deleteDepts(id);
+        if (resultDelete === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Department not found'));
+        } else if (resultDelete === 0) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete fail'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete successfully'));
         }
     }
 }
