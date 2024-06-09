@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentsService } from './departments.service';
@@ -10,6 +10,10 @@ import { UsersDto } from 'src/dto/users.dto';
 import { DepartmentsDto } from 'src/dto/departments.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { UsersService } from '../users/users.service';
+import { DeptsFilterDto } from './dto/department-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { DeptsResponseDto } from './dto/department-response.dto';
 
 @ApiTags('Departments')
 @Controller('departments')
@@ -20,6 +24,20 @@ export class DepartmentsController {
         private readonly deptService: DepartmentsService,
         private readonly usersService: UsersService,
     ) {};
+    
+    @Roles(Role.Admin)
+    @Get()
+    async getDepts(@Query() filter: DeptsFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [clubs, count] = await this.deptService.getDepts(filter);
+        let message = 'Get clubs successfully';
+        if (!clubs || count === 0) {
+            message = 'Get clubs fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(clubs, DeptsResponseDto), filter, count, message);
+    }
 
     @Roles(Role.Admin, Role.Dept)
     @Get('/:ID')
