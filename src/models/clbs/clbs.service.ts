@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
 import { ClbsFilterDto } from './dto/club-filter.dto';
+import { emitWarning } from 'process';
 
 @Injectable()
 export class ClbsService {
@@ -19,8 +20,11 @@ export class ClbsService {
     [GET]: /clubs/page?&&take?
     */
     async getClubs(dto: ClbsFilterDto) {
-        if (dto.page < 1 || dto.take < 1) {
-            throw new ForbiddenException('page and take must greater than or equal to 1');
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
         }
         return await this.clbsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
     }
@@ -44,7 +48,6 @@ export class ClbsService {
         if (!checkRight) {
             throw new ForbiddenException('You have no right');
         }
-
         const checkUser = checkClub.user;
         const responseUser = {
             userId: checkUser.userID,
@@ -52,7 +55,7 @@ export class ClbsService {
             email: checkUser.email,
             role: checkUser.role
         }
-
+        
         return {
             clubId: checkClub.clubId,
             name: checkClub.name,
@@ -135,7 +138,7 @@ export class ClbsService {
                 email: checkUser.email,
                 role: checkUser.role
             }
-
+            
             return {
                 clubId: updatedClb.clubId,
                 name: updatedClb.name,
