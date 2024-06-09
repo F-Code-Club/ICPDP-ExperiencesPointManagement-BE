@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
+import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.fi
     {
       provide: APP_FILTER,
       useClass: UnauthorizedExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ForbiddenExceptionFilter,
     }
   ]
 })

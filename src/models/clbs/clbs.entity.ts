@@ -1,12 +1,13 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PointBoard } from "../point-board/pointBoard.entity";
 import { Students } from "../students/students.entity";
 import { Events } from "../event/event.entity";
+import { Users } from "../users/users.entity";
 
 @Entity()
 export class Clbs {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    clubId: string;
 
     @Column({ unique: true })
     name: string;
@@ -14,8 +15,9 @@ export class Clbs {
     @Column()
     avt: string;
 
-    @Column()
-    userId: string;
+    @OneToOne(() => Users)
+    @JoinColumn({ name: "userId" })
+    user: Users;
 
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.clb)
     pointBoard?: PointBoard[]

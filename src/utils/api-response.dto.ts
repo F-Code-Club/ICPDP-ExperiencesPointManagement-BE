@@ -10,12 +10,12 @@ export class ApiResponseDto<T = any> {
     data?: T | T[];
 
     @ApiProperty({ required: false, type: PaginationDto })
-    pagination?: PaginationDto;
+    pagination?: PaginationDto<T>;
 
     constructor(
-        data?: T,
+        data?: T | T[],
         message?: string | string[],
-        pagination?: PaginationDto,
+        pagination?: PaginationDto<T>,
     ) {
         this.data = data;
         this.pagination = pagination;
