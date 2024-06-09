@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClbsService } from './clbs.service';
 import { ClbsDto } from 'src/dto/clbs.dto';
@@ -102,7 +102,7 @@ export class ClbsController {
     }
 
     @Roles(Role.Admin, Role.Clb)
-    @Put('/:ID')
+    @Patch('/:ID')
     async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('ID') id: string, @Res() res: Response) {
         const responseClb = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.userID);
         if (responseClb === 'Nothing changed') {
