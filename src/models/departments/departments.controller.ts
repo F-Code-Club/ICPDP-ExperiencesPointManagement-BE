@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentsService } from './departments.service';
@@ -10,6 +10,10 @@ import { UsersDto } from 'src/dto/users.dto';
 import { DepartmentsDto } from 'src/dto/departments.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { UsersService } from '../users/users.service';
+import { DeptsFilterDto } from './dto/department-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { DeptsResponseDto } from './dto/department-response.dto';
 
 @ApiTags('Departments')
 @Controller('departments')
@@ -20,6 +24,39 @@ export class DepartmentsController {
         private readonly deptService: DepartmentsService,
         private readonly usersService: UsersService,
     ) {};
+    
+    @Roles(Role.Admin)
+    @Get()
+    async getDepts(@Query() filter: DeptsFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [clubs, count] = await this.deptService.getDepts(filter);
+        let message = 'Get departments successfully';
+        if (!clubs || count === 0) {
+            message = 'Get departments fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(clubs, DeptsResponseDto), filter, count, message);
+    }
+
+    @Roles(Role.Admin, Role.Dept)
+    @Get('/:ID')
+    async getDeptById(@Request() req, @Param('ID') id: string, @Res() res: Response) {
+        const responseDept = await this.deptService.getDeptById(id, req.user.role, req.user.userId);
+        if (!responseDept) {
+            return res.status(404).json(new ApiResponseDto(null, 'Department Not Found'));
+        }
+        const responseData = {
+            userID: responseDept.user.userId,
+            username: responseDept.user.username,
+            email: responseDept.user.email,
+            role: responseDept.user.role,
+            departmentID: responseDept.clubId,
+            name: responseDept.name,
+            avt: responseDept.avt,
+        }      
+        return res.status(200).json(new ApiResponseDto(responseData, 'Get department successfully'));
+    }
 
     @Roles(Role.Admin)
     @Post()
@@ -59,6 +96,41 @@ export class DepartmentsController {
             return res.status(400).json(new ApiResponseDto(null, 'Create department fail'));
         } else {
             return res.status(201).json(new ApiResponseDto(responseData, 'Create department successfully'));
+        }
+    }
+
+    @Roles(Role.Admin, Role.Dept)
+    @Put('/:ID')
+    async updateClb(@Request() req, @Body() deptDto: DepartmentsDto, @Param('ID') id: string, @Res() res: Response) {
+        const responseDept = await this.deptService.updateDepts(deptDto, id, req.user.role, req.user.userID);
+        if (responseDept === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        }
+        if (!responseDept) {
+            return res.status(404).json(new ApiResponseDto(null, 'Department Not Found'));
+        }
+        const responseData = {
+            userID: responseDept.user.userID,
+            username: responseDept.user.username,
+            email: responseDept.user.email,
+            role: responseDept.user.role,
+            departmentID: responseDept.departmentID,
+            name: responseDept.name,
+            avt: responseDept.avt,
+        } 
+        return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
+    }
+
+    @Roles(Role.Admin)
+    @Delete('/:ID')
+    async deleteDept(@Param('ID') id: string, @Res() res: Response) {
+        const resultDelete = await this.deptService.deleteDepts(id);
+        if (resultDelete === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Department not found'));
+        } else if (resultDelete === 0) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete fail'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete successfully'));
         }
     }
 }
