@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentsService } from './departments.service';
@@ -20,6 +20,25 @@ export class DepartmentsController {
         private readonly deptService: DepartmentsService,
         private readonly usersService: UsersService,
     ) {};
+
+    @Roles(Role.Admin, Role.Dept)
+    @Get('/:ID')
+    async getDeptById(@Request() req, @Param('ID') id: string, @Res() res: Response) {
+        const responseDept = await this.deptService.getDeptById(id, req.user.role, req.user.userId);
+        if (!responseDept) {
+            return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
+        }
+        const responseData = {
+            userID: responseDept.user.userId,
+            username: responseDept.user.username,
+            email: responseDept.user.email,
+            role: responseDept.user.role,
+            departmentID: responseDept.clubId,
+            name: responseDept.name,
+            avt: responseDept.avt,
+        }      
+        return res.status(200).json(new ApiResponseDto(responseData, 'Get club successfully'));
+    }
 
     @Roles(Role.Admin)
     @Post()
