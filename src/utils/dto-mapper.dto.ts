@@ -13,7 +13,7 @@ export class DtoMapper {
             // Map user properties to DTO
             if (entity.hasOwnProperty('user')) {
                 const user = entity['user'];
-                dto['userId'] = user['userId'];
+                dto['userID'] = user['userID'];
                 dto['username'] = user['username'];
                 dto['email'] = user['email'];
                 dto['role'] = user['role'];

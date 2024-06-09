@@ -2,7 +2,7 @@ import { Expose, Type } from "class-transformer";
 
 export class ClbsResponseDto {
     @Expose()
-    userId: string;
+    userID: string;
 
     @Expose()
     username: string;

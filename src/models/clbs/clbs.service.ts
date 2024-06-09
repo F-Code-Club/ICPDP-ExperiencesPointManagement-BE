@@ -20,8 +20,11 @@ export class ClbsService {
     [GET]: /clubs/page?&&take?
     */
     async getClubs(dto: ClbsFilterDto) {
-        if(dto.page < 1) {
-            dto.page = 1;
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
         }
         return await this.clbsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
     }
@@ -38,22 +41,21 @@ export class ClbsService {
         }
 
         let checkRight = false;
-        if ((userRole === 'club' && checkClub.user.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'club' && checkClub.user.userID === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
         if (!checkRight) {
             throw new ForbiddenException('You have no right');
         }
-
         const checkUser = checkClub.user;
         const responseUser = {
-            userId: checkUser.userId,
+            userId: checkUser.userID,
             username: checkUser.username,
             email: checkUser.email,
             role: checkUser.role
         }
-
+        
         return {
             clubId: checkClub.clubId,
             name: checkClub.name,
@@ -100,24 +102,43 @@ export class ClbsService {
 
         let checkRight = false;
 
-        if ((userRole === 'clb' && clb.user.userId === userId) || userRole === 'admin') {
+        if ((userRole === 'club' && clb.user.userID === userId) || userRole === 'admin') {
             checkRight = true;
         }
 
         if (checkRight) {
-            clb.avt = clbsDto.avt || clb.avt;
-            clb.name = clbsDto.name || clb.name;
+            let isChanged = false;
+            
+            const checkExist = await this.findByName(clbsDto.name);
+
+            if (checkExist !== null && checkExist.clubId !== id) {
+                throw new ForbiddenException('This name was taken');
+            }
+
+            if (clbsDto.avt && clbsDto.avt !== clb.avt) {
+                clb.avt = clbsDto.avt;
+                isChanged = true;
+            }
+
+            if (clbsDto.name && clbsDto.name !== clb.name) {
+                clb.name = clbsDto.name;
+                isChanged = true;
+            }
+
+            if (!isChanged) {
+                return 'Nothing changed';
+            }
 
             const updatedClb = await this.clbsRepository.save(clb);
 
             const checkUser = updatedClb.user;
             const responseUser = {
-                userId: checkUser.userId,
+                userId: checkUser.userID,
                 username: checkUser.username,
                 email: checkUser.email,
                 role: checkUser.role
             }
-
+            
             return {
                 clubId: updatedClb.clubId,
                 name: updatedClb.name,
@@ -138,7 +159,7 @@ export class ClbsService {
             return null;
         }
         const resClub = await this.clbsRepository.delete(id);
-        const resUser = await this.usersService.deleteUser(checkClb.user.userId);
+        const resUser = await this.usersService.deleteUser(checkClb.user.userID);
         return resUser;
     }
 

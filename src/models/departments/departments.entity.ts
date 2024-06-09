@@ -1,26 +1,31 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Students } from "../students/students.entity";
 import { PointBoard } from "../point-board/pointBoard.entity";
 import { Events } from "../event/event.entity";
+import { Users } from "../users/users.entity";
 
 @Entity()
 export class Departments {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    departmentID: string;
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @Column()
     avt: string;
 
+    @OneToOne(() => Users)
+    @JoinColumn({ name: "userId" })
+    user: Users;
+
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.department)
-    pointBoard: PointBoard[]
+    pointBoard?: PointBoard[]
 
     @ManyToMany(() => Students)
     @JoinTable()
-    students: Students[]
+    students?: Students[]
 
     @OneToMany(() => Events, (event) => event.department)
-    event: Event[]
+    event?: Event[]
 }

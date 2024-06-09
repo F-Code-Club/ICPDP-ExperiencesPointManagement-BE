@@ -18,9 +18,9 @@ export class AuthService {
         if (user == null) {
             throw new  ForbiddenException('Incorrect username or password');
         }
-        const token: Tokens = await this.getTokens(user.userId, user.username, user.role);
+        const token: Tokens = await this.getTokens(user.userID, user.username, user.role);
 
-        const saveRefreshToken = await this.usersService.saveRefreshToken(user.userId, token.refreshToken);
+        const saveRefreshToken = await this.usersService.saveRefreshToken(user.userID, token.refreshToken);
 
         return token;
     }
@@ -32,7 +32,7 @@ export class AuthService {
 
     async getTokens(userId: string, username: string, role: string): Promise<Tokens> {
         const payload: JwtPayload = {
-            userId: userId,
+            userID: userId,
             username: username,
             role: role
         };
@@ -59,14 +59,14 @@ export class AuthService {
             const payload: JwtPayload = this.jwtService.verify(refreshToken, {
                 secret: process.env.JWT_RT_SECRET,
             });
-            const user = await this.usersService.findById(payload.userId);
+            const user = await this.usersService.findById(payload.userID);
 
             if (!user) {
                 throw new UnauthorizedException();
             }
-            const tokens = await this.getTokens(user.userId, user.username, user.role);
+            const tokens = await this.getTokens(user.userID, user.username, user.role);
 
-            const saveRefreshToken = await this.usersService.saveRefreshToken(user.userId, tokens.refreshToken);
+            const saveRefreshToken = await this.usersService.saveRefreshToken(user.userID, tokens.refreshToken);
 
             return tokens;
         } catch(e) {
