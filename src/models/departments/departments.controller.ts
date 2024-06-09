@@ -47,11 +47,11 @@ export class DepartmentsController {
             return res.status(404).json(new ApiResponseDto(null, 'Department Not Found'));
         }
         const responseData = {
-            userID: responseDept.user.userId,
+            userID: responseDept.user.userID,
             username: responseDept.user.username,
             email: responseDept.user.email,
             role: responseDept.user.role,
-            departmentID: responseDept.clubId,
+            departmentID: responseDept.departmentID,
             name: responseDept.name,
             avt: responseDept.avt,
         }      

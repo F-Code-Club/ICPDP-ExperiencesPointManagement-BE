@@ -7,7 +7,7 @@ import { Users } from "../users/users.entity";
 @Entity()
 export class Clbs {
     @PrimaryGeneratedColumn("uuid")
-    clubId: string;
+    clubID: string;
 
     @Column({ unique: true })
     name: string;

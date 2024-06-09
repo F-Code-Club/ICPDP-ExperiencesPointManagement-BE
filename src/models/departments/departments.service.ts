@@ -49,7 +49,7 @@ export class DepartmentsService {
         }
         const checkUser = checkDept.user;
         const responseUser = {
-            userId: checkUser.userID,
+            userID: checkUser.userID,
             username: checkUser.username,
             email: checkUser.email,
             role: checkUser.role
