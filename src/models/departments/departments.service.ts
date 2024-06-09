@@ -26,7 +26,12 @@ export class DepartmentsService {
         if (dto.take < 0) {
             throw new ForbiddenException('take must greater than or equal to 0');
         }
-        return await this.deptsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
+        return await this.deptsRepository.findAndCount({ 
+            relations: ['user'], 
+            take: dto.take, 
+            skip: dto.take*(dto.page - 1),
+            order: { createdAt: 'ASC' } 
+        });
     }
 
     /*

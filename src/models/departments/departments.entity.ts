@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Students } from "../students/students.entity";
 import { PointBoard } from "../point-board/pointBoard.entity";
 import { Events } from "../event/event.entity";
@@ -18,6 +18,9 @@ export class Departments {
     @OneToOne(() => Users)
     @JoinColumn({ name: "userId" })
     user: Users;
+
+    @CreateDateColumn()
+    createdAt?: Date;
 
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.department)
     pointBoard?: PointBoard[]
