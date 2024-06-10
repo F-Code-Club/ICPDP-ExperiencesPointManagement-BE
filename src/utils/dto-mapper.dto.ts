@@ -15,6 +15,7 @@ export class DtoMapper {
                 const user = entity['user'];
                 dto['userID'] = user['userID'];
                 dto['username'] = user['username'];
+                dto['password'] = user['password'];
                 dto['email'] = user['email'];
                 dto['role'] = user['role'];
             }

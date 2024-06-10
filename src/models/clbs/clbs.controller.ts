@@ -52,11 +52,13 @@ export class ClbsController {
         const responseData = {
             userID: responseClb.user.userID,
             username: responseClb.user.username,
+            password: responseClb.user.password,
             email: responseClb.user.email,
             role: responseClb.user.role,
             clubID: responseClb.clubID,
             name: responseClb.name,
             avt: responseClb.avt,
+            active: responseClb.active
         }      
         return res.status(200).json(new ApiResponseDto(responseData, 'Get club successfully'));
     }
@@ -88,11 +90,13 @@ export class ClbsController {
         const responseData = {
             userID: responseUser.userID,
             username: responseUser.username,
+            password: responseUser.password,
             email: responseUser.email,
             role: responseUser.role,
             clubID: responseClbs.clubID,
             name: responseClbs.name,
-            avt: responseClbs.avt
+            avt: responseClbs.avt,
+            active: responseClbs.active
         };
 
         if (responseClbs === null) {
@@ -115,11 +119,13 @@ export class ClbsController {
         const responseData = {
             userID: responseClb.user.userID,
             username: responseClb.user.username,
+            password: responseClb.user.password,
             email: responseClb.user.email,
             role: responseClb.user.role,
             clubID: responseClb.clubID,
             name: responseClb.name,
             avt: responseClb.avt,
+            active: responseClb.active
         } 
         return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
     }

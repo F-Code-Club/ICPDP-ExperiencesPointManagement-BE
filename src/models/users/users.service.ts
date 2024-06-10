@@ -44,6 +44,7 @@ export class UsersService {
         const responseData: Users = {
             userID: responseUser.userID,
             username: responseUser.username,
+            password: responseUser.password,
             email: responseUser.email,
             role: responseUser.role,
             avt: responseUser.avt
