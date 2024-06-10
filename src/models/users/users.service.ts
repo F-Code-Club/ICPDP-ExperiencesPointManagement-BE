@@ -94,6 +94,81 @@ export class UsersService {
         return responseUser;
     }
 
+    async updateEmail(userId: string, newEmail: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+
+        const emailExist = await this.findByEmail(newEmail);
+        if (emailExist && emailExist.userID !== userId) {
+            throw new ForbiddenException('This email is already exist');
+        }
+
+        checkUser.email = newEmail;
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
+    async updatePasswordByAdmin(userId: string, newPassword: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if(!checkUser) {
+            return null;
+        }
+
+        const key = (await promisify(scrypt)(newPassword, 'salt', 32)) as Buffer;
+        const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(checkUser.iv, 'hex'));
+        let encryptedText = cipher.update(newPassword, 'utf8', 'hex');
+        encryptedText += cipher.final('hex');
+        checkUser.password = encryptedText;
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
+    async updatePasswordByUser(userId: string, oldPassword: string, newPassword: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+
+        const checkOld = oldPassword;
+        const checkNew = newPassword;
+
+        // encode oldPassword
+        const key = (await promisify(scrypt)(oldPassword, 'salt', 32)) as Buffer;
+        const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(checkUser.iv, 'hex'));
+        let encryptedText = cipher.update(oldPassword, 'utf8', 'hex');
+        encryptedText += cipher.final('hex');
+        oldPassword = encryptedText;
+
+        //encode newPassword
+        const key2 = (await promisify(scrypt)(newPassword, 'salt', 32)) as Buffer;
+        const cipher2 = createCipheriv('aes-256-ctr', key2, Buffer.from(checkUser.iv, 'hex'));
+        let encryptedText2 = cipher2.update(newPassword, 'utf8', 'hex');
+        encryptedText2 += cipher2.final('hex');
+        newPassword= encryptedText2;
+
+        if (checkOld === checkNew) {
+            throw new ForbiddenException('The New password must different from the Old password');
+        }
+
+        if (checkUser.password === oldPassword) {
+            checkUser.password = newPassword;
+
+            const responseUser = await this.userRepository.save(checkUser);
+
+            await this.deleteRefreshToken(responseUser.userID);
+
+            return responseUser;
+        } else {
+            throw new ForbiddenException('Old password is not valid');
+        }
+    }
+
     async checkExist(userName: string, email: string): Promise<boolean> {
         let check = false;
         const checkUserName = await this.findByUserName(userName);

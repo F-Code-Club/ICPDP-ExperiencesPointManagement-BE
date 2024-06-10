@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
 import { Repository } from 'typeorm';
@@ -6,7 +6,10 @@ import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
 import { ClbsFilterDto } from './dto/club-filter.dto';
-import { emitWarning } from 'process';
+import { Role } from 'src/enum/roles/role.enum';
+import { promisify } from 'util';
+import { createCipheriv, scrypt } from 'crypto';
+import { UpdateClubRequestDto } from './dto/club-update-request.dto';
 
 @Injectable()
 export class ClbsService {
@@ -96,18 +99,18 @@ export class ClbsService {
     }
 
     /*
-    [PUT]: /clubs/{id}
+    [PATCH]: /clubs/{id}
     */
-    async updateClbs(clbsDto: ClbsDto, id: string, userRole: string, userId: string): Promise<any> {
+    async updateClbs(clbsDto: UpdateClubRequestDto, id: string, userRole: string, userId: string): Promise<any> {
         const clb = await this.findById(id);
-        
+
         if (!clb) {
             return null;
         }
 
         let checkRight = false;
 
-        if ((userRole === 'club' && clb.user.userID === userId) || userRole === 'admin') {
+        if (userRole === Role.Admin || (userRole === Role.Clb && clb.user.userID === userId)) {
             checkRight = true;
         }
 
@@ -116,8 +119,9 @@ export class ClbsService {
             
             const checkExist = await this.findByName(clbsDto.name);
 
-            if (checkExist !== null && checkExist.clubID !== id) {
-                throw new ForbiddenException('This name was taken');
+
+            if (checkExist && checkExist.clubID !== id) {
+                throw new ForbiddenException('This club name was taken');
             }
 
             if (clbsDto.avt && clbsDto.avt !== clb.avt) {
@@ -130,6 +134,33 @@ export class ClbsService {
                 isChanged = true;
             }
 
+
+            if (clbsDto.email && clb.user.email !== clbsDto.email) {
+                const updatedEmail = await this.usersService.updateEmail(clb.user.userID, clbsDto.email);
+                clb.user.email = updatedEmail.email;
+                isChanged = true;
+            }
+
+            if (userRole !== Role.Admin && clbsDto.password) {
+                throw new ForbiddenException('You have no right to update password here');
+            } else if (userRole === Role.Admin && clbsDto.password) {
+
+                // encode password to test
+                let checkPass = clbsDto.password;
+                const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
+                const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(clb.user.iv, 'hex'));
+                let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
+                encryptedText += cipher.final('hex');
+                checkPass = encryptedText;
+                
+                // check password here
+                if (checkPass !== clb.user.password) {
+                    const updatedPassword = await this.usersService.updatePasswordByAdmin(clb.user.userID, clbsDto.password);
+                    clb.user.password = updatedPassword.password;
+                    isChanged = true;
+                }
+            }
+
             if (!isChanged) {
                 return 'Nothing changed';
             }
@@ -138,7 +169,7 @@ export class ClbsService {
 
             const checkUser = updatedClb.user;
             const responseUser = {
-                userId: checkUser.userID,
+                userID: checkUser.userID,
                 username: checkUser.username,
                 email: checkUser.email,
                 role: checkUser.role
