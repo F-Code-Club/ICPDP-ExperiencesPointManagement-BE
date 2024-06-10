@@ -94,6 +94,7 @@ export class ClbsService {
             clubID: savedClbs.clubID,
             name: savedClbs.name,
             avt: savedClbs.avt,
+            active: savedClbs.active,
             user: savedClbs.user
         }
     }
