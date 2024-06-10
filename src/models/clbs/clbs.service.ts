@@ -60,6 +60,7 @@ export class ClbsService {
         const responseUser = {
             userID: checkUser.userID,
             username: checkUser.username,
+            password: checkUser.password,
             email: checkUser.email,
             role: checkUser.role
         }
@@ -68,7 +69,8 @@ export class ClbsService {
             clubID: checkClub.clubID,
             name: checkClub.name,
             avt: checkClub.avt,
-            user: responseUser
+            active: checkClub.active, 
+            user: responseUser,
         };
     }
 
@@ -94,6 +96,7 @@ export class ClbsService {
             clubID: savedClbs.clubID,
             name: savedClbs.name,
             avt: savedClbs.avt,
+            active: savedClbs.active,
             user: savedClbs.user
         }
     }
@@ -171,6 +174,7 @@ export class ClbsService {
             const responseUser = {
                 userID: checkUser.userID,
                 username: checkUser.username,
+                password: checkUser.password,
                 email: checkUser.email,
                 role: checkUser.role
             }
@@ -179,6 +183,7 @@ export class ClbsService {
                 clubID: updatedClb.clubID,
                 name: updatedClb.name,
                 avt: updatedClb.avt,
+                active: updatedClb.active,
                 user: responseUser
             };
         } else {

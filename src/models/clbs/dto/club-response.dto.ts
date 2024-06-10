@@ -8,6 +8,9 @@ export class ClbsResponseDto {
     username: string;
 
     @Expose()
+    password: string;
+
+    @Expose()
     email: string;
 
     @Expose()
