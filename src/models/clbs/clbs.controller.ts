@@ -15,6 +15,7 @@ import { ClbsFilterDto } from './dto/club-filter.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { ClbsResponseDto } from './dto/club-response.dto';
+import { UpdateClubRequestDto } from './dto/club-update-request.dto';
 
 @ApiTags('Clubs')
 @Controller('clubs')
@@ -103,13 +104,13 @@ export class ClbsController {
 
     @Roles(Role.Admin, Role.Clb)
     @Patch('/:ID')
-    async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('ID') id: string, @Res() res: Response) {
+    async updateClb(@Request() req, @Body() clbsDto: UpdateClubRequestDto, @Param('ID') id: string, @Res() res: Response) {
         const responseClb = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.userID);
         if (responseClb === 'Nothing changed') {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
         }
         if (!responseClb) {
-            return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
+            return res.status(404).json(new ApiResponseDto(null, 'Club Not Found'));
         }
         const responseData = {
             userID: responseClb.user.userID,
