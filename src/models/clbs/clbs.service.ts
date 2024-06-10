@@ -103,7 +103,7 @@ export class ClbsService {
     */
     async updateClbs(clbsDto: UpdateClubRequestDto, id: string, userRole: string, userId: string): Promise<any> {
         const clb = await this.findById(id);
-        
+
         if (!clb) {
             return null;
         }
@@ -120,7 +120,7 @@ export class ClbsService {
             const checkExist = await this.findByName(clbsDto.name);
 
 
-            if (!checkExist && checkExist.clubID !== id) {
+            if (checkExist && checkExist.clubID !== id) {
                 throw new ForbiddenException('This club name was taken');
             }
 
