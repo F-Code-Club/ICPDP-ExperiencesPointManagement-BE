@@ -20,13 +20,13 @@ export class AuthService {
         }
         const token: Tokens = await this.getTokens(user.userID, user.username, user.role);
 
-        const saveRefreshToken = await this.usersService.saveRefreshToken(user.userID, token.refreshToken);
+        await this.usersService.saveRefreshToken(user.userID, token.refreshToken);
 
         return token;
     }
 
     async logOut(userId: string) {
-        const responseUser = await this.usersService.deleteRefreshToken(userId);
+        await this.usersService.deleteRefreshToken(userId);
         return null;
     }
 
@@ -66,7 +66,7 @@ export class AuthService {
             }
             const tokens = await this.getTokens(user.userID, user.username, user.role);
 
-            const saveRefreshToken = await this.usersService.saveRefreshToken(user.userID, tokens.refreshToken);
+            await this.usersService.saveRefreshToken(user.userID, tokens.refreshToken);
 
             return tokens;
         } catch(e) {
