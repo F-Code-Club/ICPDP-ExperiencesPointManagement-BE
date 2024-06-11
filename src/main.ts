@@ -38,6 +38,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('User')
     .addTag('Auth')
+    .addTag('Local-Files')
     .addTag('Clubs')
     .addTag('Departments')
     .build();
