@@ -37,7 +37,7 @@ export class RolesGuard implements CanActivate {
             throw new UnauthorizedException('Invalid JWT token');
         }
         const user = request.user;
-        if (!user || !user.role) { 
+        if (!user || user?.role) { 
             return false; 
         }
         return requiredRoles.some(role => role === user.role);
