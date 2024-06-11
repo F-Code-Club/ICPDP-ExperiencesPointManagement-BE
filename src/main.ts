@@ -1,10 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { UsersController } from './models/users/users.controller';
-import { AuthController } from './auth/auth.controller';
-import { ClbsController } from './models/clbs/clbs.controller';
-import { DepartmentsController } from './models/departments/departments.controller';
 
 declare const module: any;
 
@@ -42,6 +38,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('User')
     .addTag('Auth')
+    .addTag('Local-Files')
     .addTag('Clubs')
     .addTag('Departments')
     .build();
