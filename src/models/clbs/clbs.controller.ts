@@ -74,6 +74,7 @@ export class ClbsController {
 
         let clbsDto: ClbsDto = new ClbsDto();
         clbsDto.name = createClubRequestDto.name;
+        clbsDto.avatar = createClubRequestDto.avatar;
 
         if (usersDto.role !== Role.Clb) {
             return res.status(403).json(new ApiResponseDto(null, 'This account role is incorrect'));

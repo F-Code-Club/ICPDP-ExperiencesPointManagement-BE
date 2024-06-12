@@ -84,11 +84,11 @@ export class ClbsService {
 
         clbsDto.user = users;
 
-        const newClbs = this.clbsRepository.create(clbsDto);
-
-        if (!newClbs.avatar) {
-            newClbs.avatar = '';
+        if (!clbsDto.avatar) {
+            clbsDto.avatar = '';
         }
+
+        const newClbs = this.clbsRepository.create(clbsDto);
 
         const savedClbs = await this.clbsRepository.save(newClbs);
 
