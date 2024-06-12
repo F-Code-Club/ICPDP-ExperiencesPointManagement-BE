@@ -137,6 +137,12 @@ export class ClbsService {
                 isChanged = true;
             }
 
+            if (clbsDto.username && clb.user.username !== clbsDto.username) {
+                const updatedUsername = await this.usersService.updateUsername(clb.user.userID, clbsDto.username);
+                clb.user.username = updatedUsername.username;
+                isChanged = true;
+            }
+
 
             if (clbsDto.email && clb.user.email !== clbsDto.email) {
                 const updatedEmail = await this.usersService.updateEmail(clb.user.userID, clbsDto.email);

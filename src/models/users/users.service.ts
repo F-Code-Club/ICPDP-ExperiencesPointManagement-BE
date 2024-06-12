@@ -113,6 +113,24 @@ export class UsersService {
         return responseUser;
     }
 
+    async updateUsername(userId: string, newUsername: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        
+        const usernameExist = await this.findByUserName(newUsername);
+        if (usernameExist && usernameExist.userID !== userId) {
+            throw new ForbiddenException('This username is already exist');
+        }
+
+        checkUser.username = newUsername;
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
     async updatePasswordByAdmin(userId: string, newPassword: string): Promise<Users | null> {
         const checkUser = await this.findById(userId);
         if(!checkUser) {
