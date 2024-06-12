@@ -16,5 +16,5 @@ export class UpdateClubRequestDto {
     })
     password?: string;
 
-    avt?: string;
+    avatar?: string;
 }

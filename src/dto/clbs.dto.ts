@@ -7,7 +7,7 @@ export class ClbsDto {
     })
     name: string;
 
-    avt?: string;
+    avatar?: string;
 
     user?: Users;
 }

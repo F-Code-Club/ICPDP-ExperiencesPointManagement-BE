@@ -68,7 +68,7 @@ export class ClbsService {
         return {
             clubID: checkClub.clubID,
             name: checkClub.name,
-            avt: checkClub.avt,
+            avatar: checkClub.avatar,
             active: checkClub.active, 
             user: responseUser,
         };
@@ -86,8 +86,8 @@ export class ClbsService {
 
         const newClbs = this.clbsRepository.create(clbsDto);
 
-        if (!newClbs.avt) {
-            newClbs.avt = 'not set avt yet';
+        if (!newClbs.avatar) {
+            newClbs.avatar = '';
         }
 
         const savedClbs = await this.clbsRepository.save(newClbs);
@@ -95,7 +95,7 @@ export class ClbsService {
         return {
             clubID: savedClbs.clubID,
             name: savedClbs.name,
-            avt: savedClbs.avt,
+            avatar: savedClbs.avatar,
             active: savedClbs.active,
             user: savedClbs.user
         }
@@ -127,8 +127,8 @@ export class ClbsService {
                 throw new ForbiddenException('This club name was taken');
             }
 
-            if (clbsDto.avt && clbsDto.avt !== clb.avt) {
-                clb.avt = clbsDto.avt;
+            if (clbsDto.avatar && clbsDto.avatar !== clb.avatar) {
+                clb.avatar = clbsDto.avatar;
                 isChanged = true;
             }
 
@@ -182,7 +182,7 @@ export class ClbsService {
             return {
                 clubID: updatedClb.clubID,
                 name: updatedClb.name,
-                avt: updatedClb.avt,
+                avatar: updatedClb.avatar,
                 active: updatedClb.active,
                 user: responseUser
             };
@@ -199,7 +199,7 @@ export class ClbsService {
         if (!checkClb) {
             return null;
         }
-        const resClub = await this.clbsRepository.delete(id);
+        await this.clbsRepository.delete(id);
         const resUser = await this.usersService.deleteUser(checkClb.user.userID);
         return resUser;
     }

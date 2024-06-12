@@ -13,7 +13,7 @@ export class Departments {
     name: string;
 
     @Column()
-    avt: string;
+    avatar: string;
 
     @OneToOne(() => Users)
     @JoinColumn({ name: "userId" })

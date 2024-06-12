@@ -34,8 +34,8 @@ export class UsersService {
         }
       
 
-        if (!userDto.avt) {
-            userDto.avt = 'not have avt yet';
+        if (!userDto.avatar) {
+            userDto.avatar = '';
         }
 
         userDto.refreshToken = "";
@@ -47,7 +47,7 @@ export class UsersService {
             password: responseUser.password,
             email: responseUser.email,
             role: responseUser.role,
-            avt: responseUser.avt
+            avatar: responseUser.avatar
         };
         return responseData;
     }

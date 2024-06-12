@@ -63,7 +63,7 @@ export class DepartmentsService {
         return {
             departmentID: checkDept.departmentID,
             name: checkDept.name,
-            avt: checkDept.avt,
+            avatar: checkDept.avatar,
             user: responseUser
         };
     }
@@ -80,8 +80,8 @@ export class DepartmentsService {
 
         const newDepts = this.deptsRepository.create(deptsDto);
 
-        if (!newDepts.avt) {
-            newDepts.avt = "";
+        if (!newDepts.avatar) {
+            newDepts.avatar = "";
         }
 
         const savedDepts = await this.deptsRepository.save(newDepts);
@@ -89,7 +89,7 @@ export class DepartmentsService {
         return  {
             departmentID: savedDepts.departmentID,
             name: savedDepts.name,
-            avt: savedDepts.avt,
+            avatar: savedDepts.avatar,
             user: savedDepts.user
         };
     }
@@ -119,8 +119,8 @@ export class DepartmentsService {
                 throw new ForbiddenException('This name was taken');
             }
 
-            if (deptsDto.avt && deptsDto.avt !== dept.avt) {
-                dept.avt = deptsDto.avt;
+            if (deptsDto.avatar && deptsDto.avatar !== dept.avatar) {
+                dept.avatar = deptsDto.avatar;
                 isChanged = true;
             }
 
@@ -146,7 +146,7 @@ export class DepartmentsService {
             return {
                 departmentID: updatedDept.departmentID,
                 name: updatedDept.name,
-                avt: updatedDept.avt,
+                avatar: updatedDept.avatar,
                 user: responseUser
             };
         } else {
@@ -162,7 +162,7 @@ export class DepartmentsService {
         if (!checkDept) {
             return null;
         }
-        const resDept = await this.deptsRepository.delete(id);
+        await this.deptsRepository.delete(id);
         const resUser = await this.usersService.deleteUser(checkDept.user.userID);
         return resUser;
     }

@@ -25,7 +25,9 @@ export class LocalFilesController {
     @ApiBearerAuth()
     async create(@Request() req, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
         const info = await this.localFilesService.createLocalFile(file.filename, file.path);
-        let responseData = `${req.protocol}://${req.headers.host}/local-files/${info.localFileID}`;
+        let responseData = {
+            avatarURL: `${req.protocol}://${req.headers.host}/local-files/${info.localFileID}`
+        };
         return res.status(201).json(new ApiResponseDto(responseData, 'Upload file successfully'));
     }
 

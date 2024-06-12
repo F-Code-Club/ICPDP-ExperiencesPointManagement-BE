@@ -13,7 +13,7 @@ export class Clbs {
     name: string;
 
     @Column()
-    avt: string;
+    avatar: string;
 
     @Column({ default: true })
     active: boolean;

@@ -20,7 +20,7 @@ export class DeptsResponseDto {
     name: string;
 
     @Expose()
-    avt: string;
+    avatar: string;
 
     @Exclude()
     createdAt?: Date;
