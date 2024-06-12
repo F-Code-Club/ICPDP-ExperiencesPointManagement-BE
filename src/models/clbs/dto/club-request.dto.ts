@@ -38,7 +38,7 @@ export class CreateClubRequestDto {
   })
   role: string;
 
-  avt?: string;
+  avatar?: string;
 
   @ApiProperty({
     example: 'F-Code'

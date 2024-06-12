@@ -7,6 +7,11 @@ export class UpdateClubRequestDto {
     name?: string;
 
     @ApiProperty({
+        example: 'updatedname'
+    })
+    username?:string;
+
+    @ApiProperty({
         example: 'emailupdate@gmail.com'
     })
     email?: string;
@@ -16,5 +21,5 @@ export class UpdateClubRequestDto {
     })
     password?: string;
 
-    avt?: string;
+    avatar?: string;
 }

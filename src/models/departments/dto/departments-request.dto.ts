@@ -38,7 +38,7 @@ export class CreateDeptRequestDto {
       })
       role: string;
     
-      avt?: string;
+      avatar?: string;
     
       @ApiProperty({
         example: 'IC-PDP'

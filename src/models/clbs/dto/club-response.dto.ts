@@ -23,7 +23,7 @@ export class ClbsResponseDto {
     name: string;
 
     @Expose()
-    avt: string;
+    avatar: string;
 
     @Exclude()
     createdAt?: Date;

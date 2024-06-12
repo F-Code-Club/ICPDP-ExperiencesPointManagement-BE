@@ -57,7 +57,7 @@ export class ClbsController {
             role: responseClb.user.role,
             clubID: responseClb.clubID,
             name: responseClb.name,
-            avt: responseClb.avt,
+            avatar: responseClb.avatar,
             active: responseClb.active
         }      
         return res.status(200).json(new ApiResponseDto(responseData, 'Get club successfully'));
@@ -95,7 +95,7 @@ export class ClbsController {
             role: responseUser.role,
             clubID: responseClbs.clubID,
             name: responseClbs.name,
-            avt: responseClbs.avt,
+            avatar: responseClbs.avatar,
             active: responseClbs.active
         };
 
@@ -124,7 +124,7 @@ export class ClbsController {
             role: responseClb.user.role,
             clubID: responseClb.clubID,
             name: responseClb.name,
-            avt: responseClb.avt,
+            avatar: responseClb.avatar,
             active: responseClb.active
         } 
         return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));

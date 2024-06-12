@@ -34,8 +34,8 @@ export class UsersService {
         }
       
 
-        if (!userDto.avt) {
-            userDto.avt = 'not have avt yet';
+        if (!userDto.avatar) {
+            userDto.avatar = '';
         }
 
         userDto.refreshToken = "";
@@ -47,7 +47,7 @@ export class UsersService {
             password: responseUser.password,
             email: responseUser.email,
             role: responseUser.role,
-            avt: responseUser.avt
+            avatar: responseUser.avatar
         };
         return responseData;
     }
@@ -107,6 +107,24 @@ export class UsersService {
         }
 
         checkUser.email = newEmail;
+
+        const responseUser = await this.userRepository.save(checkUser);
+
+        return responseUser;
+    }
+
+    async updateUsername(userId: string, newUsername: string): Promise<Users | null> {
+        const checkUser = await this.findById(userId);
+        if (!checkUser) {
+            return null;
+        }
+        
+        const usernameExist = await this.findByUserName(newUsername);
+        if (usernameExist && usernameExist.userID !== userId) {
+            throw new ForbiddenException('This username is already exist');
+        }
+
+        checkUser.username = newUsername;
 
         const responseUser = await this.userRepository.save(checkUser);
 

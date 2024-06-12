@@ -15,7 +15,7 @@ export class Users {
     email: string;
 
     @Column()
-    avt: string;
+    avatar: string;
 
     @Column()
     iv?: string;  //code to encode and decode password

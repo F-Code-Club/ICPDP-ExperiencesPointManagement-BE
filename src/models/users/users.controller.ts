@@ -40,7 +40,7 @@ export class UsersController {
             userID: checkUser.userID,
             username: checkUser.username,
             email: checkUser.email,
-            avt: checkUser.avt,
+            avatar: checkUser.avatar,
             role: checkUser.role
         }
 

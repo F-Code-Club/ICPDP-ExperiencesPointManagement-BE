@@ -53,7 +53,7 @@ export class DepartmentsController {
             role: responseDept.user.role,
             departmentID: responseDept.departmentID,
             name: responseDept.name,
-            avt: responseDept.avt,
+            avatar: responseDept.avatar,
         }      
         return res.status(200).json(new ApiResponseDto(responseData, 'Get department successfully'));
     }
@@ -89,7 +89,7 @@ export class DepartmentsController {
             role: responseUser.role,
             departmentID: responseDepts.departmentID,
             name: responseDepts.name,
-            avt: responseDepts.avt
+            avatar: responseDepts.avatar
         };
 
         if (responseDepts === null) {
@@ -116,7 +116,7 @@ export class DepartmentsController {
             role: responseDept.user.role,
             departmentID: responseDept.departmentID,
             name: responseDept.name,
-            avt: responseDept.avt,
+            avatar: responseDept.avatar,
         } 
         return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
     }

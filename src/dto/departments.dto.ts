@@ -7,7 +7,7 @@ export class DepartmentsDto {
     })
     name: string;
 
-    avt?: string;
+    avatar?: string;
 
     user?: Users;
 }

@@ -33,7 +33,7 @@ export class UsersDto {
    })
    password?: string;
 
-   avt?: string;
+   avatar?: string;
 
    iv?: string;
 
