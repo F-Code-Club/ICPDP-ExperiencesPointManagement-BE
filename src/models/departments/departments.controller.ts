@@ -31,12 +31,12 @@ export class DepartmentsController {
         if (!filter) {
             throw new BadRequestException('Lacked of request param');
         }
-        const [clubs, count] = await this.deptService.getDepts(filter);
+        const [deparments, count] = await this.deptService.getDepts(filter);
         let message = 'Get departments successfully';
-        if (!clubs || count === 0) {
+        if (!deparments || count === 0) {
             message = 'Get departments fail';
         }
-        return PaginationDto.from(DtoMapper.mapMany(clubs, DeptsResponseDto), filter, count, message);
+        return PaginationDto.from(DtoMapper.mapMany(deparments, DeptsResponseDto), filter, count, message);
     }
 
     @Roles(Role.Admin, Role.Dept)
