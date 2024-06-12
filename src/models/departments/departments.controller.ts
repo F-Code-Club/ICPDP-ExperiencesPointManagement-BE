@@ -42,13 +42,14 @@ export class DepartmentsController {
     @Roles(Role.Admin, Role.Dept)
     @Get('/:ID')
     async getDeptById(@Request() req, @Param('ID') id: string, @Res() res: Response) {
-        const responseDept = await this.deptService.getDeptById(id, req.user.role, req.user.userId);
+        const responseDept = await this.deptService.getDeptById(id, req.user.role, req.user.userID);
         if (!responseDept) {
             return res.status(404).json(new ApiResponseDto(null, 'Department Not Found'));
         }
         const responseData = {
             userID: responseDept.user.userID,
             username: responseDept.user.username,
+            password: responseDept.user.password,
             email: responseDept.user.email,
             role: responseDept.user.role,
             departmentID: responseDept.departmentID,
