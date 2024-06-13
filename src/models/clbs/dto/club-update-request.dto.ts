@@ -22,4 +22,6 @@ export class UpdateClubRequestDto {
     password?: string;
 
     avatar?: string;
+
+    active?: boolean;
 }

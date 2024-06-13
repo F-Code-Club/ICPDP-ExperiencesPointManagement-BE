@@ -130,6 +130,11 @@ export class DepartmentsService {
                 isChanged = true;
             }
 
+            if (deptsDto.active && deptsDto.active !== dept.active) {
+                dept.active = deptsDto.active;
+                isChanged = true;
+            }   
+
             if (deptsDto.name && deptsDto.name !== dept.name) {
                 dept.name = deptsDto.name;
                 isChanged = true;
