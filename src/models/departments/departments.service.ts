@@ -7,6 +7,9 @@ import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/enum/roles/role.enum';
 import { DeptsFilterDto } from './dto/department-filter.dto';
+import { UpdateDeptRequestDto } from './dto/department-update-request.dto';
+import { promisify } from 'util';
+import { createCipheriv, scrypt } from 'crypto';
 
 @Injectable()
 export class DepartmentsService {
@@ -56,6 +59,7 @@ export class DepartmentsService {
         const responseUser = {
             userID: checkUser.userID,
             username: checkUser.username,
+            password: checkUser.password,
             email: checkUser.email,
             role: checkUser.role
         }
@@ -64,6 +68,7 @@ export class DepartmentsService {
             departmentID: checkDept.departmentID,
             name: checkDept.name,
             avatar: checkDept.avatar,
+            active: checkDept.active,
             user: responseUser
         };
     }
@@ -90,6 +95,7 @@ export class DepartmentsService {
             departmentID: savedDepts.departmentID,
             name: savedDepts.name,
             avatar: savedDepts.avatar,
+            active: savedDepts.active,
             user: savedDepts.user
         };
     }
@@ -97,7 +103,7 @@ export class DepartmentsService {
     /* 
     [PUT]: /departments/{ID}
     */
-    async updateDepts(deptsDto: DepartmentsDto, id: string, userRole: string, userId: string): Promise<any> {
+    async updateDepts(deptsDto: UpdateDeptRequestDto, id: string, userRole: string, userId: string): Promise<any> {
         const dept = await this.findById(id);
         
         if (!dept) {
@@ -106,7 +112,7 @@ export class DepartmentsService {
 
         let checkRight = false;
 
-        if ((userRole === Role.Dept && dept.user.userID === userId) || userRole === 'admin') {
+        if ((userRole === Role.Dept && dept.user.userID === userId) || userRole === Role.Admin) {
             checkRight = true;
         }
 
@@ -115,8 +121,8 @@ export class DepartmentsService {
             
             const checkExist = await this.findByName(deptsDto.name);
 
-            if (checkExist !== null && checkExist.departmentID !== id) {
-                throw new ForbiddenException('This name was taken');
+            if (deptsDto.name && checkExist && checkExist.departmentID !== id) {
+                throw new ForbiddenException('This department name was taken');
             }
 
             if (deptsDto.avatar && deptsDto.avatar !== dept.avatar) {
@@ -129,6 +135,39 @@ export class DepartmentsService {
                 isChanged = true;
             }
 
+            if (deptsDto.username && dept.user.username !== deptsDto.username) {
+                const updatedUsername = await this.usersService.updateUsername(dept.user.userID, deptsDto.username);
+                dept.user.username = updatedUsername.username;
+                isChanged = true;
+            }
+
+            if (deptsDto.email && dept.user.email !== deptsDto.email) {
+                const updatedEmail = await this.usersService.updateEmail(dept.user.userID, deptsDto.email);
+                dept.user.email = updatedEmail.email;
+                isChanged = true;
+            }
+
+            if (userRole !== Role.Admin && deptsDto.password) {
+                throw new ForbiddenException('You have no right to update password here');
+            } else if (userRole === Role.Admin && deptsDto.password) {
+
+
+                // encode password to test
+                let checkPass = deptsDto.password;
+                const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
+                const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(dept.user.iv, 'hex'));
+                let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
+                encryptedText += cipher.final('hex');
+                checkPass = encryptedText;
+
+                // check password here
+                if (checkPass !== dept.user.password) {
+                    const updatedPassword = await this.usersService.updatePasswordByAdmin(dept.user.userID, deptsDto.password);
+                    dept.user.password = updatedPassword.password;
+                    isChanged = true;
+                }
+            }
+
             if (!isChanged) {
                 return 'Nothing changed';
             }
@@ -139,6 +178,7 @@ export class DepartmentsService {
             const responseUser = {
                 userID: checkUser.userID,
                 username: checkUser.username,
+                password: checkUser.password,
                 email: checkUser.email,
                 role: checkUser.role
             }
@@ -147,6 +187,7 @@ export class DepartmentsService {
                 departmentID: updatedDept.departmentID,
                 name: updatedDept.name,
                 avatar: updatedDept.avatar,
+                active: updatedDept.active,
                 user: responseUser
             };
         } else {
