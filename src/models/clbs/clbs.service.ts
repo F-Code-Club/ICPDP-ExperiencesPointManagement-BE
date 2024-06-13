@@ -123,7 +123,7 @@ export class ClbsService {
             const checkExist = await this.findByName(clbsDto.name);
 
 
-            if (checkExist && checkExist.clubID !== id) {
+            if (clbsDto.name && checkExist && checkExist.clubID !== id) {
                 throw new ForbiddenException('This club name was taken');
             }
 

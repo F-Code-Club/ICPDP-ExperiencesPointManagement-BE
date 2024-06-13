@@ -15,6 +15,9 @@ export class Departments {
     @Column()
     avatar: string;
 
+    @Column({ default: true })
+    active: boolean;
+
     @OneToOne(() => Users)
     @JoinColumn({ name: "userId" })
     user: Users;
