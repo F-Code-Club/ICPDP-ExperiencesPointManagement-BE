@@ -22,4 +22,6 @@ export class UpdateDeptRequestDto {
     password?: string;
 
     avatar?: string;
+
+    active?: boolean;
 }
