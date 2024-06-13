@@ -34,7 +34,7 @@ export class CreateDeptRequestDto {
       password: string;
     
       @ApiProperty({
-        example: "dept"
+        example: "department"
       })
       role: string;
     
