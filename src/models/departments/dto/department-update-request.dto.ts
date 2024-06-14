@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { IsBoolean } from "class-validator";
 
 export class UpdateDeptRequestDto {
     @ApiProperty({
@@ -23,5 +24,9 @@ export class UpdateDeptRequestDto {
 
     avatar?: string;
 
+    @ApiProperty({
+        example: false
+    })
+    @IsBoolean()
     active?: boolean;
 }

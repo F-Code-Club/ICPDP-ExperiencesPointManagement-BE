@@ -126,7 +126,7 @@ export class DepartmentsController {
             avatar: responseDept.avatar,
             active: responseDept.active
         } 
-        return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
+        return res.status(201).json(new ApiResponseDto(responseData, 'Update department successfully'));
     }
 
     @Roles(Role.Admin)
