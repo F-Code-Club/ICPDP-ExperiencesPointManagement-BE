@@ -19,6 +19,7 @@ export class CreateDeptRequestDto {
         example: 'testdept@gmail.com',
         description: 'Email must be unique'
       }) 
+      @IsNotEmpty()
       email: string;
     
       @ApiProperty({
@@ -43,5 +44,6 @@ export class CreateDeptRequestDto {
       @ApiProperty({
         example: 'IC-PDP'
       })
+      @IsNotEmpty()
       name: string;
 }
