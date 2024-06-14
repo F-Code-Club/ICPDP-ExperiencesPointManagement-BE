@@ -132,7 +132,7 @@ export class ClbsService {
                 isChanged = true;
             }
 
-            if(clbsDto.active && clbsDto.active !== clb.active) {
+            if(clbsDto.active !== undefined && clbsDto.active !== clb.active) {
                 clb.active = clbsDto.active;
                 isChanged = true;
             }

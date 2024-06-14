@@ -19,6 +19,7 @@ export class CreateClubRequestDto {
     example: 'test123@gmail.com',
     description: 'Email must be unique'
   }) 
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({
@@ -43,5 +44,6 @@ export class CreateClubRequestDto {
   @ApiProperty({
     example: 'F-Code'
   })
+  @IsNotEmpty()
   name: string;
 }

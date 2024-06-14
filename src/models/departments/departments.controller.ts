@@ -78,7 +78,7 @@ export class DepartmentsController {
             return res.status(403).json(new ApiResponseDto(null, 'This account role is incorrect'));
         }
         if (await this.deptService.findByName(depsDto.name)) {
-            return res.status(403).json(new ApiResponseDto(null, 'This name was taken'));
+            return res.status(403).json(new ApiResponseDto(null, 'This department name was taken'));
         }
         if (await this.usersService.checkExist(usersDto.username, usersDto.email)) {
             return;
@@ -126,7 +126,7 @@ export class DepartmentsController {
             avatar: responseDept.avatar,
             active: responseDept.active
         } 
-        return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
+        return res.status(201).json(new ApiResponseDto(responseData, 'Update department successfully'));
     }
 
     @Roles(Role.Admin)

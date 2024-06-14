@@ -130,7 +130,7 @@ export class DepartmentsService {
                 isChanged = true;
             }
 
-            if (deptsDto.active && deptsDto.active !== dept.active) {
+            if (deptsDto.active !== undefined && deptsDto.active !== dept.active) {
                 dept.active = deptsDto.active;
                 isChanged = true;
             }   
