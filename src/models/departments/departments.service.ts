@@ -155,21 +155,21 @@ export class DepartmentsService {
             if (userRole !== Role.Admin && deptsDto.password) {
                 throw new ForbiddenException('You have no right to update password here');
             } else if (userRole === Role.Admin && deptsDto.password) {
+                if (deptsDto.password !== dept.user.password) {
+                    // encode password to test
+                    let checkPass = deptsDto.password;
+                    const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
+                    const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(dept.user.iv, 'hex'));
+                    let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
+                    encryptedText += cipher.final('hex');
+                    checkPass = encryptedText;
 
-
-                // encode password to test
-                let checkPass = deptsDto.password;
-                const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
-                const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(dept.user.iv, 'hex'));
-                let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
-                encryptedText += cipher.final('hex');
-                checkPass = encryptedText;
-
-                // check password here
-                if (checkPass !== dept.user.password) {
-                    const updatedPassword = await this.usersService.updatePasswordByAdmin(dept.user.userID, deptsDto.password);
-                    dept.user.password = updatedPassword.password;
-                    isChanged = true;
+                    // check password here
+                    if (checkPass !== dept.user.password) {
+                        const updatedPassword = await this.usersService.updatePasswordByAdmin(dept.user.userID, deptsDto.password);
+                        dept.user.password = updatedPassword.password;
+                        isChanged = true;
+                    }
                 }
             }
 

@@ -158,20 +158,21 @@ export class ClbsService {
             if (userRole !== Role.Admin && clbsDto.password) {
                 throw new ForbiddenException('You have no right to update password here');
             } else if (userRole === Role.Admin && clbsDto.password) {
+                if (clbsDto.password !== clb.user.password) {
+                    // encode password to test
+                    let checkPass = clbsDto.password;
+                    const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
+                    const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(clb.user.iv, 'hex'));
+                    let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
+                    encryptedText += cipher.final('hex');
+                    checkPass = encryptedText;
 
-                // encode password to test
-                let checkPass = clbsDto.password;
-                const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
-                const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(clb.user.iv, 'hex'));
-                let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
-                encryptedText += cipher.final('hex');
-                checkPass = encryptedText;
-                
-                // check password here
-                if (checkPass !== clb.user.password) {
-                    const updatedPassword = await this.usersService.updatePasswordByAdmin(clb.user.userID, clbsDto.password);
-                    clb.user.password = updatedPassword.password;
-                    isChanged = true;
+                    // check password here
+                    if (checkPass !== clb.user.password) {
+                        const updatedPassword = await this.usersService.updatePasswordByAdmin(clb.user.userID, clbsDto.password);
+                        clb.user.password = updatedPassword.password;
+                        isChanged = true;
+                    }
                 }
             }
 
