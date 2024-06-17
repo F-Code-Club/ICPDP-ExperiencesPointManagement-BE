@@ -13,10 +13,11 @@ export class StudentsDto {
     @MaxLength(8, {
         message: 'This id is not valid'
     })
-    id: string;
+    studentID: string;
 
     @ApiProperty({
         example: 'Nguyen Van A'
     })
+    @IsNotEmpty()
     name: string;
 }
