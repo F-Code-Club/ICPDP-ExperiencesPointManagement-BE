@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Students } from './students.entity';
 import { Repository } from 'typeorm';
 import { StudentsDto } from 'src/dto/students.dto';
+import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
 
 @Injectable()
 export class StudentsService {
@@ -45,6 +46,38 @@ export class StudentsService {
         const newStudent = this.studentsRepository.create(studentDto);
 
         return await this.studentsRepository.save(newStudent);
+    }
+
+    /*
+    [PATCH]: /students/{id}
+    */
+    async updateStudents(studentDto: UpdateStudentRequestDto, id: string) {
+        const checkValid = await this.checkValidId(id);
+
+        if (!checkValid) {
+            throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+        }   
+
+        const checkStudent = await this.findByID(id);
+
+        if (!checkStudent) {
+            return null;
+        }
+
+        let isChanged = false;
+        
+        if (studentDto.name && checkStudent.name !== studentDto.name) {
+            checkStudent.name = studentDto.name;
+            isChanged = true;
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const updatedStudent = await this.studentsRepository.save(checkStudent);
+
+        return updatedStudent;
     }
 
     /* 

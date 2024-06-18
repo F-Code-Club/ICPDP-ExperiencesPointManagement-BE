@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { StudentsService } from './students.service';
@@ -7,6 +7,7 @@ import { Role } from 'src/enum/roles/role.enum';
 import { StudentsDto } from 'src/dto/students.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { Response } from 'express';
+import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
 
 @ApiTags('Students')
 @Controller('students')
@@ -32,6 +33,19 @@ export class StudentsController {
     async createStudents(@Body() studentDto: StudentsDto) {
         const responseData = await this.studentsService.createStudents(studentDto);
         return new ApiResponseDto(responseData, 'Create student successfully');
+    }
+
+    @Roles(Role.Admin)
+    @Patch('/:ID')
+    async updateStudents(@Body() studentDto: UpdateStudentRequestDto, @Param('ID') id: string, @Res() res: Response) {
+        const responseData = await this.studentsService.updateStudents(studentDto, id);
+        if (responseData === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Student Not Found'));
+        } else if (responseData === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseData, 'Update successfully'));
+        }
     }
 
     @Roles(Role.Admin)
