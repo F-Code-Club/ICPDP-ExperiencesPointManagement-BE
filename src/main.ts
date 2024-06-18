@@ -41,6 +41,7 @@ async function bootstrap() {
     .addTag('Local-Files')
     .addTag('Clubs')
     .addTag('Departments')
+    .addTag('Students')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

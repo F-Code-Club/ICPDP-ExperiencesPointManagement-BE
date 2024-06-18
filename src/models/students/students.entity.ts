@@ -4,11 +4,11 @@ import { EventStudent } from "../eventStudent/event-student.entity";
 @Entity()
 export class Students {
     @PrimaryColumn({ unique: true })
-    id: string;
+    studentID: string;
 
     @Column()
     name: string;
 
     @OneToMany(() => EventStudent, (eventStudent) => eventStudent.student)
-    eventStudent: EventStudent[]
+    eventStudent?: EventStudent[]
 }
