@@ -15,13 +15,14 @@ export class DtoMapper {
                 const user = entity['user'];
                 dto['userID'] = user['userID'];
                 dto['username'] = user['username'];
+                dto['password'] = user['password'];
                 dto['email'] = user['email'];
                 dto['role'] = user['role'];
             }
 
             // Map the properties from entity to DTO
             Object.keys(entity).forEach(key => {
-                if (key !== 'user' && entity.hasOwnProperty(key)) {
+                if (key !== 'user' && key !=='createdAt' && entity.hasOwnProperty(key)) {
                     dto[key] = entity[key];
                 }
             });

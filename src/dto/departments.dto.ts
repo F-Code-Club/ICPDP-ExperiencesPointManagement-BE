@@ -1,12 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { Users } from "src/models/users/users.entity";
 
 export class DepartmentsDto {
     @ApiProperty({
-        example: 'Academic Deparment'
+        example: 'IC-PDP'
     })
-    @IsNotEmpty()
     name: string;
 
-    avt?: string;
+    avatar?: string;
+
+    user?: Users;
 }

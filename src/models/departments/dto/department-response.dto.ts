@@ -1,14 +1,11 @@
-import { Exclude, Expose, Type } from "class-transformer";
+import { Exclude, Expose } from "class-transformer";
 
-export class ClbsResponseDto {
+export class DeptsResponseDto {
     @Expose()
     userID: string;
 
     @Expose()
     username: string;
-
-    @Expose()
-    password: string;
 
     @Expose()
     email: string;
@@ -17,7 +14,7 @@ export class ClbsResponseDto {
     role: string;
 
     @Expose()
-    clubID: string;
+    departmentID: string;
 
     @Expose()
     name: string;

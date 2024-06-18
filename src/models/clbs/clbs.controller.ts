@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ClbsService } from './clbs.service';
 import { ClbsDto } from 'src/dto/clbs.dto';
@@ -15,6 +15,7 @@ import { ClbsFilterDto } from './dto/club-filter.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { ClbsResponseDto } from './dto/club-response.dto';
+import { UpdateClubRequestDto } from './dto/club-update-request.dto';
 
 @ApiTags('Clubs')
 @Controller('clubs')
@@ -42,20 +43,22 @@ export class ClbsController {
     }
 
     @Roles(Role.Admin, Role.Clb)
-    @Get('/:id')
-    async getClubById(@Request() req, @Param('id') id: string, @Res() res: Response) {
-        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userId);
+    @Get('/:ID')
+    async getClubById(@Request() req, @Param('ID') id: string, @Res() res: Response) {
+        const responseClb = await this.clbsService.getClubById(id, req.user.role, req.user.userID);
         if (!responseClb) {
             return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
         }
         const responseData = {
-            userID: responseClb.user.userId,
+            userID: responseClb.user.userID,
             username: responseClb.user.username,
+            password: responseClb.user.password,
             email: responseClb.user.email,
             role: responseClb.user.role,
-            clubId: responseClb.clubId,
+            clubID: responseClb.clubID,
             name: responseClb.name,
-            avt: responseClb.avt,
+            avatar: responseClb.avatar,
+            active: responseClb.active
         }      
         return res.status(200).json(new ApiResponseDto(responseData, 'Get club successfully'));
     }
@@ -71,6 +74,7 @@ export class ClbsController {
 
         let clbsDto: ClbsDto = new ClbsDto();
         clbsDto.name = createClubRequestDto.name;
+        clbsDto.avatar = createClubRequestDto.avatar;
 
         if (usersDto.role !== Role.Clb) {
             return res.status(403).json(new ApiResponseDto(null, 'This account role is incorrect'));
@@ -87,11 +91,13 @@ export class ClbsController {
         const responseData = {
             userID: responseUser.userID,
             username: responseUser.username,
+            password: responseUser.password,
             email: responseUser.email,
             role: responseUser.role,
-            clubId: responseClbs.clubId,
+            clubID: responseClbs.clubID,
             name: responseClbs.name,
-            avt: responseClbs.avt
+            avatar: responseClbs.avatar,
+            active: responseClbs.active
         };
 
         if (responseClbs === null) {
@@ -102,30 +108,32 @@ export class ClbsController {
     }
 
     @Roles(Role.Admin, Role.Clb)
-    @Put('/:id')
-    async updateClb(@Request() req, @Body() clbsDto: ClbsDto, @Param('id') id: string, @Res() res: Response) {
+    @Patch('/:ID')
+    async updateClb(@Request() req, @Body() clbsDto: UpdateClubRequestDto, @Param('ID') id: string, @Res() res: Response) {
         const responseClb = await this.clbsService.updateClbs(clbsDto, id, req.user.role, req.user.userID);
         if (responseClb === 'Nothing changed') {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
         }
         if (!responseClb) {
-            return res.status(404).json(new ApiResponseDto(null, 'Clb Not Found'));
+            return res.status(404).json(new ApiResponseDto(null, 'Club Not Found'));
         }
         const responseData = {
             userID: responseClb.user.userID,
             username: responseClb.user.username,
+            password: responseClb.user.password,
             email: responseClb.user.email,
             role: responseClb.user.role,
-            clubId: responseClb.clubId,
+            clubID: responseClb.clubID,
             name: responseClb.name,
-            avt: responseClb.avt,
+            avatar: responseClb.avatar,
+            active: responseClb.active
         } 
         return res.status(201).json(new ApiResponseDto(responseData, 'Update club successfully'));
     }
 
     @Roles(Role.Admin)
-    @Delete('/:id')
-    async deleteClb(@Param('id') id: string, @Res() res: Response) {
+    @Delete('/:ID')
+    async deleteClb(@Param('ID') id: string, @Res() res: Response) {
         const resultDelete = await this.clbsService.deleteClbs(id);
         if (resultDelete === null) {
             return res.status(404).json(new ApiResponseDto(null, 'Club not found'));

@@ -9,13 +9,13 @@ export class Users {
     username: string;
 
     @Column()
-    password?: string;
+    password: string;
 
     @Column({ unique: true })
     email: string;
 
     @Column()
-    avt: string;
+    avatar: string;
 
     @Column()
     iv?: string;  //code to encode and decode password

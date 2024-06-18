@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
 import { Repository } from 'typeorm';
@@ -6,7 +6,10 @@ import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
 import { ClbsFilterDto } from './dto/club-filter.dto';
-import { emitWarning } from 'process';
+import { Role } from 'src/enum/roles/role.enum';
+import { promisify } from 'util';
+import { createCipheriv, scrypt } from 'crypto';
+import { UpdateClubRequestDto } from './dto/club-update-request.dto';
 
 @Injectable()
 export class ClbsService {
@@ -26,7 +29,12 @@ export class ClbsService {
         if (dto.take < 0) {
             throw new ForbiddenException('take must greater than or equal to 0');
         }
-        return await this.clbsRepository.findAndCount({ relations: ['user'], take: dto.take, skip: dto.take*(dto.page - 1) });
+        return await this.clbsRepository.findAndCount({ 
+            relations: ['user'], 
+            take: dto.take, 
+            skip: dto.take*(dto.page - 1),
+            order: { createdAt: 'ASC' } 
+        });
     }
 
 
@@ -50,17 +58,19 @@ export class ClbsService {
         }
         const checkUser = checkClub.user;
         const responseUser = {
-            userId: checkUser.userID,
+            userID: checkUser.userID,
             username: checkUser.username,
+            password: checkUser.password,
             email: checkUser.email,
             role: checkUser.role
         }
         
         return {
-            clubId: checkClub.clubId,
+            clubID: checkClub.clubID,
             name: checkClub.name,
-            avt: checkClub.avt,
-            user: responseUser
+            avatar: checkClub.avatar,
+            active: checkClub.active, 
+            user: responseUser,
         };
     }
 
@@ -74,35 +84,36 @@ export class ClbsService {
 
         clbsDto.user = users;
 
-        const newClbs = this.clbsRepository.create(clbsDto);
-
-        if (!newClbs.avt) {
-            newClbs.avt = 'not set avt yet';
+        if (!clbsDto.avatar) {
+            clbsDto.avatar = '';
         }
+
+        const newClbs = this.clbsRepository.create(clbsDto);
 
         const savedClbs = await this.clbsRepository.save(newClbs);
 
         return {
-            clubId: savedClbs.clubId,
+            clubID: savedClbs.clubID,
             name: savedClbs.name,
-            avt: savedClbs.avt,
+            avatar: savedClbs.avatar,
+            active: savedClbs.active,
             user: savedClbs.user
         }
     }
 
     /*
-    [PUT]: /clubs/{id}
+    [PATCH]: /clubs/{id}
     */
-    async updateClbs(clbsDto: ClbsDto, id: string, userRole: string, userId: string): Promise<any> {
+    async updateClbs(clbsDto: UpdateClubRequestDto, id: string, userRole: string, userId: string): Promise<any> {
         const clb = await this.findById(id);
-        
+
         if (!clb) {
             return null;
         }
 
         let checkRight = false;
 
-        if ((userRole === 'club' && clb.user.userID === userId) || userRole === 'admin') {
+        if (userRole === Role.Admin || (userRole === Role.Clb && clb.user.userID === userId)) {
             checkRight = true;
         }
 
@@ -111,18 +122,58 @@ export class ClbsService {
             
             const checkExist = await this.findByName(clbsDto.name);
 
-            if (checkExist !== null && checkExist.clubId !== id) {
-                throw new ForbiddenException('This name was taken');
+
+            if (clbsDto.name && checkExist && checkExist.clubID !== id) {
+                throw new ForbiddenException('This club name was taken');
             }
 
-            if (clbsDto.avt && clbsDto.avt !== clb.avt) {
-                clb.avt = clbsDto.avt;
+            if (clbsDto.avatar && clbsDto.avatar !== clb.avatar) {
+                clb.avatar = clbsDto.avatar;
+                isChanged = true;
+            }
+
+            if(clbsDto.active !== undefined && clbsDto.active !== clb.active) {
+                clb.active = clbsDto.active;
                 isChanged = true;
             }
 
             if (clbsDto.name && clbsDto.name !== clb.name) {
                 clb.name = clbsDto.name;
                 isChanged = true;
+            }
+
+            if (clbsDto.username && clb.user.username !== clbsDto.username) {
+                const updatedUsername = await this.usersService.updateUsername(clb.user.userID, clbsDto.username);
+                clb.user.username = updatedUsername.username;
+                isChanged = true;
+            }
+
+
+            if (clbsDto.email && clb.user.email !== clbsDto.email) {
+                const updatedEmail = await this.usersService.updateEmail(clb.user.userID, clbsDto.email);
+                clb.user.email = updatedEmail.email;
+                isChanged = true;
+            }
+
+            if (userRole !== Role.Admin && clbsDto.password) {
+                throw new ForbiddenException('You have no right to update password here');
+            } else if (userRole === Role.Admin && clbsDto.password) {
+                if (clbsDto.password !== clb.user.password) {
+                    // encode password to test
+                    let checkPass = clbsDto.password;
+                    const key = (await promisify(scrypt)(checkPass, 'salt', 32)) as Buffer;
+                    const cipher = createCipheriv('aes-256-ctr', key, Buffer.from(clb.user.iv, 'hex'));
+                    let encryptedText = cipher.update(checkPass, 'utf8', 'hex');
+                    encryptedText += cipher.final('hex');
+                    checkPass = encryptedText;
+
+                    // check password here
+                    if (checkPass !== clb.user.password) {
+                        const updatedPassword = await this.usersService.updatePasswordByAdmin(clb.user.userID, clbsDto.password);
+                        clb.user.password = updatedPassword.password;
+                        isChanged = true;
+                    }
+                }
             }
 
             if (!isChanged) {
@@ -133,16 +184,18 @@ export class ClbsService {
 
             const checkUser = updatedClb.user;
             const responseUser = {
-                userId: checkUser.userID,
+                userID: checkUser.userID,
                 username: checkUser.username,
+                password: checkUser.password,
                 email: checkUser.email,
                 role: checkUser.role
             }
             
             return {
-                clubId: updatedClb.clubId,
+                clubID: updatedClb.clubID,
                 name: updatedClb.name,
-                avt: updatedClb.avt,
+                avatar: updatedClb.avatar,
+                active: updatedClb.active,
                 user: responseUser
             };
         } else {
@@ -158,7 +211,7 @@ export class ClbsService {
         if (!checkClb) {
             return null;
         }
-        const resClub = await this.clbsRepository.delete(id);
+        await this.clbsRepository.delete(id);
         const resUser = await this.usersService.deleteUser(checkClb.user.userID);
         return resUser;
     }
@@ -175,7 +228,7 @@ export class ClbsService {
     async findById(id: string): Promise<Clbs | null> {
         const existClb = await this.clbsRepository.findOne({
             where: {
-                clubId: id,
+                clubID: id,
             },
             relations: ['user']
         });

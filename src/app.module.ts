@@ -27,6 +27,8 @@ import { EventStudent } from './models/eventStudent/event-student.entity';
 import { EventStudentHttpModule } from './models/eventStudent/event-student-http.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
+import { LocalFilesModule } from './local-files/local-files.module';
+import { LocalFile } from './local-files/local-file.entity';
 dotenv.config();
 
 @Module({
@@ -38,7 +40,8 @@ dotenv.config();
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Users, 
+      entities: [LocalFile,
+                 Users, 
                  RoleClbs, 
                  RoleDepartments, 
                  Semesters,
@@ -51,6 +54,7 @@ dotenv.config();
                  EventStudent],
       synchronize: true,
     }),
+    LocalFilesModule,
     UsersHttpModule,
     RoleClbsHttpModule,
     RoleDeparmentsHttpModule,
