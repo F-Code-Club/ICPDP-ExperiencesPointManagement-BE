@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { StudentsService } from './students.service';
@@ -8,6 +8,10 @@ import { StudentsDto } from 'src/dto/students.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { Response } from 'express';
 import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
+import { StudentsFilterDto } from './dto/students-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { StudentsResponseDto } from './dto/students-response.dto';
 
 @ApiTags('Students')
 @Controller('students')
@@ -17,6 +21,20 @@ export class StudentsController {
     constructor (
         private readonly studentsService: StudentsService,
     ) {};
+
+    @Roles(Role.Admin)
+    @Get()
+    async getStudents(@Query() filter: StudentsFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [students, count] = await this.studentsService.getStudents(filter);
+        let message = 'Get students successfully';
+        if (!students || count === 0) {
+            message = 'Get students fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(students, StudentsResponseDto), filter, count, message);
+    }
 
     @Get('/:ID')
     async getStudentById(@Param('ID') id: string, @Res() res: Response) {

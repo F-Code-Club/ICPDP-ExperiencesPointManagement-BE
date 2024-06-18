@@ -4,6 +4,7 @@ import { Students } from './students.entity';
 import { Repository } from 'typeorm';
 import { StudentsDto } from 'src/dto/students.dto';
 import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
+import { StudentsFilterDto } from './dto/students-filter.dto';
 
 @Injectable()
 export class StudentsService {
@@ -11,6 +12,23 @@ export class StudentsService {
         @InjectRepository(Students)
         private studentsRepository: Repository<Students>,
     ) {};
+
+    /*
+    [GET]: /students/page?&&take?
+    */
+    async getStudents(dto: StudentsFilterDto) {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+        return await this.studentsRepository.findAndCount({
+            take: dto.take,
+            skip: dto.take*(dto.page - 1),
+            order: { studentID: 'ASC' }
+        });
+    }
 
     /*
     [GET]: /students/{id}
