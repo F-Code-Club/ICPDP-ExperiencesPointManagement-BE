@@ -47,6 +47,26 @@ export class StudentsService {
         return await this.studentsRepository.save(newStudent);
     }
 
+    /* 
+    [DELETE]: /students/{id}
+    */
+    async deleteStudents(id: string): Promise<Number | null> {
+        const checkValid = await this.checkValidId(id);
+
+        if (!checkValid) {
+            throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+        }
+
+        const checkStudent = await this.findByID(id);
+        
+        if (!checkStudent) {
+            return null;
+        }
+
+        const res = await this.studentsRepository.delete(id);
+        return res.affected;
+    }
+
     async findByID(id: string) {
         const existStudent = await this.studentsRepository.findOne({
             where: {

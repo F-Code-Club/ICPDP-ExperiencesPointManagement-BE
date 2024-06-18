@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { StudentsService } from './students.service';
@@ -32,5 +32,18 @@ export class StudentsController {
     async createStudents(@Body() studentDto: StudentsDto) {
         const responseData = await this.studentsService.createStudents(studentDto);
         return new ApiResponseDto(responseData, 'Create student successfully');
+    }
+
+    @Roles(Role.Admin)
+    @Delete('/:ID')
+    async deleteStudents(@Param('ID') id: string, @Res() res: Response) {
+        const responseData = await this.studentsService.deleteStudents(id);
+        if (responseData === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Student Not Found'));
+        } else if (responseData === 0) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete fail'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete successfully'));
+        }
     }
 }
