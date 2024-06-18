@@ -11,6 +11,21 @@ export class StudentsService {
         private studentsRepository: Repository<Students>,
     ) {};
 
+    /*
+    [GET]: /students/{id}
+    */
+    async getStudentById(id: string): Promise<Students | null> {
+        const checkValid = await this.checkValidId(id);
+
+        if (!checkValid) {
+            throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+        }
+
+        const checkExistStudent = await this.findByID(id);
+
+        return checkExistStudent;
+    }
+
     /* 
     [POST]: /students
     */
