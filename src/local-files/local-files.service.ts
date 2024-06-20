@@ -16,7 +16,7 @@ export class LocalFilesService {
     [POST]: /local-files
     */
     async createLocalFile(fileName: string, path: string) {
-        const localFile = await this.localFileRepo.create({
+        const localFile = this.localFileRepo.create({
             diskPath: path,
             fileName: fileName
         });
@@ -59,7 +59,7 @@ export class LocalFilesService {
     [POST]: /students/import
     */
     async readExcelFileById(id: string) {
-        const existFile = this.localFileRepo.findOne({
+        const existFile = await this.localFileRepo.findOne({
             where: {
                 localFileID: id,
             }
@@ -67,11 +67,11 @@ export class LocalFilesService {
         if (!existFile) {
             return null;
         }
-        const checkExcelFile = this.isExcelFile((await existFile).fileName);
+        const checkExcelFile = await this.isExcelFile(existFile.fileName);
         if (!checkExcelFile) {
             throw new BadRequestException('This file is not an excel file');
         }
-        const responseData = await this.readExcelFileByPath((await existFile).diskPath);
+        const responseData = await this.readExcelFileByPath(existFile.diskPath);
         return responseData;
     }
 
