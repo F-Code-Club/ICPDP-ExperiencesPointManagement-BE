@@ -40,4 +40,14 @@ export class LocalFilesController {
         }
         return res.sendFile(responseData.diskPath, { root: "." });
     }
+
+    @Public()
+    @Get('/excel-files/:ID')
+    async readExcelFile(@Param('ID') id: string, @Res() res: Response) {
+        const responseData = await this.localFilesService.readExcelFileById(id);
+        if (!responseData) {
+            return res.status(404).json(new ApiResponseDto(null, 'File not found'));
+        }
+        return res.status(200).json(new ApiResponseDto(responseData, 'Read excel file successfully'));
+    }
 }
