@@ -8,9 +8,10 @@ import { RolesGuard } from 'src/enum/roles/role.guard';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
 import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-exception.filter';
+import { LocalFilesModule } from 'src/local-files/local-files.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Students])],
+  imports: [TypeOrmModule.forFeature([Students]), LocalFilesModule],
   exports: [TypeOrmModule],
   controllers: [StudentsController],
   providers: [StudentsService,
