@@ -54,6 +54,14 @@ export class StudentsController {
     }
 
     @Roles(Role.Admin)
+    @Post('/import')
+    async importStudentsFromExcel(@Body() studentsDto: StudentsDto[]) {
+        const responseData = await this.studentsService.importStudentsFromExcel(studentsDto);
+        return new ApiResponseDto(responseData, 'Import students successfully');
+    }
+
+
+    @Roles(Role.Admin)
     @Patch('/:ID')
     async updateStudents(@Body() studentDto: UpdateStudentRequestDto, @Param('ID') id: string, @Res() res: Response) {
         const responseData = await this.studentsService.updateStudents(studentDto, id);

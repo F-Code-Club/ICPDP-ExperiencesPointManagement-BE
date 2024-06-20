@@ -66,6 +66,34 @@ export class StudentsService {
         return await this.studentsRepository.save(newStudent);
     }
 
+    /* 
+    [POST]: /students/import
+    */
+    async importStudentsFromExcel(studentsDto: StudentsDto[]) {
+        const importedStudents: StudentsDto[] = [];
+
+        // Filter and validate each student
+        await Promise.all(
+            studentsDto.map(async (studentDto) => {
+                const isValidId = await this.checkValidId(studentDto.studentID);
+                const existStudent = await this.findByID(studentDto.studentID);
+
+                if (!isValidId) {
+                    throw new ForbiddenException(`Invalid student ID: ${studentDto.studentID}`);
+                }
+
+                if (existStudent) {
+                    throw new ForbiddenException(`student ID ${studentDto.studentID} already exist`);
+                }
+                importedStudents.push(studentDto);
+            })      
+        );
+
+        const newStudents = await this.studentsRepository.save(importedStudents);
+
+        return newStudents;
+    }
+
     /*
     [PATCH]: /students/{id}
     */
