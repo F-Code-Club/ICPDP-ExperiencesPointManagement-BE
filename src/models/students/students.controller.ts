@@ -1,5 +1,5 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { StudentsService } from './students.service';
 import { Roles } from 'src/enum/roles/role.decorator';
@@ -12,6 +12,9 @@ import { StudentsFilterDto } from './dto/students-filter.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { StudentsResponseDto } from './dto/students-response.dto';
+import { LocalFilesService } from 'src/local-files/local-files.service';
+import { UploadFileDto } from 'src/local-files/dto/upload-file.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Students')
 @Controller('students')
@@ -20,6 +23,7 @@ import { StudentsResponseDto } from './dto/students-response.dto';
 export class StudentsController {
     constructor (
         private readonly studentsService: StudentsService,
+        private readonly localFilesService: LocalFilesService,
     ) {};
 
     @Roles(Role.Admin)
@@ -55,9 +59,16 @@ export class StudentsController {
 
     @Roles(Role.Admin)
     @Post('/import')
-    async importStudentsFromExcel(@Body() studentsDto: StudentsDto[]) {
-        const responseData = await this.studentsService.importStudentsFromExcel(studentsDto);
-        return new ApiResponseDto(responseData, 'Import students successfully');
+    @ApiConsumes("multipart/form-data")
+    @ApiBody({
+        type: UploadFileDto
+    })
+    @UseInterceptors(FileInterceptor("file"))
+    async importStudentsFromExcel(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+        const infoExcelFile = await this.localFilesService.createExcelFile(file.filename, file.path);
+        const readExcelFile = await this.localFilesService.readExcelFileById(infoExcelFile.localFileID);
+        const responseData = await this.studentsService.importStudentsFromExcel(readExcelFile);
+        return res.status(201).json(new ApiResponseDto(responseData, 'Import students successfully'));
     }
 
 

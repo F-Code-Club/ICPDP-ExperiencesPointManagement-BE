@@ -34,7 +34,7 @@ const storage = multer.diskStorage({
 @Module({
     imports: [MulterModule.register({ storage }), TypeOrmModule.forFeature([LocalFile])],
     controllers: [LocalFilesController],
-    providers: [LocalFilesService]
-
+    providers: [LocalFilesService],
+    exports: [LocalFilesService]
 })
 export class LocalFilesModule {}

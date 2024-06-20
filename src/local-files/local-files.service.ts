@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { LocalFile } from "./local-file.entity";
 import { Repository } from "typeorm";
 import * as XLSX from 'xlsx';
+import { StudentsDto } from "src/dto/students.dto";
 
 @Injectable()
 export class LocalFilesService {
@@ -36,10 +37,29 @@ export class LocalFilesService {
     }
 
     /* 
-    [GET]: /local-files/excel-files/{ID}
+    [POST]: /students/import
     */
-    async readExcelFileById(id: string): Promise<any> {
-        const existFile = await this.localFileRepo.findOne({
+    async createExcelFile(fileName: string, path: string): Promise<LocalFile> {
+        const localFile = this.localFileRepo.create({
+            diskPath: path,
+            fileName: fileName
+        });
+
+        const isExcel = await this.isExcelFile(fileName);
+        
+        if (!isExcel) {
+            throw new BadRequestException('This file is not an excel file');
+        }
+
+        const savedFile = await this.localFileRepo.save(localFile);
+        return savedFile;
+    }
+
+    /* 
+    [POST]: /students/import
+    */
+    async readExcelFileById(id: string) {
+        const existFile = this.localFileRepo.findOne({
             where: {
                 localFileID: id,
             }
@@ -47,11 +67,11 @@ export class LocalFilesService {
         if (!existFile) {
             return null;
         }
-        const checkExcelFile = await this.isExcelFile(existFile.fileName);
+        const checkExcelFile = this.isExcelFile((await existFile).fileName);
         if (!checkExcelFile) {
             throw new BadRequestException('This file is not an excel file');
         }
-        const responseData = await this.readExcelFileByPath(existFile.diskPath);
+        const responseData = await this.readExcelFileByPath((await existFile).diskPath);
         return responseData;
     }
 
@@ -60,11 +80,11 @@ export class LocalFilesService {
         return check === 'xlsx' || check === 'xls'; 
     }
 
-    async readExcelFileByPath(filePath: string): Promise<any> {
+    async readExcelFileByPath(filePath: string): Promise<StudentsDto[]> {
         const workBook = XLSX.readFile(filePath);
         const sheetName = workBook.SheetNames[0];
         const workSheet = workBook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(workSheet);
+        const jsonData: StudentsDto[] = XLSX.utils.sheet_to_json(workSheet);
         return jsonData;
     }
 }
