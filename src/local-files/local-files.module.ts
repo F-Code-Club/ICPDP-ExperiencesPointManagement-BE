@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
 
 
 @Module({
-    imports: [MulterModule.register({ storage }), TypeOrmModule.forFeature([LocalFile])],
+    imports: [MulterModule.register({ storage, limits: { fileSize: 25 * 1024 * 1024 } }), TypeOrmModule.forFeature([LocalFile])],
     controllers: [LocalFilesController],
     providers: [LocalFilesService],
     exports: [LocalFilesService]

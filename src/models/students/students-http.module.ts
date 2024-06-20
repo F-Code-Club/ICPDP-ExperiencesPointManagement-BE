@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
 });
 
 @Module({
-    imports: [MulterModule.register({ storage }), StudentsModule, LocalFilesModule],
+    imports: [MulterModule.register({ storage, limits: { fileSize: 25 * 1024 * 1024 } }), StudentsModule, LocalFilesModule],
     controllers: [StudentsController],
     providers: [StudentsService],
     exports: [StudentsService]
