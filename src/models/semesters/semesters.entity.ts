@@ -1,17 +1,28 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { PointBoard } from "../point-board/pointBoard.entity";
 
 @Entity()
 export class Semesters {
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
+    @PrimaryColumn()
+    semesterID: string;
 
     @Column()
-    name: string;
+    semester: string;
 
     @Column()
     year: number;
 
+    @Column({ type: 'varchar', length: 10})
+    startDate: string;
+
+    @Column({ type: 'varchar', length: 10})
+    endDate: string;
+
     @OneToMany(() => PointBoard, (pointBoard) => pointBoard.semester)
-    pointBoard: PointBoard[]
+    pointBoard?: PointBoard[]
+
+    @BeforeInsert()
+    setSemesterID() {
+        this.semesterID = `${this.semester}${this.year}`;
+    }
 }
