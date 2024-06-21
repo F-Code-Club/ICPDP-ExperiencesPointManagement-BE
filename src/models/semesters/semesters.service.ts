@@ -12,6 +12,25 @@ export class SemestersService {
         private semestersRepository: Repository<Semesters>,
     ) {};
 
+    /*
+    [GET]: /semesters/now
+    */
+    async getCurrentSemester(): Promise<Semesters | null> {
+        const currentDate = new Date();
+        const semesters = await this.semestersRepository.find();
+
+        for (const semester of semesters) {
+            const startDate = this.parseDate(semester.startDate);
+            const endDate = this.parseDate(semester.endDate);
+
+            if (currentDate >= startDate && currentDate <= endDate) {
+                return semester;
+            }
+        }
+
+        return null;
+    }
+
     /* 
     [POST]: /semesters
     */
@@ -100,5 +119,8 @@ export class SemestersService {
         return true;
     }
     
-
+    parseDate(dateString: string) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    }
 }
