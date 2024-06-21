@@ -1,22 +1,30 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, Max, Min } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 
 export class SemesterDto {
     @ApiProperty({
-        example: 'Summer2024',
+        example: 'Summer',
     })
-    @IsNotEmpty()
-    name: string;
+    @IsNotEmpty({
+        message: 'Semester should not be empty'
+    })
+    semester: string;
+
+    year?: number;
 
     @ApiProperty({
-        example: 2024,
+        example: '20/05/2024',
     })
-    @IsNotEmpty()
-    @Min(2006, {
-        message: 'FPT HCM is not exist before 2006',
+    @IsNotEmpty({
+        message: 'Start date should not be empty'
     })
-    @Max(2030, {
-        message: 'This year is too far',
+    startDate: string;
+
+    @ApiProperty({
+        example: '12/08/2024',
     })
-    year: number;
+    @IsNotEmpty({
+        message: 'End date should not be empty'
+    })
+    endDate: string;
 }

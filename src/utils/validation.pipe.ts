@@ -22,13 +22,24 @@ export class ValidationPipe implements PipeTransform {
         ['username', 'password'].includes(error.property)
       );
       const formattedErrors = errors.map(error => {
-        const constraints = error.constraints;
-        const constraintsArray = Object.keys(constraints).map(key => ({ [key]: constraints[key] }));
-        return { [error.property]: constraintsArray };
+        if (error.constraints) {
+          const constraintsArray = Object.keys(error.constraints).map(key => error.constraints[key]);
+          return { [error.property]: constraintsArray };
+        } else {
+          return { [error.property]: ['Validation error'] };
+        }
       });
       const message = containsUsernameOrPasswordError 
         ? 'Username or password is incorrect'
-        : 'Information is incorrect';
+        : formattedErrors.map(error => {
+          const firstKey = Object.keys(error)[0];
+          const constraintsArray = error[firstKey];
+          if (Array.isArray(constraintsArray) && constraintsArray.length > 0) {
+            return constraintsArray[0];
+          }
+          return 'Validation error';
+        }).join(', ');
+        
       throw new BadRequestException({ data: null, message: message }); // response the error of the request
     }
 
