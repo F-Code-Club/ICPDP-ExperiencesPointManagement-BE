@@ -98,9 +98,9 @@ export class StudentsService {
     [PATCH]: /students/{id}
     */
     async updateStudents(studentDto: UpdateStudentRequestDto, id: string) {
-        const checkValid = await this.checkValidId(id);
+        const checkValIdFromParam = await this.checkValidId(id);
 
-        if (!checkValid) {
+        if (!checkValIdFromParam) {
             throw new ForbiddenException("ID must follow the standards of FPT University's student code");
         }   
 
@@ -111,6 +111,20 @@ export class StudentsService {
         }
 
         let isChanged = false;
+
+        if (studentDto.studentID && checkStudent.studentID !== studentDto.studentID) {
+            const checkValidID = await this.checkValidId(studentDto.studentID);
+            if (!checkValidID) {
+                throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+            }
+
+            const checkExistID = await this.findByID(studentDto.studentID);
+            if(checkExistID) {
+                throw new ForbiddenException(`This student ID is already exist: ${studentDto.studentID}`)
+            }
+            checkStudent.studentID = studentDto.studentID;
+            isChanged = true;
+        }
         
         if (studentDto.name && checkStudent.name !== studentDto.name) {
             checkStudent.name = studentDto.name;
