@@ -4,6 +4,8 @@ import { Semesters } from './semesters.entity';
 import { Repository } from 'typeorm';
 import { CreateSemestersRequestDto } from './dto/semesters-create-request.dto';
 import { SemesterDto } from 'src/dto/semester.dto';
+import { SemestersFilterDto } from './dto/semesters-filter.dto';
+import { SemestersUpdateRequestDto } from './dto/semesters-update-request.dto';
 
 @Injectable()
 export class SemestersService {
@@ -11,6 +13,42 @@ export class SemestersService {
         @InjectRepository(Semesters)
         private semestersRepository: Repository<Semesters>,
     ) {};
+
+    /* 
+    [GET]: /semesters
+    */
+    async getAllSemesters(dto: SemestersFilterDto) {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must be greater than or equal to 1');
+        } 
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+        return await this.semestersRepository.findAndCount({
+            take: dto.take,
+            skip: dto.take*(dto.page - 1),
+            order: { semesterID: 'DESC' }
+        });
+    }
+
+    /*
+    [GET]: /semesters/now
+    */
+    async getCurrentSemester(): Promise<Semesters | null> {
+        const currentDate = new Date();
+        const semesters = await this.semestersRepository.find();
+
+        for (const semester of semesters) {
+            const startDate = this.parseDate(semester.startDate);
+            const endDate = this.parseDate(semester.endDate);
+
+            if (currentDate >= startDate && currentDate <= endDate) {
+                return semester;
+            }
+        }
+
+        return null;
+    }
 
     /* 
     [POST]: /semesters
@@ -49,6 +87,43 @@ export class SemestersService {
         const saveSemesters = await this.semestersRepository.save(createSemesters);
 
         return saveSemesters;
+    }
+
+    /*
+    [PATCH]: /semesters/{ID}
+    */
+    async updateSemester (updateDto: SemestersUpdateRequestDto, id: string) {
+        const checkSemester = await this.findById(id);
+
+        if (!checkSemester) {
+            return null;
+        }
+
+        let isChanged = false;
+
+        if (updateDto.startDate && updateDto.startDate !== checkSemester.startDate) {
+            const checkStartDate = await this.isValidDateFormat(updateDto.startDate);
+            if (checkStartDate) {
+                checkSemester.startDate = updateDto.startDate;
+                isChanged = true;
+            }
+        }
+
+        if (updateDto.endDate && updateDto.endDate !== checkSemester.endDate) {
+            const checkEndDate = await this.isValidDateFormat(updateDto.endDate);
+            if (checkEndDate) {
+                checkSemester.endDate = updateDto.endDate;
+                isChanged = true;
+            }
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const updatedSemester = await this.semestersRepository.save(checkSemester);
+
+        return updatedSemester;
     }
 
     async findById(id: string) {
@@ -100,5 +175,8 @@ export class SemestersService {
         return true;
     }
     
-
+    parseDate(dateString: string) {
+        const [day, month, year] = dateString.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    }
 }
