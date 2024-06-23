@@ -29,7 +29,17 @@ export class Departments {
     pointBoard?: PointBoard[]
 
     @ManyToMany(() => Students)
-    @JoinTable()
+    @JoinTable({
+        name: "departmentmember",
+        joinColumn: {
+            name: "departmentID",
+            referencedColumnName: "departmentID"
+        },
+        inverseJoinColumn: {
+            name: "studentID",
+            referencedColumnName: "studentID"
+        }
+    })
     students?: Students[]
 
     @OneToMany(() => Events, (event) => event.department)
