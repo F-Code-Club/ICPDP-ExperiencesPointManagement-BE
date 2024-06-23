@@ -4,6 +4,7 @@ import { Semesters } from './semesters.entity';
 import { Repository } from 'typeorm';
 import { CreateSemestersRequestDto } from './dto/semesters-create-request.dto';
 import { SemesterDto } from 'src/dto/semester.dto';
+import { SemestersFilterDto } from './dto/semesters-filter.dto';
 
 @Injectable()
 export class SemestersService {
@@ -11,6 +12,23 @@ export class SemestersService {
         @InjectRepository(Semesters)
         private semestersRepository: Repository<Semesters>,
     ) {};
+
+    /* 
+    [GET]: /semesters
+    */
+    async getAllSemesters(dto: SemestersFilterDto) {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must be greater than or equal to 1');
+        } 
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+        return await this.semestersRepository.findAndCount({
+            take: dto.take,
+            skip: dto.take*(dto.page - 1),
+            order: { semesterID: 'DESC' }
+        });
+    }
 
     /*
     [GET]: /semesters/now

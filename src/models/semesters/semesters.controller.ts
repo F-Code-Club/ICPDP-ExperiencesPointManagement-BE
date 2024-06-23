@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SemestersService } from './semesters.service';
@@ -7,6 +7,10 @@ import { Roles } from 'src/enum/roles/role.decorator';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { CreateSemestersRequestDto } from './dto/semesters-create-request.dto';
 import { Response } from 'express';
+import { SemestersFilterDto } from './dto/semesters-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { SemestersResponseDto } from './dto/semester-response.dto';
 
 @ApiTags('Semesters')
 @Controller('semesters')
@@ -16,6 +20,20 @@ export class SemestersController {
     constructor(
         private readonly semestersService: SemestersService
     ) {};
+
+    @Roles(Role.Admin)
+    @Get()
+    async getAllSemesters(@Query() filter: SemestersFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [semesters, count] = await this.semestersService.getAllSemesters(filter);
+        let message = 'Get semesters successfully';
+        if (!semesters || count == 0) {
+            message = 'Get semesters fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(semesters, SemestersResponseDto), filter, count, message);
+    }
 
     @Get('/now')
     async getCurrentSemester(@Res() res: Response) {
