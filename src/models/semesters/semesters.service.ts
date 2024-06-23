@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateSemestersRequestDto } from './dto/semesters-create-request.dto';
 import { SemesterDto } from 'src/dto/semester.dto';
 import { SemestersFilterDto } from './dto/semesters-filter.dto';
+import { SemestersUpdateRequestDto } from './dto/semesters-update-request.dto';
 
 @Injectable()
 export class SemestersService {
@@ -86,6 +87,43 @@ export class SemestersService {
         const saveSemesters = await this.semestersRepository.save(createSemesters);
 
         return saveSemesters;
+    }
+
+    /*
+    [PATCH]: /semesters/{ID}
+    */
+    async updateSemester (updateDto: SemestersUpdateRequestDto, id: string) {
+        const checkSemester = await this.findById(id);
+
+        if (!checkSemester) {
+            return null;
+        }
+
+        let isChanged = false;
+
+        if (updateDto.startDate && updateDto.startDate !== checkSemester.startDate) {
+            const checkStartDate = await this.isValidDateFormat(updateDto.startDate);
+            if (checkStartDate) {
+                checkSemester.startDate = updateDto.startDate;
+                isChanged = true;
+            }
+        }
+
+        if (updateDto.endDate && updateDto.endDate !== checkSemester.endDate) {
+            const checkEndDate = await this.isValidDateFormat(updateDto.endDate);
+            if (checkEndDate) {
+                checkSemester.endDate = updateDto.endDate;
+                isChanged = true;
+            }
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const updatedSemester = await this.semestersRepository.save(checkSemester);
+
+        return updatedSemester;
     }
 
     async findById(id: string) {

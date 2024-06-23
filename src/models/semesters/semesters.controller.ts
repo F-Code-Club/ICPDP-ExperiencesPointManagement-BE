@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SemestersService } from './semesters.service';
@@ -11,6 +11,7 @@ import { SemestersFilterDto } from './dto/semesters-filter.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { SemestersResponseDto } from './dto/semester-response.dto';
+import { SemestersUpdateRequestDto } from './dto/semesters-update-request.dto';
 
 @ApiTags('Semesters')
 @Controller('semesters')
@@ -50,4 +51,18 @@ export class SemestersController {
         const responseData = await this.semestersService.createSemesters(semesterDto);
         return new ApiResponseDto(responseData, 'Create semester successfully');
     }
+
+    @Roles(Role.Admin)
+    @Patch('/:ID')
+    async updateSemester(@Body() updateDto: SemestersUpdateRequestDto, @Param('ID') id: string, @Res() res: Response) {
+        const responseData = await this.semestersService.updateSemester(updateDto, id);
+        if (responseData === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Semester Not Found'));            
+        } else if (responseData === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseData, 'Update successfully'));
+        }
+    }
+
 }
