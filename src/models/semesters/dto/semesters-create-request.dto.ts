@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsArray, IsNotEmpty, Max, Min, ValidateNested } from "class-validator";
+import { IsArray, IsNotEmpty, ValidateNested } from "class-validator";
 import { SemesterDto } from "src/dto/semester.dto";
 
 export class CreateSemestersRequestDto {
@@ -8,12 +8,6 @@ export class CreateSemestersRequestDto {
         example: 2024,
     })
     @IsNotEmpty()
-    @Min(2006, {
-        message: 'FPT HCM is not exist before 2006',
-    })
-    @Max(2030, {
-        message: 'This year is too far',
-    })
     year: number;
 
     @ApiProperty({

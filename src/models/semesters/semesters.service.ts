@@ -59,8 +59,14 @@ export class SemestersService {
         //Filter and validate each semester in a year
         await Promise.all(
             semestersDto.semesters.map(async (dto) => {
+                const checkYear = await this.findByYear(semestersDto.year);
+
+                if (!checkYear) {
+                    throw new ForbiddenException(`The year ${semestersDto.year} is already full of semesters`);
+                }
+
                 dto.year = semestersDto.year;
-                
+
                 const checkExistSemester = await this.findById(`${dto.semester.toLowerCase()}${dto.year}`);
 
                 const checkStartDate = await this.isValidDateFormat(dto.startDate);
@@ -133,6 +139,19 @@ export class SemestersService {
             }
         });
         return existSemester;
+    }
+
+    async findByYear(year: number) {
+        let check = false;
+        const count = await this.semestersRepository.count({
+            where: {
+                year: year,
+            }
+        });
+        if (count < 3) {
+            check = true;
+        }
+        return check;
     }
 
     async isValidDateFormat(dateString: string) {
