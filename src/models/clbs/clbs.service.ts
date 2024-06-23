@@ -234,4 +234,16 @@ export class ClbsService {
         });
         return existClb;
     }
+
+    async findByUserId(userId: string): Promise<Clbs | null> {
+        const existClb = await this.clbsRepository.findOne({
+            where: {
+                user: {
+                    userID: userId
+                },
+            },
+            relations: ['user']
+        });
+        return existClb;
+    }
 }

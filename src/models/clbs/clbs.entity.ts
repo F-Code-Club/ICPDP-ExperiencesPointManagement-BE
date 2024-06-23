@@ -42,6 +42,6 @@ export class Clbs {
     })
     students?: Students[]
 
-    @OneToMany(() => Events, (event) => event.clb)
+    @OneToMany(() => Events, (event) => event.club)
     event?: Events[]
 }

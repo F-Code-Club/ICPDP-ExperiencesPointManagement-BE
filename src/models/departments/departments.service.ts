@@ -223,12 +223,24 @@ export class DepartmentsService {
     }
 
     async findById(id: string): Promise<Departments | null> {
-        const existClb = await this.deptsRepository.findOne({
+        const existDepts = await this.deptsRepository.findOne({
             where: {
                 departmentID: id,
             },
             relations: ['user']
         });
-        return existClb;
+        return existDepts;
+    }
+
+    async findByUserId(userId: string): Promise<Departments | null> {
+        const existDepts = await this.deptsRepository.findOne({
+            where: {
+                user: {
+                    userID: userId
+                },
+            },
+            relations: ['user']
+        });
+        return existDepts;
     }
 }

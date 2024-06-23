@@ -19,12 +19,12 @@ export class Events {
 
     @ManyToOne(() => Clbs, (clb) => clb.event)
     @JoinColumn({ name: "clubID" })
-    clb: Clbs
+    club: Clbs
 
     @ManyToOne(() => Departments, (department) => department.event)
     @JoinColumn({ name: "departmentID" })
     department: Departments
 
     @OneToMany(() => EventStudent, (eventStudent) => eventStudent.event)
-    eventStudent: EventStudent[]
+    eventStudent?: EventStudent[]
 }
