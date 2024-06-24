@@ -7,6 +7,7 @@ import { ClbsService } from '../clbs/clbs.service';
 import { DepartmentsService } from '../departments/departments.service';
 import { Role } from 'src/enum/roles/role.enum';
 import { SemestersService } from '../semesters/semesters.service';
+import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 
 @Injectable()
 export class EventService {
@@ -55,5 +56,75 @@ export class EventService {
         };
 
         return responseData;
+    }
+
+    /* 
+    [PATCH]: /events/{ID}
+    */
+    async updateEvents (updateDto: EventUpdateRequestDto, id: string, userRole: string, userId: string) {
+        const checkExistEventByEventID = await this.findById(id);
+
+        let isChanged = false;
+
+        if (!checkExistEventByEventID) {
+            return null;
+        }
+
+        if (userRole === Role.Clb) {
+            const checkClubByUserID = await this.clbsService.findByUserId(userId);
+
+            if (!checkClubByUserID) {
+                throw new ForbiddenException('You do not have right to edit this event');
+            }
+
+            if (checkExistEventByEventID.club && checkExistEventByEventID.club.clubID === checkClubByUserID.clubID) {
+                if (updateDto.eventName && updateDto.eventName !== checkExistEventByEventID.eventName) {
+                    checkExistEventByEventID.eventName = updateDto.eventName;
+                    isChanged = true;
+                }
+            } else {
+                throw new ForbiddenException('You do not have right to edit this event');
+            }
+        } else if (userRole === Role.Dept) {
+            const checkDepartmentByUserID = await this.departmentSerivce.findByUserId(userId);
+
+            if (!checkDepartmentByUserID) {
+                throw new ForbiddenException('You do not have right to edit this event');
+            }
+
+            if (checkExistEventByEventID.department && checkExistEventByEventID.department.departmentID === checkDepartmentByUserID.departmentID) {
+                if (updateDto.eventName && updateDto.eventName !== checkExistEventByEventID.eventName) {
+                    checkExistEventByEventID.eventName = updateDto.eventName;
+                    isChanged = true;
+                }
+            } else {
+                throw new ForbiddenException('You do not have right to edit this event');
+            }
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const updatedEvent = await this.eventsRepository.save(checkExistEventByEventID);
+
+        const responseData = {
+            eventID: updatedEvent.eventID,
+            eventName: updatedEvent.eventName,
+            semester: updatedEvent.semester,
+            year: updatedEvent.year,
+        };
+
+        return responseData;
+    }
+
+    async findById (id: string) {
+        const existEvent = await this.eventsRepository.findOne({
+            where: {
+                eventID: id,
+            },
+            relations: ['club', 'department']
+        });
+        return existEvent;
     }
 }
