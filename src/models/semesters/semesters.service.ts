@@ -54,11 +54,18 @@ export class SemestersService {
     [POST]: /semesters
     */
     async createSemesters(semestersDto: CreateSemestersRequestDto) {
+        const validSemesters = ["spring", "summer", "fall"];
         const newSemesters: SemesterDto[] = [];
 
         //Filter and validate each semester in a year
         await Promise.all(
             semestersDto.semesters.map(async (dto) => {
+                if (!validSemesters.includes(dto.semester.toLowerCase())) {
+                    throw new ForbiddenException(`The semester ${dto.semester} is not valid`);
+                }
+
+                dto.semester = dto.semester.toLowerCase();
+
                 const checkYear = await this.findByYear(semestersDto.year);
 
                 if (!checkYear) {
@@ -84,9 +91,22 @@ export class SemestersService {
                     throw new ForbiddenException(`The end date of ${dto.semester.toLowerCase()}${dto.year} is not valid`);
                 }
 
+                const startDateYear = new Date(dto.startDate).getFullYear();
+                const endDateYear = new Date(dto.endDate).getFullYear();
+
+                if (startDateYear !== dto.year || endDateYear !== dto.year) {
+                    throw new ForbiddenException(`The year in the start date or end date does not match the semester year ${semestersDto.year}`);
+                }
+
                 newSemesters.push(dto);
             }),
         );
+
+        // Check if all three semesters (spring, summer, fall) are included
+        const semesterNames = newSemesters.map(semester => semester.semester);
+        if (!validSemesters.every(semester => semesterNames.includes(semester))) {
+            throw new ForbiddenException(`You must include all three semesters: ${validSemesters.join(", ")} in a single year`);
+        }
 
         const createSemesters = this.semestersRepository.create(newSemesters);
 
