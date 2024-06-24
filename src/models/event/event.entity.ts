@@ -6,7 +6,7 @@ import { EventStudent } from "../eventStudent/event-student.entity";
 @Entity()
 export class Events {
     @PrimaryGeneratedColumn("uuid")
-    eventID: string;
+    ID: string;
 
     @Column()
     eventName: string;

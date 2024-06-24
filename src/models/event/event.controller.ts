@@ -9,9 +9,6 @@ import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { Response } from 'express';
 import { EventFilterDto } from './dto/event-filter.dto';
-import { PaginationDto } from 'src/utils/pagination.dto';
-import { DtoMapper } from 'src/utils/dto-mapper.dto';
-import { EventResponseDto } from './dto/event-response.dto';
 
 @ApiTags('Events')
 @Controller('events')
@@ -24,16 +21,13 @@ export class EventController {
 
     @Roles(Role.Admin, Role.Clb, Role.Dept)
     @Get()
-    async getAllEvents (@Request() req, @Query() filter: EventFilterDto) {
-        if (!filter) {
-            throw new BadRequestException('Lacked of request param');
+    async getAllEvents (@Request() req, @Query() filter: EventFilterDto, @Res() res: Response) {
+        const responseData = await this.eventsService.getAllEvents(filter, req.user.role, req.user.userID);
+        if (responseData.length === 0) {
+            return res.status(404).json(new ApiResponseDto(null, 'Empty page'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseData, 'Get events successfully'));
         }
-        const [events, count] = await this.eventsService.getAllEvents(filter, req.user.role, req.user.userID);
-        let message = 'Get events successfully';
-        if (!events || count === 0) {
-            message = 'Get events fail';
-        }
-        return PaginationDto.from(DtoMapper.mapMany(events, EventResponseDto), filter, count, message);
     }
 
     @Roles(Role.Clb, Role.Dept)

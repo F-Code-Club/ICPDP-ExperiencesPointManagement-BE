@@ -24,57 +24,32 @@ export class EventService {
     [GET]: /events
     */
     async getAllEvents (dto: EventFilterDto, userRole: string, userId: string) {
-        if (dto.page < 1) {
-            throw new ForbiddenException('page must greater than or equal to 1');
-        }
-        if (dto.take < 0) {
-            throw new ForbiddenException('take must greater than or equal to 0');
-        }
+        let responseData = await this.getByOrganization(dto.organization, dto.semester, dto.year);
+        let organization = null;
 
-        if (userRole === Role.Admin) {
-            return await this.eventsRepository.findAndCount({
-                relations: ['club', 'department'],
-                take: dto.take,
-                skip: dto.take*(dto.page - 1),
-                order: { createdAt: 'ASC' }
-            });
-        } else if (userRole === Role.Clb) {
-            const checkClubByUserID = await this.clbsService.findByUserId(userId);
+        if (userRole === Role.Clb) {
+            organization = await this.clbsService.findByUserId(userId);
 
-            if (!checkClubByUserID) {
-                throw new ForbiddenException('You do not have right to get all events');
+            if (!organization || organization.clubID !== dto.organization) {
+                throw new ForbiddenException('You do not have right to get event');
             }
 
-            return await this.eventsRepository.findAndCount({
-                relations: ['club'],
-                take: dto.take,
-                skip: dto.take*(dto.page - 1),
-                order: { createdAt: 'ASC' },
-                where: {
-                    club: {
-                        clubID: checkClubByUserID.clubID
-                    }
-                }
-            });
         } else if (userRole === Role.Dept) {
-            const checkDepartmentByUserID = await this.departmentSerivce.findByUserId(userId);
+            organization = await this.departmentSerivce.findByUserId(userId);
 
-            if (!checkDepartmentByUserID) {
-                throw new ForbiddenException('You do not have right to get all events');
+            if (!organization || organization.departmentID !== dto.organization) {
+                throw new ForbiddenException('You do not have right to get event');
             }
 
-            return await this.eventsRepository.findAndCount({
-                relations: ['department'],
-                take: dto.take, 
-                skip: dto.take*(dto.page - 1),
-                order: { createdAt: 'ASC' },
-                where: {
-                    department: {
-                        departmentID: checkDepartmentByUserID.departmentID
-                    }
-                }
-            });
         }
+
+        // Remove ID and createdAt from responseData
+        const formattedData = responseData.map(event => {
+            const { ID, createdAt, ...rest } = event;
+            return rest;
+        })
+
+        return formattedData;
     }
 
 
@@ -114,7 +89,6 @@ export class EventService {
         const saveEvent = await this.eventsRepository.save(newEvent);
 
         const responseData = {
-            eventID: saveEvent.eventID,
             eventName: saveEvent.eventName,
             semester: saveEvent.semester,
             year: saveEvent.year,
@@ -174,7 +148,6 @@ export class EventService {
         const updatedEvent = await this.eventsRepository.save(checkExistEventByEventID);
 
         const responseData = {
-            eventID: updatedEvent.eventID,
             eventName: updatedEvent.eventName,
             semester: updatedEvent.semester,
             year: updatedEvent.year,
@@ -225,7 +198,7 @@ export class EventService {
     async findById (id: string) {
         const existEvent = await this.eventsRepository.findOne({
             where: {
-                eventID: id,
+                ID: id,
             },
             relations: ['club', 'department']
         });
@@ -239,6 +212,20 @@ export class EventService {
                 semester: semester,
                 year: year
             }
+        });
+        return existEvent;
+    }
+
+    async getByOrganization (organization: string, semester: string, year: number) {
+        const existEvent = await this.eventsRepository.find({
+            where: {
+                semester: semester,
+                year: year,
+                club: {
+                    clubID: organization
+                }
+            },
+            order: { createdAt: 'ASC' }
         });
         return existEvent;
     }
