@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { EventService } from './event.service';
@@ -35,6 +35,19 @@ export class EventController {
             return res.status(404).json(new ApiResponseDto(null, 'Event Not Found'));
         } else {
             return res.status(200).json(new ApiResponseDto(responseData, 'Update event successfully'));
+        }
+    }
+
+    @Roles(Role.Clb, Role.Dept)
+    @Delete('/:ID')
+    async deleteEvents (@Request() req, @Param('ID') id: string, @Res() res: Response) {
+        const responseData = await this.eventsService.deleteEvents(id, req.user.role, req.user.userID);
+        if (responseData === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Event Not Found'));
+        } else if (responseData === 0) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete failed'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete successfully'));
         }
     }
 }

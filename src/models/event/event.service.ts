@@ -118,6 +118,45 @@ export class EventService {
         return responseData;
     }
 
+    /* 
+    [DELETE]: /events/{ID}
+    */
+    async deleteEvents (id: string, userRole: string, userId: string) {
+        const checkExistEvent = await this.findById(id);
+
+        let deleteEvent = null;
+
+        if (!checkExistEvent) {
+            return null;
+        }
+
+        if (userRole === Role.Clb) {
+            const checkClubByUserID = await this.clbsService.findByUserId(userId);
+
+            if (!checkClubByUserID) {
+                throw new ForbiddenException('You do not have right to delete this event');
+            }
+
+            if (checkExistEvent.club && checkExistEvent.club.clubID === checkClubByUserID.clubID) {
+                deleteEvent = await this.eventsRepository.delete(id);
+            } else {
+                throw new ForbiddenException('You do not have right to delete this event');
+            }
+        } else if (userRole === Role.Dept) {
+            const checkDepartmentByUserID = await this.departmentSerivce.findByUserId(userId);
+            
+            if (!checkDepartmentByUserID) {
+                throw new ForbiddenException('You do not have right to delete this event');
+            }
+
+            if (checkExistEvent.department && checkExistEvent.department.departmentID === checkDepartmentByUserID.departmentID) {
+                deleteEvent = await this.eventsRepository.delete(id);
+            }
+        }
+
+        return deleteEvent.affected;
+    }
+
     async findById (id: string) {
         const existEvent = await this.eventsRepository.findOne({
             where: {
