@@ -8,6 +8,7 @@ import { DepartmentsService } from '../departments/departments.service';
 import { Role } from 'src/enum/roles/role.enum';
 import { SemestersService } from '../semesters/semesters.service';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
+import { EventFilterDto } from './dto/event-filter.dto';
 
 @Injectable()
 export class EventService {
@@ -18,6 +19,64 @@ export class EventService {
         private readonly departmentSerivce: DepartmentsService,
         private readonly semesterSerivce: SemestersService,
     ) {};
+
+    /* 
+    [GET]: /events
+    */
+    async getAllEvents (dto: EventFilterDto, userRole: string, userId: string) {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+
+        if (userRole === Role.Admin) {
+            return await this.eventsRepository.findAndCount({
+                relations: ['club', 'department'],
+                take: dto.take,
+                skip: dto.take*(dto.page - 1),
+                order: { semester: 'ASC' }
+            });
+        } else if (userRole === Role.Clb) {
+            const checkClubByUserID = await this.clbsService.findByUserId(userId);
+
+            if (!checkClubByUserID) {
+                throw new ForbiddenException('You do not have right to get all events');
+            }
+
+            return await this.eventsRepository.findAndCount({
+                relations: ['club'],
+                take: dto.take,
+                skip: dto.take*(dto.page - 1),
+                order: { semester: 'ASC' },
+                where: {
+                    club: {
+                        clubID: checkClubByUserID.clubID
+                    }
+                }
+            });
+        } else if (userRole === Role.Dept) {
+            const checkDepartmentByUserID = await this.departmentSerivce.findByUserId(userId);
+
+            if (!checkDepartmentByUserID) {
+                throw new ForbiddenException('You do not have right to get all events');
+            }
+
+            return await this.eventsRepository.findAndCount({
+                relations: ['department'],
+                take: dto.take, 
+                skip: dto.take*(dto.page - 1),
+                order: { semester: 'ASC' },
+                where: {
+                    department: {
+                        departmentID: checkDepartmentByUserID.departmentID
+                    }
+                }
+            });
+        }
+    }
+
 
     /*
     [POST]: /events

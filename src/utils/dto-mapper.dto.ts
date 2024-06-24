@@ -10,7 +10,7 @@ export class DtoMapper {
         return entities.map(entity => {
             const dto = new dtoClass();
 
-            // Map user properties to DTO
+            // Map user properties to DTO for club and department [GET]
             if (entity.hasOwnProperty('user')) {
                 const user = entity['user'];
                 dto['userID'] = user['userID'];
@@ -20,9 +20,21 @@ export class DtoMapper {
                 dto['role'] = user['role'];
             }
 
+            // Map club properties to DTO for event [GET]
+            if (entity.hasOwnProperty('club') && entity['club'] !== null) {
+                const club = entity['club'];
+                dto['clubName'] = club['name'];
+            }
+
+            // Map department properties to DTO for event [GET]
+            if (entity.hasOwnProperty('department') && entity['department'] !== null) {
+                const department = entity['department'];
+                dto['departmentName'] = department['name'];
+            }
+
             // Map the properties from entity to DTO
             Object.keys(entity).forEach(key => {
-                if (key !== 'user' && key !=='createdAt' && entity.hasOwnProperty(key)) {
+                if (key !== 'user' && key !=='createdAt' && key !=='club' && key !=='department' && entity.hasOwnProperty(key)) {
                     dto[key] = entity[key];
                 }
             });

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { EventService } from './event.service';
@@ -8,6 +8,10 @@ import { EventDto } from 'src/dto/event.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { Response } from 'express';
+import { EventFilterDto } from './dto/event-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { EventResponseDto } from './dto/event-response.dto';
 
 @ApiTags('Events')
 @Controller('events')
@@ -17,6 +21,20 @@ export class EventController {
     constructor (
         private readonly eventsService: EventService,
     ) {};
+
+    @Roles(Role.Admin, Role.Clb, Role.Dept)
+    @Get()
+    async getAllEvents (@Request() req, @Query() filter: EventFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [events, count] = await this.eventsService.getAllEvents(filter, req.user.role, req.user.userID);
+        let message = 'Get events successfully';
+        if (!events || count === 0) {
+            message = 'Get events fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(events, EventResponseDto), filter, count, message);
+    }
 
     @Roles(Role.Clb, Role.Dept)
     @Post()
