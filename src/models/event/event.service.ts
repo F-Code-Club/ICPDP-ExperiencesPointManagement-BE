@@ -82,6 +82,12 @@ export class EventService {
     [POST]: /events
     */
     async createEvents (eventDto: EventDto, userRole: string, userID: string) {
+        const checkDuplicate = await this.checkDuplicateEvent(eventDto.eventName, eventDto.semester, eventDto.year);
+
+        if (checkDuplicate) {
+            throw new ForbiddenException('This event is already exist in this semester');
+        }
+
         if (userRole === Role.Clb) {
             const checkClub = await this.clbsService.findByUserId(userID);
             if (!checkClub) {
@@ -222,6 +228,17 @@ export class EventService {
                 eventID: id,
             },
             relations: ['club', 'department']
+        });
+        return existEvent;
+    }
+
+    async checkDuplicateEvent (eventName: string, semester: string, year: number) {
+        const existEvent = await this.eventsRepository.findOne({
+            where: {
+                eventName: eventName,
+                semester: semester,
+                year: year
+            }
         });
         return existEvent;
     }
