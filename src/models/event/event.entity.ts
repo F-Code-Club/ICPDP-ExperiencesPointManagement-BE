@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Clbs } from "../clbs/clbs.entity";
 import { Departments } from "../departments/departments.entity";
 import { EventStudent } from "../eventStudent/event-student.entity";
@@ -27,4 +27,7 @@ export class Events {
 
     @OneToMany(() => EventStudent, (eventStudent) => eventStudent.event)
     eventStudent?: EventStudent[]
+
+    @CreateDateColumn()
+    createdAt?: Date;
 }

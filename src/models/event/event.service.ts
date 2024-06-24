@@ -36,7 +36,7 @@ export class EventService {
                 relations: ['club', 'department'],
                 take: dto.take,
                 skip: dto.take*(dto.page - 1),
-                order: { semester: 'ASC' }
+                order: { createdAt: 'ASC' }
             });
         } else if (userRole === Role.Clb) {
             const checkClubByUserID = await this.clbsService.findByUserId(userId);
@@ -49,7 +49,7 @@ export class EventService {
                 relations: ['club'],
                 take: dto.take,
                 skip: dto.take*(dto.page - 1),
-                order: { semester: 'ASC' },
+                order: { createdAt: 'ASC' },
                 where: {
                     club: {
                         clubID: checkClubByUserID.clubID
@@ -67,7 +67,7 @@ export class EventService {
                 relations: ['department'],
                 take: dto.take, 
                 skip: dto.take*(dto.page - 1),
-                order: { semester: 'ASC' },
+                order: { createdAt: 'ASC' },
                 where: {
                     department: {
                         departmentID: checkDepartmentByUserID.departmentID
