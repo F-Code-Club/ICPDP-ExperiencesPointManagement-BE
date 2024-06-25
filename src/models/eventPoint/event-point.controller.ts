@@ -21,8 +21,8 @@ export class EventPointController {
         private readonly eventPointService: EventPointService,
     ) {};
 
-    @Get('/:ID')
-    async getStudents (@Request() req, @Param('ID') id: string, @Query() filter: EventPointFilterDto) {
+    @Get('/:eventID')
+    async getStudents (@Request() req, @Param('eventID') id: string, @Query() filter: EventPointFilterDto) {
         if (!filter) {
             throw new BadRequestException('Lacked of request param');
         }
@@ -35,8 +35,8 @@ export class EventPointController {
     }
 
     @Roles(Role.Clb, Role.Dept)
-    @Post('/:ID')
-    async addStudents (@Request() req, @Body() addStudentDto: EventPointCreateRequestDto, @Param('ID') id: string) {
+    @Post('/:eventID')
+    async addStudents (@Request() req, @Body() addStudentDto: EventPointCreateRequestDto, @Param('eventID') id: string) {
         const responseData = await this.eventPointService.addStudents(id, addStudentDto, req.user.role, req.user.userID);
         return new ApiResponseDto(responseData, 'Add student successfully');
     }
