@@ -80,7 +80,7 @@ export class EventPointService {
         }
 
         // check if this studentID is exist on this eventID or not
-        const checkExistStudentOnThisEvent = await this.findByStudentID(addStudentDto.studentID);
+        const checkExistStudentOnThisEvent = await this.findByStudentIDnEventID(eventID, addStudentDto.studentID);
         if (checkExistStudentOnThisEvent) {
             throw new ForbiddenException(`This student ${addStudentDto.studentID} is already exist on this event`);
         }
@@ -168,17 +168,6 @@ export class EventPointService {
 
         const res = await this.eventPointRepository.delete(checkDelEvent.id);
         return res.affected;
-    }
-
-    async findByStudentID (studentID: string) {
-        const existStudent = await this.eventPointRepository.findOne({
-            where: {
-                student: {
-                    studentID: studentID,
-                }
-            }
-        });
-        return existStudent;
     }
 
     async findByStudentIDnEventID (eventID: string, studentID: string) {
