@@ -23,7 +23,7 @@ import { Departments } from './models/departments/departments.entity';
 import { DepartmentsHttpModule } from './models/departments/departments-http.module';
 import { Events } from './models/event/event.entity';
 import { EventHttpModule } from './models/event/event-http.module';
-import { EventStudent } from './models/eventPoint/event-point.entity';
+import { EventPoint } from './models/eventPoint/event-point.entity';
 import { EventStudentHttpModule } from './models/eventPoint/event-point-http.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
@@ -51,7 +51,7 @@ dotenv.config();
                  Clbs,
                  Departments,
                  Events,
-                 EventStudent],
+                 EventPoint],
       synchronize: true,
     }),
     LocalFilesModule,

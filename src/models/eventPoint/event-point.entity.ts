@@ -16,7 +16,7 @@ export class EventPoint {
     @Column()
     point: number;  
 
-    @ManyToOne(() => Students, (student) => student.eventStudent)
+    @ManyToOne(() => Students, (student) => student.eventPoint)
     @JoinColumn({ name: "studentID" })
     student: Students
 
