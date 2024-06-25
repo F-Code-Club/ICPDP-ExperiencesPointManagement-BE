@@ -1,12 +1,12 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Clbs } from "../clbs/clbs.entity";
 import { Departments } from "../departments/departments.entity";
-import { EventStudent } from "../eventStudent/event-student.entity";
+import { EventPoint } from "../eventPoint/event-point.entity";
 
 @Entity()
 export class Events {
     @PrimaryGeneratedColumn("uuid")
-    ID: string;
+    eventID: string;
 
     @Column()
     eventName: string;
@@ -25,8 +25,8 @@ export class Events {
     @JoinColumn({ name: "departmentID" })
     department: Departments
 
-    @OneToMany(() => EventStudent, (eventStudent) => eventStudent.event)
-    eventStudent?: EventStudent[]
+    @OneToMany(() => EventPoint, (eventPoint) => eventPoint.event)
+    eventPoint?: EventPoint[]
 
     @CreateDateColumn()
     createdAt?: Date;

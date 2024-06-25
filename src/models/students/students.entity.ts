@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { EventStudent } from "../eventStudent/event-student.entity";
+import { EventStudent } from "../eventPoint/event-point.entity";
 
 @Entity()
 export class Students {

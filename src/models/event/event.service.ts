@@ -45,7 +45,7 @@ export class EventService {
 
         // Remove ID and createdAt from responseData
         const formattedData = responseData.map(event => {
-            const { ID, createdAt, ...rest } = event;
+            const { createdAt, ...rest } = event;
             return rest;
         })
 
@@ -89,6 +89,7 @@ export class EventService {
         const saveEvent = await this.eventsRepository.save(newEvent);
 
         const responseData = {
+            eventID: saveEvent.eventID,
             eventName: saveEvent.eventName,
             semester: saveEvent.semester,
             year: saveEvent.year,
@@ -148,6 +149,7 @@ export class EventService {
         const updatedEvent = await this.eventsRepository.save(checkExistEventByEventID);
 
         const responseData = {
+            eventID: updatedEvent.eventID,
             eventName: updatedEvent.eventName,
             semester: updatedEvent.semester,
             year: updatedEvent.year,
@@ -198,7 +200,7 @@ export class EventService {
     async findById (id: string) {
         const existEvent = await this.eventsRepository.findOne({
             where: {
-                ID: id,
+                eventID: id,
             },
             relations: ['club', 'department']
         });

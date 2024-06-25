@@ -2,8 +2,8 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 import { Students } from "../students/students.entity";
 import { Events } from "../event/event.entity";
 
-@Entity({ name: "eventstudent" })
-export class EventStudent {
+@Entity({ name: "eventpoint" })
+export class EventPoint {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
@@ -20,7 +20,7 @@ export class EventStudent {
     @JoinColumn({ name: "studentID" })
     student: Students
 
-    @ManyToOne(() => Events, (event) => event.eventStudent)
+    @ManyToOne(() => Events, (event) => event.eventPoint)
     @JoinColumn({ name: "eventID" })
     event: Events
 }
