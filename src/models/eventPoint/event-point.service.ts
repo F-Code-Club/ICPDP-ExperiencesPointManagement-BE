@@ -131,6 +131,45 @@ export class EventPointService {
         return responseData;
     }
 
+    /* 
+    [DELETE]: /eventpoint/{ID}
+    */
+    async deleteStudents (eventID: string, studentID: string, userRole: string, userId: string) {
+        let checkOrganization = null;
+
+        // check if event is exist or not
+        const checkEvent = await this.eventService.findById(eventID);
+        if (!checkEvent) {
+            throw new ForbiddenException('This event is not exist');
+        }
+
+        if (userRole === Role.Clb) {
+            checkOrganization = await this.clubService.findByUserId(userId);
+
+            if (!checkOrganization || checkEvent.club === null || checkEvent.club.clubID !== checkOrganization.clubID) {
+                throw new ForbiddenException('You do not have right to delete students to this event');
+            }
+        } else if (userRole === Role.Dept) {
+            checkOrganization = await this.departmentSerivce.findByUserId(userId);
+
+            if (!checkOrganization || checkEvent.department === null || checkEvent.department.departmentID !== checkOrganization.departmentID) {
+                throw new ForbiddenException('You do not have right to delete students to this event');
+            }   
+        }
+
+        const checkDelEvent = await this.findByStudentIDnEventID(eventID, studentID);
+        if (!checkDelEvent) {
+            throw new ForbiddenException('This event or this student is not valid');
+        }
+        
+        if (checkEvent.eventID !== checkDelEvent.event.eventID) {
+            throw new ForbiddenException('This event is not valid');
+        }
+
+        const res = await this.eventPointRepository.delete(checkDelEvent.id);
+        return res.affected;
+    }
+
     async findByStudentID (studentID: string) {
         const existStudent = await this.eventPointRepository.findOne({
             where: {
@@ -140,5 +179,20 @@ export class EventPointService {
             }
         });
         return existStudent;
+    }
+
+    async findByStudentIDnEventID (eventID: string, studentID: string) {
+        const exist = await this.eventPointRepository.findOne({
+            where: {
+                student: {
+                    studentID: studentID
+                },
+                event: {
+                    eventID: eventID
+                }
+            },
+            relations: ['student', 'event']
+        });
+        return exist;
     }
 }

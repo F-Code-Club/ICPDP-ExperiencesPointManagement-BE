@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { EventPointService } from './event-point.service';
@@ -10,6 +10,7 @@ import { EventPointFilterDto } from './dto/event-point-filter.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { EventPointResponseDto } from './dto/event-point-response.dto';
+import { Response } from 'express';
 
 @ApiTags('EventPoint')
 @Controller('eventpoint')
@@ -38,5 +39,16 @@ export class EventPointController {
     async addStudents (@Request() req, @Body() addStudentDto: EventPointCreateRequestDto, @Param('ID') id: string) {
         const responseData = await this.eventPointService.addStudents(id, addStudentDto, req.user.role, req.user.userID);
         return new ApiResponseDto(responseData, 'Add student successfully');
+    }
+
+    @Roles(Role.Clb, Role.Dept)
+    @Delete('/:eventID&:studentID')
+    async deleteStudents (@Request() req, @Param('eventID') eventID: string, @Param('studentID') studentID: string, @Res() res: Response) {
+        const responseData = await this.eventPointService.deleteStudents(eventID, studentID, req.user.role, req.user.userID);
+        if (responseData === 0) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete student fail'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete student successfully'));
+        }
     }
 }
