@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { EventPointService } from './event-point.service';
@@ -11,6 +11,7 @@ import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { EventPointResponseDto } from './dto/event-point-response.dto';
 import { Response } from 'express';
+import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto';
 
 @ApiTags('EventPoint')
 @Controller('eventpoint')
@@ -39,6 +40,17 @@ export class EventPointController {
     async addStudents (@Request() req, @Body() addStudentDto: EventPointCreateRequestDto, @Param('eventID') id: string) {
         const responseData = await this.eventPointService.addStudents(id, addStudentDto, req.user.role, req.user.userID);
         return new ApiResponseDto(responseData, 'Add student successfully');
+    }
+
+    @Roles(Role.Clb, Role.Dept)
+    @Patch('/:eventID&:studentID')
+    async updateStudents (@Request() req, @Body() updateDto: EventPointUpdateRequestDto, @Param('eventID') eventID: string, @Param('studentID') studentIDFromParam: string, @Res() res: Response) {
+        const responseData = await this.eventPointService.updateStudents(eventID, studentIDFromParam, updateDto, req.user.role, req.user.userID);
+        if (responseData === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseData, 'Update student on this event successfully'));
+        }
     }
 
     @Roles(Role.Clb, Role.Dept)
