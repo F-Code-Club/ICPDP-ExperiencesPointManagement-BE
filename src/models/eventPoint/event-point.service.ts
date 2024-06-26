@@ -38,22 +38,9 @@ export class EventPointService {
             throw new ForbiddenException('This event is not exist');
         }        
 
-        let checkOrganization = null;
-
-        if (userRole === Role.Clb) {
-            checkOrganization = await this.clubService.findByUserId(userID);
-
-            if (!checkOrganization || checkEvent.club === null || checkEvent.club.clubID !== checkOrganization.clubID) {
-                throw new ForbiddenException('You do not have right to get students on this event');
-            }
-
-            
-        } else if (userRole === Role.Dept) {
-            checkOrganization = await this.departmentSerivce.findByUserId(userID);
-
-            if (!checkOrganization || checkEvent.department === null || checkEvent.department.departmentID !== checkOrganization.departmentID) {
-                throw new ForbiddenException('You do not have right to get students on this event');
-            }
+        const checkRoleForGetStudent = await this.checkRole(eventID, userRole, userID);
+        if (!checkRoleForGetStudent) {
+            throw new ForbiddenException('You do not have right to get student on this event');
         }
 
         return await this.eventPointRepository.findAndCount({
@@ -72,7 +59,6 @@ export class EventPointService {
     [POST]: /eventpoint/{eventID}
     */
     async addStudents (eventID: string, addStudentDto: EventPointCreateRequestDto, userRole: string, userId: string) {
-        let createdStudents = null;
 
         // check valid of studentID
         const checkStudentID = await this.studentService.checkValidId(addStudentDto.studentID);
@@ -100,25 +86,13 @@ export class EventPointService {
         }
         addStudentDto.event = checkEvent;
 
-        let checkOrganization = null;
-
-        if (userRole === Role.Clb) {
-            checkOrganization = await this.clubService.findByUserId(userId);
-
-            if (!checkOrganization || checkEvent.club === null || checkEvent.club.clubID !== checkOrganization.clubID) {
-                throw new ForbiddenException('You do not have right to add students to this event');
-            }
-
-            createdStudents = this.eventPointRepository.create(addStudentDto);
-        } else if (userRole === Role.Dept) {
-            checkOrganization = await this.departmentSerivce.findByUserId(userId);
-
-            if (!checkOrganization || checkEvent.department === null || checkEvent.department.departmentID !== checkOrganization.departmentID) {
-                throw new ForbiddenException('You do not have right to add students to this event');
-            }
-
-            createdStudents = this.eventPointRepository.create(addStudentDto);
+        const checkRoleForAddStudents = await this.checkRole(eventID, userRole, userId);
+        if (!checkRoleForAddStudents) {
+            throw new ForbiddenException('You do not have right to add students on this event');
         }
+
+        const createdStudents = this.eventPointRepository.create(addStudentDto);
+
 
         const newStudent = await this.eventPointRepository.save(createdStudents);
 
@@ -136,29 +110,12 @@ export class EventPointService {
     [PATCH]: /eventpoint/{eventID&studentID}
     */
     async updateStudents (eventID: string, studentIDFromParam: string, updateDto: EventPointUpdateRequestDto, userRole: string, userId: string) {
-        let checkOrganization = null;
+        const checkRoleForUpdate = await this.checkRole(eventID, userRole, userId);
+        if (!checkRoleForUpdate) {
+            throw new ForbiddenException('You do not have right to update student on this event');
+        }
+
         let isChanged = false;
-
-        // check if exist is exist or not
-        const checkEvent = await this.eventService.findById(eventID);
-        if (!checkEvent) {
-            throw new ForbiddenException('This event is not exist');
-        }
-
-        if (userRole === Role.Clb) {
-            checkOrganization = await this.clubService.findByUserId(userId);
-
-            if (!checkOrganization || checkEvent.club === null || checkEvent.club.clubID !== checkOrganization.clubID) {
-                throw new ForbiddenException('You do not have right to update students on this event');
-            }
-        } else if (userRole === Role.Dept) {
-            checkOrganization = await this.departmentSerivce.findByUserId(userId);
-
-            if (!checkOrganization || checkEvent.department === null || checkEvent.department.departmentID !== checkOrganization.departmentID) {
-                throw new ForbiddenException('You do not have right to update students on this event');
-            }   
-        }
-
         // update start here
         const checkUpStudentEventPoint = await this.findByStudentIDnEventID(eventID, studentIDFromParam);
         if (!checkUpStudentEventPoint) {
@@ -225,27 +182,15 @@ export class EventPointService {
     [DELETE]: /eventpoint/{eventID&studentID}
     */
     async deleteStudents (eventID: string, studentID: string, userRole: string, userId: string) {
-        let checkOrganization = null;
+        const checkRoleForDelete = await this.checkRole(eventID, userRole, userId);
+        if (!checkRoleForDelete) {
+            throw new ForbiddenException('You do not have right to delete students on this event');
+        }        
 
-        // check if event is exist or not
         const checkEvent = await this.eventService.findById(eventID);
         if (!checkEvent) {
             throw new ForbiddenException('This event is not exist');
-        }
-
-        if (userRole === Role.Clb) {
-            checkOrganization = await this.clubService.findByUserId(userId);
-
-            if (!checkOrganization || checkEvent.club === null || checkEvent.club.clubID !== checkOrganization.clubID) {
-                throw new ForbiddenException('You do not have right to delete students on this event');
-            }
-        } else if (userRole === Role.Dept) {
-            checkOrganization = await this.departmentSerivce.findByUserId(userId);
-
-            if (!checkOrganization || checkEvent.department === null || checkEvent.department.departmentID !== checkOrganization.departmentID) {
-                throw new ForbiddenException('You do not have right to delete students on this event');
-            }   
-        }
+        } 
 
         const checkDelEvent = await this.findByStudentIDnEventID(eventID, studentID);
         if (!checkDelEvent) {
@@ -258,6 +203,32 @@ export class EventPointService {
 
         const res = await this.eventPointRepository.delete(checkDelEvent.id);
         return res.affected;
+    }
+
+    async checkRole (eventID: string, userRole: string, userID: string) {
+        const checkEvent = await this.eventService.findById(eventID);
+        if (!checkEvent) {
+            throw new ForbiddenException('This event is not exist');
+        }        
+
+        let checkOrganization = null;
+
+        if (userRole === Role.Clb) {
+            checkOrganization = await this.clubService.findByUserId(userID);
+
+            if (!checkOrganization || checkEvent.club === null || checkEvent.club.clubID !== checkOrganization.clubID) {
+                throw new ForbiddenException('You do not have right on this event');
+            }
+
+            
+        } else if (userRole === Role.Dept) {
+            checkOrganization = await this.departmentSerivce.findByUserId(userID);
+
+            if (!checkOrganization || checkEvent.department === null || checkEvent.department.departmentID !== checkOrganization.departmentID) {
+                throw new ForbiddenException('You do not have right on this event');
+            }
+        }
+        return true;
     }
 
     async findByStudentIDnEventID (eventID: string, studentID: string) {

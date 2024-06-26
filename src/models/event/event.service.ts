@@ -79,7 +79,7 @@ export class EventService {
             eventDto.club = null;
         }
 
-        const checkValidYear = this.semesterSerivce.findByYear(eventDto.year);
+        const checkValidYear = await this.semesterSerivce.findByYear(eventDto.year);
         if (!checkValidYear) {
             throw new ForbiddenException("This semester year is not valid");
         }
