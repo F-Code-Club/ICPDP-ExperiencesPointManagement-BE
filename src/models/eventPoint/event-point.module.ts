@@ -1,22 +1,23 @@
 import { Module } from '@nestjs/common';
-import { EventController } from './event.controller';
-import { EventService } from './event.service';
+import { EventPointController } from './event-point.controller';
+import { EventPointService } from './event-point.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Events } from './event.entity';
-import { ClbsHttpModule } from '../clbs/clbs-http.module';
-import { DepartmentsHttpModule } from '../departments/departments-http.module';
-import { SemestersHttpModule } from '../semesters/semesters-http.module';
+import { EventPoint } from './event-point.entity';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/enum/roles/role.guard';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-exception.filter';
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
+import { EventHttpModule } from '../event/event-http.module';
+import { DepartmentsHttpModule } from '../departments/departments-http.module';
+import { ClbsHttpModule } from '../clbs/clbs-http.module';
+import { StudentsHttpModule } from '../students/students-http.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Events]), ClbsHttpModule, DepartmentsHttpModule, SemestersHttpModule],
+  imports: [TypeOrmModule.forFeature([EventPoint]), EventHttpModule, ClbsHttpModule, DepartmentsHttpModule, StudentsHttpModule],
   exports: [TypeOrmModule],
-  controllers: [EventController],
-  providers: [EventService,
+  controllers: [EventPointController],
+  providers: [EventPointService,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
@@ -35,4 +36,4 @@ import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.fi
     }
   ]
 })
-export class EventModule {}
+export class EventPointModule {}

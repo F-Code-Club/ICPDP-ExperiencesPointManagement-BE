@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { EventStudent } from "../eventStudent/event-student.entity";
+import { EventPoint } from "../eventPoint/event-point.entity";
 
 @Entity()
 export class Students {
@@ -9,6 +9,6 @@ export class Students {
     @Column()
     name: string;
 
-    @OneToMany(() => EventStudent, (eventStudent) => eventStudent.student)
-    eventStudent?: EventStudent[]
+    @OneToMany(() => EventPoint, (eventPoint) => eventPoint.student)
+    eventPoint?: EventPoint[]
 }

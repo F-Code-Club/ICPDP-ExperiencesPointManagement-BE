@@ -29,9 +29,19 @@ export class Clbs {
     pointBoard?: PointBoard[]
 
     @ManyToMany(() => Students)
-    @JoinTable()
+    @JoinTable({
+        name: "clubmember",
+        joinColumn: {
+            name: "clubID",
+            referencedColumnName: "clubID"
+        },
+        inverseJoinColumn: {
+            name: "studentID",
+            referencedColumnName: "studentID"
+        }
+    })
     students?: Students[]
 
-    @OneToMany(() => Events, (event) => event.clb)
+    @OneToMany(() => Events, (event) => event.club)
     event?: Events[]
 }

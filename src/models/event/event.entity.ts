@@ -1,22 +1,33 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Clbs } from "../clbs/clbs.entity";
 import { Departments } from "../departments/departments.entity";
-import { EventStudent } from "../eventStudent/event-student.entity";
+import { EventPoint } from "../eventPoint/event-point.entity";
 
 @Entity()
 export class Events {
     @PrimaryGeneratedColumn("uuid")
-    id: string;
+    eventID: string;
 
     @Column()
-    name: string;
+    eventName: string;
+
+    @Column()
+    semester: string;
+
+    @Column()
+    year: number;
 
     @ManyToOne(() => Clbs, (clb) => clb.event)
-    clb: Clbs
+    @JoinColumn({ name: "clubID" })
+    club: Clbs
 
     @ManyToOne(() => Departments, (department) => department.event)
+    @JoinColumn({ name: "departmentID" })
     department: Departments
 
-    @OneToMany(() => EventStudent, (eventStudent) => eventStudent.event)
-    eventStudent: EventStudent[]
+    @OneToMany(() => EventPoint, (eventPoint) => eventPoint.event)
+    eventPoint?: EventPoint[]
+
+    @CreateDateColumn()
+    createdAt?: Date;
 }
