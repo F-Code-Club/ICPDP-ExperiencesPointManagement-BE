@@ -10,11 +10,6 @@ export class EventPointUpdateRequestDto {
     studentID: string;
 
     @ApiProperty({
-        example: 'Nguyen Cap Nhat'
-    })
-    studentName: string;
-
-    @ApiProperty({
         example: 3
     })
     @IsNumber()

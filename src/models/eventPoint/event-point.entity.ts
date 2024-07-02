@@ -11,9 +11,6 @@ export class EventPoint {
     role: string;
 
     @Column()
-    studentName: string;
-
-    @Column()
     point: number;  
 
     @ManyToOne(() => Students, (student) => student.eventPoint)

@@ -98,7 +98,7 @@ export class EventPointService {
 
         const responseData = {
             studentID: newStudent.student.studentID,
-            studentName: newStudent.studentName,
+            studentName: newStudent.student.name,
             point: newStudent.point,
             role: newStudent.role
         };
@@ -142,13 +142,6 @@ export class EventPointService {
             checkUpStudentEventPoint.student.studentID = updateDto.studentID;
             isChanged = true;
         }
-
-        // update studentName
-        if (updateDto.studentName && updateDto.studentName !== checkUpStudentEventPoint.student.name) {
-            checkUpStudentEventPoint.student.name = updateDto.studentName;
-            checkUpStudentEventPoint.studentName = updateDto.studentName;
-            isChanged = true;
-        }
         
         // update point
         if (updateDto.point && updateDto.point !== checkUpStudentEventPoint.point) {
@@ -170,7 +163,7 @@ export class EventPointService {
 
         const responseData = {
             studentID: updatedStudentOnEventPoint.student.studentID,
-            studentName: updatedStudentOnEventPoint.studentName,
+            studentName: updatedStudentOnEventPoint.student.name,
             point: updatedStudentOnEventPoint.point,
             role: updatedStudentOnEventPoint.role
         };
