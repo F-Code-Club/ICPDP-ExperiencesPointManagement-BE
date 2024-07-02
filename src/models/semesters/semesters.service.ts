@@ -27,7 +27,7 @@ export class SemestersService {
         return await this.semestersRepository.findAndCount({
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            order: { semesterID: 'DESC' }
+            order: { year: 'DESC' }
         });
     }
 

@@ -22,7 +22,6 @@ export class SemestersController {
         private readonly semestersService: SemestersService
     ) {};
 
-    @Roles(Role.Admin)
     @Get()
     async getAllSemesters(@Query() filter: SemestersFilterDto) {
         if (!filter) {
