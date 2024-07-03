@@ -4,13 +4,18 @@ import { UsersService } from 'src/models/users/users.service';
 import { Tokens } from './type/Tokens.type';
 import { JwtPayload } from './type/jwtPayload.type';
 import * as dotenv from 'dotenv';
+import { ClbsService } from 'src/models/clbs/clbs.service';
+import { Role } from 'src/enum/roles/role.enum';
+import { DepartmentsService } from 'src/models/departments/departments.service';
 dotenv.config();
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private clbsService: ClbsService,
+        private deptService: DepartmentsService,
     ) {};
 
     async signIn(username: string, password: string): Promise<Tokens> {
@@ -31,11 +36,40 @@ export class AuthService {
     }
 
     async getTokens(userId: string, username: string, role: string): Promise<Tokens> {
-        const payload: JwtPayload = {
-            userID: userId,
-            username: username,
-            role: role
-        };
+        let checkOrganization = null;
+        let organizationID: string = null;  
+        let payload: JwtPayload = null; 
+
+        if (role === Role.Clb) {
+            checkOrganization = await this.clbsService.findByUserId(userId);
+            
+            organizationID = checkOrganization.clubID;
+
+            payload = {
+                userID: userId,
+                username: username,
+                role: role,
+                organizationID: organizationID
+            };
+        } else if (role === Role.Dept) {
+            checkOrganization = await this.deptService.findByUserId(userId);
+
+            organizationID = checkOrganization.departmentID;
+
+            payload = {
+                userID: userId,
+                username: username,
+                role: role,
+                organizationID: organizationID
+            };
+        } else {
+            payload = {
+                userID: userId,
+                username: username,
+                role: role
+            };
+        }
+        
 
         const [at, rt] = await Promise.all([
             this.jwtService.signAsync(payload, {

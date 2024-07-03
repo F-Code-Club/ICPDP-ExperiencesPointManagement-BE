@@ -23,6 +23,6 @@ export class Users {
     @Column()
     role: string;
 
-    @Column()
+    @Column({ length: 512 })
     refreshToken?: string;
 };
