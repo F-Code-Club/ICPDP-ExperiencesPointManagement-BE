@@ -7,10 +7,12 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
 import { ForbiddenExceptionFilter } from 'src/utils/forbidden-exception.filter';
+import { ClbsHttpModule } from 'src/models/clbs/clbs-http.module';
+import { DepartmentsHttpModule } from 'src/models/departments/departments-http.module';
 
 @Module({
   imports: [
-    UsersHttpModule,
+    UsersHttpModule, ClbsHttpModule, DepartmentsHttpModule,
     JwtModule.register({
       global: true,
     }),
