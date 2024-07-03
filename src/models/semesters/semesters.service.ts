@@ -27,7 +27,7 @@ export class SemestersService {
         return await this.semestersRepository.findAndCount({
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            order: { semesterID: 'DESC' }
+            order: { year: 'DESC' }
         });
     }
 
@@ -91,10 +91,12 @@ export class SemestersService {
                     throw new ForbiddenException(`The end date of ${dto.semester.toLowerCase()}${dto.year} is not valid`);
                 }
 
-                const startDateYear = new Date(dto.startDate).getFullYear();
-                const endDateYear = new Date(dto.endDate).getFullYear();
-
-                if (startDateYear !== dto.year || endDateYear !== dto.year) {
+                const startDate = this.parseDate(dto.startDate);
+                const endDate = this.parseDate(dto.endDate);
+                const startDateYear = startDate.getFullYear();
+                const endDateYear = endDate.getFullYear();
+        
+                if (startDateYear !== dto.year || endDateYear !== dto.year) {                                        
                     throw new ForbiddenException(`The year in the start date or end date does not match the semester year ${semestersDto.year}`);
                 }
 

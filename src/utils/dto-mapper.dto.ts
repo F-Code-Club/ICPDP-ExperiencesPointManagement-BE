@@ -24,6 +24,7 @@ export class DtoMapper {
             if (entity.hasOwnProperty('student') && entity['student'] !== null) {
                 const student = entity['student'];
                 dto['studentID'] = student['studentID'];
+                dto['studentName'] = student['name'];
             }
 
             // Map club properties to DTO for event [GET]

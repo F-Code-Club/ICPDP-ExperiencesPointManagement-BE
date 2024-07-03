@@ -18,12 +18,6 @@ export class EventPointCreateRequestDto {
     studentID: string;
 
     @ApiProperty({
-        example: 'Nguyen Van A'
-    })
-    @IsNotEmpty()
-    studentName: string;
-
-    @ApiProperty({
         example: 5
     })
     point: number;
