@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Events } from './event.entity';
 import { ClbsHttpModule } from '../clbs/clbs-http.module';
 import { DepartmentsHttpModule } from '../departments/departments-http.module';
-import { SemestersHttpModule } from '../semesters/semesters-http.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/enum/roles/role.guard';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -13,7 +12,7 @@ import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-excepti
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Events]), ClbsHttpModule, DepartmentsHttpModule, SemestersHttpModule],
+  imports: [TypeOrmModule.forFeature([Events]), ClbsHttpModule, DepartmentsHttpModule],
   exports: [TypeOrmModule],
   controllers: [EventController],
   providers: [EventService,

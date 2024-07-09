@@ -6,7 +6,6 @@ import { EventDto } from 'src/dto/event.dto';
 import { ClbsService } from '../clbs/clbs.service';
 import { DepartmentsService } from '../departments/departments.service';
 import { Role } from 'src/enum/roles/role.enum';
-import { SemestersService } from '../semesters/semesters.service';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
 
@@ -17,7 +16,6 @@ export class EventService {
         private eventsRepository: Repository<Events>,
         private readonly clbsService: ClbsService,
         private readonly departmentSerivce: DepartmentsService,
-        private readonly semesterSerivce: SemestersService,
     ) {};
 
     /* 
