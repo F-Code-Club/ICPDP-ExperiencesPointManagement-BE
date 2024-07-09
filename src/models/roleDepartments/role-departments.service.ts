@@ -64,6 +64,18 @@ export class RoleDepartmentsService {
         return updatedRoleDepartment;
     }
 
+    /*
+    [DELETE]: /roledepartments/{ID}
+    */
+    async deleteRoleDepartment (id: string): Promise<Number | null> {
+        const checkRole = await this.findById(id);
+        if (!checkRole) {
+            return null;
+        }
+        const res = await this.roleDeptRepository.delete(id);
+        return res.affected;
+    }
+
     async findByName (role: string): Promise<RoleDepartments | null> {
         const existRole = await this.roleDeptRepository.findOne({
             where: {
