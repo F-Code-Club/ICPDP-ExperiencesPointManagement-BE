@@ -14,7 +14,7 @@ import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { RoleClubResponseDto } from './dto/role-clbs-response.dto';
 
 @ApiTags('RoleClubs')
-@Controller('roleclubs')
+@Controller('role-clubs')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class RoleClbsController {
