@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleClbsService } from './role-clbs.service';
@@ -8,6 +8,10 @@ import { RoleClbsDto } from 'src/dto/roleClbs.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { UpdateRoleClubDto } from './dto/role-clbs-update-request.dto';
 import { Response } from 'express';
+import { RoleClubFilterDto } from './dto/role-clbs-filter.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { RoleClubResponseDto } from './dto/role-clbs-response.dto';
 
 @ApiTags('RoleClubs')
 @Controller('roleclubs')
@@ -17,6 +21,20 @@ export class RoleClbsController {
     constructor (
         private readonly roleClubsService: RoleClbsService,
     ) {};
+
+    @Roles(Role.Admin)
+    @Get()
+    async getRoleClub (@Query() filter: RoleClubFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [roleClubs, count] = await this.roleClubsService.getRoleClubs(filter);
+        let message = 'Get role club successfully';
+        if (!roleClubs || count === 0) {
+            message = 'Get role club fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(roleClubs, RoleClubResponseDto), filter, count, message);
+    }
 
     @Roles(Role.Admin)
     @Post()

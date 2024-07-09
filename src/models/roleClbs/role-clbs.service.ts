@@ -4,6 +4,7 @@ import { RoleClbs } from './roleClbs.entity';
 import { Repository } from 'typeorm';
 import { RoleClbsDto } from 'src/dto/roleClbs.dto';
 import { UpdateRoleClubDto } from './dto/role-clbs-update-request.dto';
+import { RoleClubFilterDto } from './dto/role-clbs-filter.dto';
 
 @Injectable()
 export class RoleClbsService {
@@ -11,6 +12,22 @@ export class RoleClbsService {
         @InjectRepository(RoleClbs)
         private roleClbRepository: Repository<RoleClbs>
     ) {};
+
+    /* 
+    [GET]: /roleclubs/page?&&take?
+    */
+    async getRoleClubs (dto: RoleClubFilterDto) {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+        return await this.roleClbRepository.findAndCount({
+            take: dto.take,
+            skip: dto.take*(dto.page - 1),
+        });
+    }
 
     /*
     [POST]: /roleclubs/
