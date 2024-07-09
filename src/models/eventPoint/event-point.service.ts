@@ -10,6 +10,10 @@ import { ClbsService } from '../clbs/clbs.service';
 import { StudentsService } from '../students/students.service';
 import { EventPointFilterDto } from './dto/event-point-filter.dto';
 import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto';
+import { RoleClbsService } from '../roleClbs/role-clbs.service';
+import { RoleDepartmentsService } from '../roleDepartments/role-departments.service';
+import { RoleClbs } from '../roleClbs/roleClbs.entity';
+import { RoleDepartments } from '../roleDepartments/roleDepartments.entity';
 
 @Injectable()
 export class EventPointService {
@@ -20,6 +24,8 @@ export class EventPointService {
         private readonly departmentSerivce: DepartmentsService,
         private readonly clubService: ClbsService,
         private readonly studentService: StudentsService,
+        private readonly roleClubService: RoleClbsService,
+        private readonly roleDepartmentService: RoleDepartmentsService,
     ) {};
 
     /* 
@@ -89,6 +95,22 @@ export class EventPointService {
         const checkRoleForAddStudents = await this.checkRole(eventID, userRole, userId);
         if (!checkRoleForAddStudents) {
             throw new ForbiddenException('You do not have right to add students on this event');
+        }
+
+        // check the role of that student in the event to take the point
+        let checkRole = null;
+        if (userRole === Role.Clb) {
+            checkRole = await this.roleClubService.findByName(addStudentDto.role);
+            if (!checkRole) {
+                throw new ForbiddenException(`This role ${addStudentDto.role} is not valid`);
+            }
+            addStudentDto.point = checkRole.point;
+        } else if (userRole === Role.Dept) {
+            checkRole = await this.roleDepartmentService.findByName(addStudentDto.role);
+            if (!checkRole) {
+                throw new ForbiddenException(`This role ${addStudentDto.role} is not valid`);
+            }
+            addStudentDto.point = checkRole.point;
         }
 
         const createdStudents = this.eventPointRepository.create(addStudentDto);
