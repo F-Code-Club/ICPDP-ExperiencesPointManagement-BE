@@ -45,6 +45,8 @@ async function bootstrap() {
     .addTag('Semesters')
     .addTag('Events')
     .addTag('EventPoint')
+    .addTag('RoleClubs')
+    .addTag('RoleDepartments')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

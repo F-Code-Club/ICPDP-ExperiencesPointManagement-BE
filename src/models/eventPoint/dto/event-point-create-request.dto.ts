@@ -17,10 +17,7 @@ export class EventPointCreateRequestDto {
     })
     studentID: string;
 
-    @ApiProperty({
-        example: 5
-    })
-    point: number;
+    point?: number;
 
     @ApiProperty({
         example: 'organizer'

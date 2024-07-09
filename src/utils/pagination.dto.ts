@@ -15,7 +15,11 @@ export class PaginationDto<T> {
         dto.take = +filter.take;
         dto.data = data;
         dto.totalRecord = totalRecord;
-        dto.totalPage = Math.ceil(dto.totalRecord/dto.take);
+        if (dto.take === 0) {
+            dto.totalPage = 1;
+        } else {
+            dto.totalPage = Math.ceil(dto.totalRecord/dto.take);    
+        }
         if (dto.page < dto.totalPage) {
             dto.nextPage = dto.page+1;
         }
@@ -28,6 +32,7 @@ export class PaginationDto<T> {
         }
         return {
             data: dto.data,
+            totalPage: dto.totalPage,
             message: message,
         };
     }
