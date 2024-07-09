@@ -27,6 +27,9 @@ export class RoleClbsService {
         return saveRoleClub;
     }
 
+    /*
+    [PATCH]: /roleclubs/{ID}
+    */
     async updateRoleClub (id: string, updateDto: UpdateRoleClubDto) {
         // find by ID to check exist role
         const checkExistRole = await this.findById(id);
@@ -59,6 +62,18 @@ export class RoleClbsService {
         const updatedRoleClub = await this.roleClbRepository.save(checkExistRole);
 
         return updatedRoleClub;
+    }
+
+    /*
+    [DELETE]: /roleclubs/{ID}
+    */
+    async deleteRoleClub (id: string): Promise<Number | null> {
+        const checkRole = await this.findById(id);
+        if (!checkRole) {
+            return null;
+        }
+        const res = await this.roleClbRepository.delete(id);
+        return res.affected;
     }
 
     async findByName (role: string): Promise<RoleClbs | null> {

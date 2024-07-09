@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleClbsService } from './role-clbs.service';
@@ -33,6 +33,19 @@ export class RoleClbsController {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
         } else {
             return res.status(200).json(new ApiResponseDto(responseData, 'Update role club successfully'));
+        }
+    }
+
+    @Roles(Role.Admin)
+    @Delete('/:ID')
+    async deleteRoleClub (@Param('ID') id: string, @Res() res: Response) {
+        const responseData = await this.roleClubsService.deleteRoleClub(id);
+        if (responseData === null) {
+            return res.status(404).json(new ApiResponseDto(null, 'Role club not found'));
+        } else if (responseData === 0) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete fail'));
+        } else {
+            return res.status(201).json(new ApiResponseDto(null, 'Delete successfully'));
         }
     }
 }
