@@ -8,6 +8,8 @@ export class RoleClbs {
     @Column()
     point: number;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string;
 }
