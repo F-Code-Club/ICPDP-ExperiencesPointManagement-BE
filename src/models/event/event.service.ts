@@ -24,6 +24,8 @@ export class EventService {
     [GET]: /events
     */
     async getAllEvents (dto: EventFilterDto, userRole: string, userId: string) {
+        await this.validateSemester(dto.semester);
+
         let responseData = await this.getByOrganization(dto.organization, dto.semester, dto.year);
         let organization = null;
 
@@ -57,6 +59,8 @@ export class EventService {
     [POST]: /events
     */
     async createEvents (eventDto: EventDto, userRole: string, userID: string) {
+        await this.validateSemester(eventDto.semester);
+
         const checkDuplicate = await this.checkDuplicateEvent(eventDto.eventName, eventDto.semester, eventDto.year);
 
         if (checkDuplicate) {
@@ -225,5 +229,12 @@ export class EventService {
             order: { createdAt: 'ASC' }
         });
         return existEvent;
+    }
+
+    async validateSemester (semester: string) {
+        const validSemesters = ['summer', 'spring', 'fall'];
+        if (!validSemesters.includes(semester.toLowerCase())) {
+            throw new ForbiddenException(`This semester ${semester} is not valid`);
+        }
     }
 }
