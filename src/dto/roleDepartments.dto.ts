@@ -3,6 +3,12 @@ import { IsNotEmpty, IsNumber, Max, Min } from "class-validator";
 
 export class RoleDepartmentsDto {
     @ApiProperty({
+        example: 'organizer',
+    })
+    @IsNotEmpty()
+    role: string;
+
+    @ApiProperty({
         example: 10,
     })
     @IsNotEmpty()
@@ -10,10 +16,4 @@ export class RoleDepartmentsDto {
     @Max(100)
     @Min(1)
     point: number;
-
-    @ApiProperty({
-        example: 'Vice President',
-    })
-    @IsNotEmpty()
-    name: string;
 }
