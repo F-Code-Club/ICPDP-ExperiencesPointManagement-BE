@@ -14,7 +14,7 @@ import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 
 @ApiTags('RoleDepartments')
-@Controller('roledepartments')
+@Controller('role-departments')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class RoleDepartmentsController {

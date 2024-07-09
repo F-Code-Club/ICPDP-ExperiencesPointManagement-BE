@@ -14,7 +14,7 @@ import { Response } from 'express';
 import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto';
 
 @ApiTags('EventPoint')
-@Controller('eventpoint')
+@Controller('event-point')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class EventPointController {
