@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RoleClbs } from './roleClbs.entity';
 import { Repository } from 'typeorm';
 import { RoleClbsDto } from 'src/dto/roleClbs.dto';
+import { UpdateRoleClubDto } from './dto/role-clbs-update-request.dto';
 
 @Injectable()
 export class RoleClbsService {
@@ -15,9 +16,9 @@ export class RoleClbsService {
     [POST]: /roleclubs/
     */
     async addRoleClub (roleClubDto: RoleClbsDto): Promise<RoleClbs> {
-        const checkExistRole = await this.findByName(roleClubDto.name);
+        const checkExistRole = await this.findByName(roleClubDto.role);
         if (checkExistRole) {
-            throw new ForbiddenException(`This role ${roleClubDto.name} is already exist`);
+            throw new ForbiddenException(`This role ${roleClubDto.role} is already exist`);
         }
 
         const createRoleClub = this.roleClbRepository.create(roleClubDto);
@@ -26,10 +27,53 @@ export class RoleClbsService {
         return saveRoleClub;
     }
 
-    async findByName (name: string): Promise<RoleClbs | null> {
+    async updateRoleClub (id: string, updateDto: UpdateRoleClubDto) {
+        // find by ID to check exist role
+        const checkExistRole = await this.findById(id);
+        if (!checkExistRole) {
+            throw new ForbiddenException('This role is not exist');
+        }
+
+        // check if the new role is exist or not
+        const checkExistName = await this.findByName(updateDto.role);
+        if (checkExistName.roleClubID !== checkExistRole.roleClubID) {
+            throw new ForbiddenException(`This role ${updateDto.role} is already exist`);
+        }
+
+        let isChanged = false;
+
+        if (updateDto.role && updateDto.role !== checkExistRole.role) {
+            checkExistRole.role = updateDto.role;
+            isChanged = true;
+        }
+
+        if (updateDto.point && updateDto.point !== checkExistRole.point) {
+            checkExistRole.point = updateDto.point;
+            isChanged = true;
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const updatedRoleClub = await this.roleClbRepository.save(checkExistRole);
+
+        return updatedRoleClub;
+    }
+
+    async findByName (role: string): Promise<RoleClbs | null> {
         const existRole = await this.roleClbRepository.findOne({
             where: {
-                name: name,
+                role: role,
+            }
+        });
+        return existRole;
+    }
+
+    async findById (id: string): Promise<RoleClbs | null> {
+        const existRole = await this.roleClbRepository.findOne({
+            where: {
+                roleClubID: id,
             }
         });
         return existRole;
