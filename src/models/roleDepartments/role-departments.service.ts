@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RoleDepartments } from './roleDepartments.entity';
 import { Repository } from 'typeorm';
 import { RoleDepartmentsDto } from 'src/dto/roleDepartments.dto';
+import { UpdateRoleDepartmentDto } from './dto/role-departments-update.dto';
 
 @Injectable()
 export class RoleDepartmentsService {
@@ -24,6 +25,43 @@ export class RoleDepartmentsService {
 
         const saveRoleDepartment = await this.roleDeptRepository.save(createRoleDepartment);
         return saveRoleDepartment;
+    }
+
+    /* 
+    [PATCH]: /roledepartments/{ID}
+    */
+    async updateRoleDepartment(id: string, updateDto: UpdateRoleDepartmentDto) {
+        // find by ID to check exist role
+        const checkExistRole = await this.findById(id);
+        if (!checkExistRole) {
+            throw new ForbiddenException('This role is not exist');
+        }
+
+        // check if the new role is exist or not
+        const checkExistName = await this.findByName(updateDto.role);
+        if (checkExistName.roleDepartmentID !== checkExistRole.roleDepartmentID) {
+            throw new ForbiddenException(`This role ${updateDto.role} is already exist`);
+        }
+
+        let isChanged = false;
+
+        if (updateDto.role && updateDto.role !== checkExistRole.role) {
+            checkExistRole.role = updateDto.role;
+            isChanged = true;
+        }
+
+        if (updateDto.point && updateDto.point !== checkExistRole.point) {
+            checkExistRole.point = updateDto.point;
+            isChanged = true;
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const updatedRoleDepartment = await this.roleDeptRepository.save(checkExistRole);
+
+        return updatedRoleDepartment;
     }
 
     async findByName (role: string): Promise<RoleDepartments | null> {
