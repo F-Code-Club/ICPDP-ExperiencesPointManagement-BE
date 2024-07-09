@@ -4,6 +4,7 @@ import { RoleDepartments } from './roleDepartments.entity';
 import { Repository } from 'typeorm';
 import { RoleDepartmentsDto } from 'src/dto/roleDepartments.dto';
 import { UpdateRoleDepartmentDto } from './dto/role-departments-update.dto';
+import { RoleDepartmentFilterDto } from './dto/role-department-filter.dto';
 
 @Injectable()
 export class RoleDepartmentsService {
@@ -11,6 +12,22 @@ export class RoleDepartmentsService {
         @InjectRepository(RoleDepartments)
         private roleDeptRepository: Repository<RoleDepartments>
     ) {};
+
+    /*
+    [GET]: /roledepartments/page?&&take?
+    */
+    async getRoleDepartments (dto: RoleDepartmentFilterDto) {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+        return await this.roleDeptRepository.findAndCount({
+            take: dto.take,
+            skip: dto.take*(dto.page - 1),
+        });
+    }
 
     /*
     [POST]: /roledepartments/

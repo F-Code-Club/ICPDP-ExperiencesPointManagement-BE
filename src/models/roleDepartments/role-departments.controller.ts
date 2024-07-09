@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleDepartmentsService } from './role-departments.service';
@@ -8,6 +8,10 @@ import { RoleDepartmentsDto } from 'src/dto/roleDepartments.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { Response } from 'express';
 import { UpdateRoleDepartmentDto } from './dto/role-departments-update.dto';
+import { RoleDepartmentFilterDto } from './dto/role-department-filter.dto';
+import { RoleDepartmentResponseDto } from './dto/role-department-response.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
 
 @ApiTags('RoleDepartments')
 @Controller('roledepartments')
@@ -17,6 +21,20 @@ export class RoleDepartmentsController {
     constructor (
         private readonly roleDepartmentsService: RoleDepartmentsService,
     ) {};
+
+    @Roles(Role.Admin)
+    @Get()
+    async getRoleDepartment (@Query() filter: RoleDepartmentFilterDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [roleDepartments, count] = await this.roleDepartmentsService.getRoleDepartments(filter);
+        let message = 'Get role club successfully';
+        if (!roleDepartments || count === 0) {
+            message = 'Get role club fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(roleDepartments, RoleDepartmentResponseDto), filter, count, message);
+    }
 
     @Roles(Role.Admin)
     @Post()
