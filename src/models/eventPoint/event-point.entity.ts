@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Students } from "../students/students.entity";
 import { Events } from "../event/event.entity";
 
@@ -12,6 +12,9 @@ export class EventPoint {
 
     @Column()
     point: number;  
+
+    @CreateDateColumn()
+    createdAt?: Date;
 
     @ManyToOne(() => Students, (student) => student.eventPoint)
     @JoinColumn({ name: "studentID" })
