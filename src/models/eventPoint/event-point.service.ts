@@ -57,6 +57,9 @@ export class EventPointService {
                 event: {
                     eventID: checkEvent.eventID
                 }
+            },
+            order: {
+                createdAt: 'ASC'
             }
         });
     }
