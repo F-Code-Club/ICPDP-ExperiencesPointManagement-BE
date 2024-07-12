@@ -22,7 +22,7 @@ export class RoleClbsController {
         private readonly roleClubsService: RoleClbsService,
     ) {};
 
-    @Roles(Role.Admin)
+    @Roles(Role.Admin, Role.Clb)
     @Get()
     async getRoleClub (@Query() filter: RoleClubFilterDto) {
         if (!filter) {
