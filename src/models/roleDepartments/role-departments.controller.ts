@@ -22,7 +22,7 @@ export class RoleDepartmentsController {
         private readonly roleDepartmentsService: RoleDepartmentsService,
     ) {};
 
-    @Roles(Role.Admin)
+    @Roles(Role.Admin, Role.Dept)
     @Get()
     async getRoleDepartment (@Query() filter: RoleDepartmentFilterDto) {
         if (!filter) {
