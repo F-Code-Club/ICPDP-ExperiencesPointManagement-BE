@@ -1,0 +1,14 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "https-sonarqube-f-code-tech",
+        "projectKey": "F-Code-Club_ICPDP-ExperiencesPointManagement-BE_418a0340-7488-4be0-8a7f-4a6d65d7316b"
+    },
+    "env": {
+        "JWT_AT_SECRET": "ICPDP-EPM-BE2024!",
+        "JWT_RT_SECRET": "ICPDP-EPM-BE2024!!",
+        "DB_HOST": "10.69.0.49",
+        "DB_USERNAME": "root",
+        "DB_PASSWORD": "ICPDP-EPM-BED4t4b3s32024!!",
+        "DB_DATABASE": "be-epm-api-dev"
+    }
+}
