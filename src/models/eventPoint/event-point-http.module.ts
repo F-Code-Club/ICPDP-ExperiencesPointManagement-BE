@@ -16,4 +16,4 @@ import { RoleDeparmentsHttpModule } from "../roleDepartments/role-departments-ht
     exports: [EventPointService]
 })
 
-export class EventStudentHttpModule {};
+export class EventPointHttpModule {};

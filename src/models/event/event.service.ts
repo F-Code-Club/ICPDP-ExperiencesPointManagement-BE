@@ -8,12 +8,15 @@ import { DepartmentsService } from '../departments/departments.service';
 import { Role } from 'src/enum/roles/role.enum';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
+import { EventPoint } from '../eventPoint/event-point.entity';
 
 @Injectable()
 export class EventService {
     constructor (
         @InjectRepository(Events)
         private eventsRepository: Repository<Events>,
+        @InjectRepository(EventPoint)
+        private eventPointRepository: Repository<EventPoint>,
         private readonly clbsService: ClbsService,
         private readonly departmentSerivce: DepartmentsService,
     ) {};
@@ -175,6 +178,11 @@ export class EventService {
             }
 
             if (checkExistEvent.club && checkExistEvent.club.clubID === checkClubByUserID.clubID) {
+                await this.eventPointRepository.delete({
+                    event: {
+                        eventID: id,
+                    }
+                });
                 deleteEvent = await this.eventsRepository.delete(id);
             } else {
                 throw new ForbiddenException('You do not have right to delete this event');
@@ -187,6 +195,11 @@ export class EventService {
             }
 
             if (checkExistEvent.department && checkExistEvent.department.departmentID === checkDepartmentByUserID.departmentID) {
+                await this.eventPointRepository.delete({
+                    event: {
+                        eventID: id,
+                    }
+                });
                 deleteEvent = await this.eventsRepository.delete(id);
             }
         }

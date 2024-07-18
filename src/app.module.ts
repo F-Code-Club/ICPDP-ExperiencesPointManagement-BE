@@ -24,7 +24,7 @@ import { DepartmentsHttpModule } from './models/departments/departments-http.mod
 import { Events } from './models/event/event.entity';
 import { EventHttpModule } from './models/event/event-http.module';
 import { EventPoint } from './models/eventPoint/event-point.entity';
-import { EventStudentHttpModule } from './models/eventPoint/event-point-http.module';
+import { EventPointHttpModule } from './models/eventPoint/event-point-http.module';
 import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
 import { LocalFilesModule } from './local-files/local-files.module';
@@ -65,7 +65,7 @@ dotenv.config();
     ClbsHttpModule,
     DepartmentsHttpModule,
     EventHttpModule,
-    EventStudentHttpModule,
+    EventPointHttpModule,
     AuthModule
   ],
   controllers: [AppController],
