@@ -12,8 +12,6 @@ import { EventPointFilterDto } from './dto/event-point-filter.dto';
 import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto';
 import { RoleClbsService } from '../roleClbs/role-clbs.service';
 import { RoleDepartmentsService } from '../roleDepartments/role-departments.service';
-import { RoleClbs } from '../roleClbs/roleClbs.entity';
-import { RoleDepartments } from '../roleDepartments/roleDepartments.entity';
 
 @Injectable()
 export class EventPointService {

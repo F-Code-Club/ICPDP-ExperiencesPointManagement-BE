@@ -10,9 +10,10 @@ import { RolesGuard } from 'src/enum/roles/role.guard';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-exception.filter';
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
+import { EventPoint } from '../eventPoint/event-point.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Events]), ClbsHttpModule, DepartmentsHttpModule],
+  imports: [TypeOrmModule.forFeature([Events]), TypeOrmModule.forFeature([EventPoint]), ClbsHttpModule, DepartmentsHttpModule],
   exports: [TypeOrmModule],
   controllers: [EventController],
   providers: [EventService,
