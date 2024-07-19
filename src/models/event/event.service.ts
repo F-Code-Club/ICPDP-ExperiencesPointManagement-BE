@@ -230,13 +230,22 @@ export class EventService {
 
     async getByOrganization (organization: string, semester: string, year: number) {
         const existEvent = await this.eventsRepository.find({
-            where: {
-                semester: semester,
-                year: year,
-                club: {
-                    clubID: organization
+            where: [
+                {
+                    semester: semester,
+                    year: year,
+                    club: {
+                        clubID: organization
+                    }
+                },
+                {
+                    semester: semester,
+                    year: year,
+                    department: {
+                        departmentID: organization
+                    }
                 }
-            },
+            ],
             order: { createdAt: 'ASC' }
         });
         return existEvent;
