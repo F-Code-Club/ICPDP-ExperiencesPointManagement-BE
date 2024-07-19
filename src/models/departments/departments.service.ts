@@ -10,12 +10,18 @@ import { DeptsFilterDto } from './dto/department-filter.dto';
 import { UpdateDeptRequestDto } from './dto/department-update-request.dto';
 import { promisify } from 'util';
 import { createCipheriv, scrypt } from 'crypto';
+import { Events } from '../event/event.entity';
+import { EventPoint } from '../eventPoint/event-point.entity';
 
 @Injectable()
 export class DepartmentsService {
     constructor(
         @InjectRepository(Departments)
         private deptsRepository: Repository<Departments>,
+        @InjectRepository(Events)
+        private eventsRepository: Repository<Events>,
+        @InjectRepository(EventPoint)
+        private eventPointRepository: Repository<EventPoint>,
         private readonly usersService: UsersService,
     ) {};
 
@@ -207,6 +213,25 @@ export class DepartmentsService {
         const checkDept = await this.findById(id);
         if (!checkDept) {
             return null;
+        }
+
+        const existEvents = await this.eventsRepository.find({
+            where: {
+                department: {
+                    departmentID: id
+                }
+            }
+        });
+
+        for (const event of existEvents) {
+            await this.eventPointRepository.delete({
+                event: {
+                    eventID: event.eventID
+                }
+            });
+            await this.eventsRepository.delete({
+                eventID: event.eventID
+            });
         }
         await this.deptsRepository.delete(id);
         const resUser = await this.usersService.deleteUser(checkDept.user.userID);
