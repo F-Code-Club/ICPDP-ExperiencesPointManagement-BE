@@ -10,12 +10,18 @@ import { Role } from 'src/enum/roles/role.enum';
 import { promisify } from 'util';
 import { createCipheriv, scrypt } from 'crypto';
 import { UpdateClubRequestDto } from './dto/club-update-request.dto';
+import { Events } from '../event/event.entity';
+import { EventPoint } from '../eventPoint/event-point.entity';
 
 @Injectable()
 export class ClbsService {
     constructor (
         @InjectRepository(Clbs)
         private clbsRepository: Repository<Clbs>,
+        @InjectRepository(Events)
+        private eventsRepository: Repository<Events>,
+        @InjectRepository(EventPoint)
+        private eventPointRepository: Repository<EventPoint>,
         private readonly usersService: UsersService,
     ) {};
 
@@ -210,6 +216,25 @@ export class ClbsService {
         const checkClb = await this.findById(id);
         if (!checkClb) {
             return null;
+        }
+
+        const existEvents = await this.eventsRepository.find({
+            where: {
+                club: {
+                    clubID: id
+                }
+            }
+        });
+
+        for (const event of existEvents) {
+            await this.eventPointRepository.delete({
+                event: {
+                    eventID: event.eventID
+                }
+            });
+            await this.eventsRepository.delete({
+                eventID: event.eventID
+            });
         }
         await this.clbsRepository.delete(id);
         const resUser = await this.usersService.deleteUser(checkClb.user.userID);
