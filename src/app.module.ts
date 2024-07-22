@@ -30,6 +30,7 @@ import * as dotenv from 'dotenv';
 import { LocalFilesModule } from './local-files/local-files.module';
 import { LocalFile } from './local-files/local-file.entity';
 import { ClubMemberHttpModule } from './models/clubMember/club-member-http.module';
+import { DepartmentMemberHttpModule } from './models/departmentMember/department-member-http.module';
 dotenv.config();
 
 @Module({
@@ -68,7 +69,8 @@ dotenv.config();
     EventHttpModule,
     EventPointHttpModule,
     AuthModule,
-    ClubMemberHttpModule
+    ClubMemberHttpModule,
+    DepartmentMemberHttpModule
   ],
   controllers: [AppController],
   providers: [AppService],
