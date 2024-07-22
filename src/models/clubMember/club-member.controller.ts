@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ClubMemberService } from './club-member.service';
@@ -51,6 +51,17 @@ export class ClubMemberController {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
         } else {
             return res.status(200).json(new ApiResponseDto(responseData, 'Update member on this club successfully'));
+        }
+    }
+
+    @Roles(Role.Clb)
+    @Delete('/:studentID')
+    async deleteClubMember (@Request() req, @Param('studentID') studentID: string, @Res() res: Response) {
+        const responseData = await this.clubMemberService.deleteClubMember(req.user.organizationID, studentID);
+        if (!responseData) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete member fail'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete member successfully'));
         }
     }
 }

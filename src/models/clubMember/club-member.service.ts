@@ -144,6 +144,40 @@ export class ClubMemberService {
         return responseData;
     }
 
+    /*
+    [DELETE]: /club-member/{studentID}
+    */
+    async deleteClubMember(clubID: string, studentIDFromParam: string) {
+        const delClubMember = await this.clubRepository.findOne({
+            where: {
+                clubID: clubID
+            },
+            relations: ['students']
+        });
+
+        if (!delClubMember) {
+            throw new ForbiddenException('Invalid clubID');
+        }
+
+        let isDeleted = false;
+
+        const studentIndex = delClubMember.students.findIndex(student => student.studentID === studentIDFromParam);
+
+        if (studentIndex === -1) {
+            throw new ForbiddenException(`This studentID ${studentIDFromParam} does not exist in this club`);
+        } else {
+            isDeleted = true;
+        }
+
+        //Remove the student from club
+        delClubMember.students.splice(studentIndex, 1);
+
+        // Save the udpated club
+        await this.clubRepository.save(delClubMember);
+
+        return isDeleted;
+    }
+
     async findByStudentID(clubID: string, studentID: string) {
         const exist = await this.clubRepository.findOne({ 
             where: {
