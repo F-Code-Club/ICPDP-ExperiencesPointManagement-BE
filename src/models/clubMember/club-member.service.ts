@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Students } from '../students/students.entity';
 import { StudentsService } from '../students/students.service';
 import { AddClubMemberDto } from './dto/club-meber-post-request.dto';
+import { UpdateClubMemberDto } from './dto/club-member-patch-request.dto';
 
 @Injectable()
 export class ClubMemberService {
@@ -16,6 +17,9 @@ export class ClubMemberService {
         private readonly studentService: StudentsService,
     ) {};
 
+    /*
+    [POST]: club-member/{clubID}
+    */
     async addMember(clubID: string, addMemberDto: AddClubMemberDto) {
         // check valid of studentID
         const checkStudentID = await this.studentService.checkValidId(addMemberDto.studentID);
@@ -54,6 +58,66 @@ export class ClubMemberService {
         const responseData = {
             students: addMemberDto.students
         }
+        return responseData;
+    }
+
+    /*
+    [PATCH]: club-member/{clubID&studentID}
+    */
+    async updateClubMember(clubID: string, updateDto: UpdateClubMemberDto, studentIDFromParam: string) {
+        const updateClubMember = await this.clubRepository.findOne({ 
+            where: {
+                clubID: clubID,
+            },
+            relations: ['students']
+        });
+
+        if (!updateClubMember) {
+            throw new ForbiddenException('Invalid clubID');
+        }
+
+        // started update here
+        let isChanged = false;
+
+        // check if studentID from param is exist on this club or not
+        const studentIndex = updateClubMember.students.findIndex(student => student.studentID === studentIDFromParam);
+        if (studentIndex === -1) {
+            throw new ForbiddenException('This studentID from param is not valid or not exist');
+        }
+
+        if (updateDto.studentID && updateDto.studentID !== studentIDFromParam) {
+            const checkValidUpStudentID = await this.studentService.checkValidId(updateDto.studentID);
+            if (!checkValidUpStudentID) {
+                throw new ForbiddenException(`This studentID ${updateDto.studentID} is not valid`);
+            }
+
+            const checkExistUpdateStudentID = await this.studentService.findByID(updateDto.studentID);
+            if (!checkExistUpdateStudentID) {
+                throw new ForbiddenException(`This new studentID ${updateDto.studentID} is not exist on this application`);
+            }
+
+            // check if this studentID is exist on this club or not
+            const checkExistStudentIDOnClub = await this.findByStudentID(clubID, updateDto.studentID);
+            if (checkExistStudentIDOnClub) {
+                throw new ForbiddenException(`This student ${updateDto.studentID} is already exist on this club`);
+            }
+
+            updateDto.student = checkExistUpdateStudentID;
+            isChanged = true;
+        }
+
+        updateClubMember.students[studentIndex] = updateDto.student;
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        await this.clubRepository.save(updateClubMember);
+
+        const responseData = {
+            students: updateDto.student,
+        };
+        
         return responseData;
     }
 
