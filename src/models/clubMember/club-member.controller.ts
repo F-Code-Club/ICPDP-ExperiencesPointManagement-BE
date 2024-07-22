@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ClubMemberService } from './club-member.service';
@@ -8,6 +8,10 @@ import { Role } from 'src/enum/roles/role.enum';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { UpdateClubMemberDto } from './dto/club-member-patch-request.dto';
 import { Response } from 'express';
+import { GetClubMemberDto } from './dto/club-member-get-request.dto';
+import { PaginationDto } from 'src/utils/pagination.dto';
+import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { ClubMemberResponseDto } from './dto/club-member-response.dto';
 
 @ApiTags('ClubMember')
 @Controller('club-member')
@@ -19,14 +23,28 @@ export class ClubMemberController {
     ) {};
 
     @Roles(Role.Clb)
-    @Post('/:clubID')
+    @Get()
+    async getClubMember (@Request() req, @Query() filter: GetClubMemberDto) {
+        if (!filter) {
+            throw new BadRequestException('Lacked of request param');
+        }
+        const [members, count] = await this.clubMemberService.getClubMember(req.user.organizationID, filter);
+        let message = 'Get members successfully';
+        if (!members || count == 0) {  
+            message = 'Get members fail';
+        }
+        return PaginationDto.from(DtoMapper.mapMany(members, ClubMemberResponseDto), filter, count, message);
+    }
+
+    @Roles(Role.Clb)
+    @Post()
     async addClubMember (@Request() req, @Body() dto: AddClubMemberDto) {        
         const responseData = await this.clubMemberService.addMember(req.user.organizationID, dto);
         return new ApiResponseDto(responseData, 'Add member to club successfully');
     }
 
     @Roles(Role.Clb)
-    @Patch('/:clubID&:studentID')
+    @Patch('/:studentID')
     async updateClubMember (@Request() req, @Body() dto: UpdateClubMemberDto, @Param('studentID') studentID: string, @Res() res: Response) {
         const responseData = await this.clubMemberService.updateClubMember(req.user.organizationID, dto, studentID);
         if (responseData === 'Nothing changed') {

@@ -6,6 +6,7 @@ import { Students } from '../students/students.entity';
 import { StudentsService } from '../students/students.service';
 import { AddClubMemberDto } from './dto/club-meber-post-request.dto';
 import { UpdateClubMemberDto } from './dto/club-member-patch-request.dto';
+import { GetClubMemberDto } from './dto/club-member-get-request.dto';
 
 @Injectable()
 export class ClubMemberService {
@@ -18,7 +19,29 @@ export class ClubMemberService {
     ) {};
 
     /*
-    [POST]: club-member/{clubID}
+    [GET]: club-member
+    */
+    async getClubMember(clubID: string, dto: GetClubMemberDto): Promise<[Students[], number]> {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+
+        const queryBuilder = this.studentRepository.createQueryBuilder('student')
+            .innerJoin('clubmember', 'cm', 'cm.studentID = student.studentID')
+            .where('cm.clubID = :clubID', { clubID })
+            .skip(dto.take * (dto.page - 1))
+            .take(dto.take);
+
+        const [students, total] = await queryBuilder.getManyAndCount();
+
+        return [students, total];
+    }
+
+    /*
+    [POST]: club-member
     */
     async addMember(clubID: string, addMemberDto: AddClubMemberDto) {
         // check valid of studentID
@@ -62,7 +85,7 @@ export class ClubMemberService {
     }
 
     /*
-    [PATCH]: club-member/{clubID&studentID}
+    [PATCH]: club-member/{studentID}
     */
     async updateClubMember(clubID: string, updateDto: UpdateClubMemberDto, studentIDFromParam: string) {
         const updateClubMember = await this.clubRepository.findOne({ 
