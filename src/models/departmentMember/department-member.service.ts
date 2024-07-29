@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddDepartmentMemberDto } from './dto/department-member-post-request.dto';
 import { updateDepartmentMemberDto } from './dto/department-member-patch-request.dto';
+import { GetDepartmentMemberDto } from './dto/department-member-get-request.dto';
 
 @Injectable()
 export class DepartmentMemberService {
@@ -16,6 +17,28 @@ export class DepartmentMemberService {
         private studentRepository: Repository<Students>,
         private readonly studentService: StudentsService,
     ) {};
+
+    /*
+    [GET]: department-member
+    */
+    async getClubMember(departmentID: string, dto: GetDepartmentMemberDto): Promise<[Students[], number]> {
+        if (dto.page < 1) {
+            throw new ForbiddenException('page must greater than or equal to 1');
+        }
+        if (dto.take < 0) {
+            throw new ForbiddenException('take must greater than or equal to 0');
+        }
+
+        const queryBuilder = this.studentRepository.createQueryBuilder('student')
+            .innerJoin('departmentmember', 'dm', 'dm.studentID = student.studentID')
+            .where('dm.departmentID = :departmentID', { departmentID })
+            .skip(dto.take * (dto.page - 1))
+            .take(dto.take);
+
+        const [students, total] = await queryBuilder.getManyAndCount();
+
+        return [students, total];
+    }
 
     /*
     [POST]: department-member
