@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentMemberService } from './department-member.service';
@@ -24,11 +24,11 @@ export class DepartmentMemberController {
 
     @Roles(Role.Dept)
     @Get()
-    async getClubMember (@Request() req, @Query() filter: GetDepartmentMemberDto) {
+    async getDepartmentMember (@Request() req, @Query() filter: GetDepartmentMemberDto) {
         if (!filter) {
             throw new BadRequestException('Lacked of request param');
         }
-        const [members, count] = await this.deptMemberService.getClubMember(req.user.organizationID, filter);
+        const [members, count] = await this.deptMemberService.getDepartmentMember(req.user.organizationID, filter);
         let message = 'Get members successfully';
         if (!members || count == 0) {  
             message = 'Get members fail';
@@ -51,6 +51,17 @@ export class DepartmentMemberController {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
         } else {
             return res.status(200).json(new ApiResponseDto(responseData, 'Update member on this department successfully'));
+        }
+    }
+
+    @Roles(Role.Dept)
+    @Delete('/:studentID')
+    async deleteDepartmentMember (@Request() req, @Param('studentID') studentID: string, @Res() res: Response) {
+        const responseData = await this.deptMemberService.deleteDepartmentMember(req.user.organizationID, studentID);
+        if (!responseData) {
+            return res.status(400).json(new ApiResponseDto(null, 'Delete member fail'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(null, 'Delete member successfully'));
         }
     }
 }

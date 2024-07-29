@@ -21,7 +21,7 @@ export class DepartmentMemberService {
     /*
     [GET]: department-member
     */
-    async getClubMember(departmentID: string, dto: GetDepartmentMemberDto): Promise<[Students[], number]> {
+    async getDepartmentMember(departmentID: string, dto: GetDepartmentMemberDto): Promise<[Students[], number]> {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -142,6 +142,40 @@ export class DepartmentMemberService {
         };
 
         return responseData;
+    }
+
+    /*
+    [DELETE]: /department-member/{studentID}
+    */
+    async deleteDepartmentMember(departmentID: string, studentIDFromParam: string) {
+        const delDeptMember = await this.deptRepository.findOne({
+            where: {
+                departmentID: departmentID
+            },
+            relations: ['students']
+        });
+
+        if (!delDeptMember) {
+            throw new ForbiddenException('Invalid DepartmentID');
+        }
+
+        let isDeleted = false;
+
+        const studentIndex = delDeptMember.students.findIndex(student => student.studentID === studentIDFromParam);
+
+        if (studentIndex === -1) {
+            throw new ForbiddenException(`This studentID ${studentIDFromParam} does not exist in this department`);
+        } else {
+            isDeleted = true;
+        }
+
+        //Remove the student from department
+        delDeptMember.students.splice(studentIndex, 1);
+
+        // Save the udpated department
+        await this.deptRepository.save(delDeptMember);
+
+        return isDeleted;
     }
 
     async findByStudentID(deptID: string, studentID: string) {
