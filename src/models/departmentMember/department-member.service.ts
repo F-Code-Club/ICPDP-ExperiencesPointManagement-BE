@@ -5,6 +5,7 @@ import { StudentsService } from '../students/students.service';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddDepartmentMemberDto } from './dto/department-member-post-request.dto';
+import { updateDepartmentMemberDto } from './dto/department-member-patch-request.dto';
 
 @Injectable()
 export class DepartmentMemberService {
@@ -57,6 +58,66 @@ export class DepartmentMemberService {
         const responseData = {
             students: addMemberDto.students
         };
+        return responseData;
+    }
+
+    /*
+    [PATCH]: department-member/{studentID}
+    */
+    async updateDepartmentMember(departmentID: string, updateDto: updateDepartmentMemberDto, studentIDFromParam: string) {
+        const updateDepartmentMember = await this.deptRepository.findOne({
+            where: {
+                departmentID: departmentID,
+            },
+            relations: ['students']
+        });
+
+        if (!updateDepartmentMember) {
+            throw new ForbiddenException('Invalid departmentID');
+        }
+
+        // started update here
+        let isChanged = false;
+
+        // check if studentID from param is exist on this department or not
+        const studentIndex = updateDepartmentMember.students.findIndex(student => student.studentID === studentIDFromParam);
+        if (studentIndex === -1) {
+            throw new ForbiddenException('This studentID from param is not valid or not exist');
+        }
+
+        if (updateDto.studentID && updateDto.studentID !== studentIDFromParam) {
+            const checkValidUpStudentID = await this.studentService.checkValidId(updateDto.studentID);
+            if (!checkValidUpStudentID) {
+                throw new ForbiddenException(`This studentID ${updateDto.studentID} is not valid`);
+            }
+
+            const checkExistUpdateStudentID = await this.studentService.findByID(updateDto.studentID);
+            if (!checkExistUpdateStudentID) {
+                throw new ForbiddenException(`This new studentID ${updateDto.studentID} is not exist on this application`);
+            }
+
+            // check if this studentID is exist on this department or not
+            const checkExistStudentIDOnDept = await this.findByStudentID(departmentID, updateDto.studentID);
+            if (checkExistStudentIDOnDept) {
+                throw new ForbiddenException(`This student ${updateDto.studentID} is already exist on this club`);
+            }
+
+            updateDto.student = checkExistUpdateStudentID;
+            isChanged = true;
+        }
+
+        updateDepartmentMember.students[studentIndex] = updateDto.student;
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        await this.deptRepository.save(updateDepartmentMember);
+
+        const responseData = {
+            students: updateDto.student,
+        };
+
         return responseData;
     }
 
