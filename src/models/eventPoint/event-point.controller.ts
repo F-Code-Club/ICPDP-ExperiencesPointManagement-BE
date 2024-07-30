@@ -38,7 +38,7 @@ export class EventPointController {
     @Roles(Role.Clb, Role.Dept)
     @Post('/:eventID')
     async addStudents (@Request() req, @Body() addStudentDto: EventPointCreateRequestDto, @Param('eventID') id: string) {
-        const responseData = await this.eventPointService.addStudents(id, addStudentDto, req.user.role, req.user.userID);
+        const responseData = await this.eventPointService.addStudents(id, addStudentDto, req.user.role, req.user.userID, req.user.organizationID);
         return new ApiResponseDto(responseData, 'Add student successfully');
     }
 

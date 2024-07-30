@@ -12,6 +12,8 @@ import { EventPointFilterDto } from './dto/event-point-filter.dto';
 import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto';
 import { RoleClbsService } from '../roleClbs/role-clbs.service';
 import { RoleDepartmentsService } from '../roleDepartments/role-departments.service';
+import { ClubMemberService } from '../clubMember/club-member.service';
+import { DepartmentMemberService } from '../departmentMember/department-member.service';
 
 @Injectable()
 export class EventPointService {
@@ -24,6 +26,8 @@ export class EventPointService {
         private readonly studentService: StudentsService,
         private readonly roleClubService: RoleClbsService,
         private readonly roleDepartmentService: RoleDepartmentsService,
+        private readonly clubMemberService: ClubMemberService,
+        private readonly deptMemberService: DepartmentMemberService,
     ) {};
 
     /* 
@@ -65,7 +69,7 @@ export class EventPointService {
     /* 
     [POST]: /eventpoint/{eventID}
     */
-    async addStudents (eventID: string, addStudentDto: EventPointCreateRequestDto, userRole: string, userId: string) {
+    async addStudents (eventID: string, addStudentDto: EventPointCreateRequestDto, userRole: string, userId: string, organizationID: string) {
 
         // check valid of studentID
         const checkStudentID = await this.studentService.checkValidId(addStudentDto.studentID);
@@ -73,6 +77,9 @@ export class EventPointService {
             throw new ForbiddenException("ID must follow the standards of FPT University's student code");
         }
 
+        // check if this studentID is exist on organization
+        await this.checkStudentOnOrganization(organizationID, userRole, addStudentDto.studentID);
+        
         // check if this studentID is exist on this eventID or not
         const checkExistStudentOnThisEvent = await this.findByStudentIDnEventID(eventID, addStudentDto.studentID);
         if (checkExistStudentOnThisEvent) {
@@ -260,5 +267,20 @@ export class EventPointService {
             relations: ['student', 'event']
         });
         return exist;
+    }
+
+    async checkStudentOnOrganization (organizationID: string, userRole: string, studentID: string) {
+        if (userRole === Role.Clb) {
+            const isExist = await this.clubMemberService.findByStudentID(organizationID, studentID);
+            if (!isExist) {
+                throw new ForbiddenException(`This studentID ${studentID} is not exist on your club`);
+            }
+        } else if (userRole === Role.Dept) {
+            const isExist = await this.deptMemberService.findByStudentID(organizationID, studentID);
+            if (!isExist) {
+                throw new ForbiddenException(`This studentID ${studentID} is not exist on your department`);
+            }
+        }
+        return true;
     }
 }
