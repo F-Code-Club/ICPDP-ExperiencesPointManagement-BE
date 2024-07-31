@@ -56,7 +56,7 @@ export class EventPointController {
     @Roles(Role.Clb, Role.Dept)
     @Delete('/:eventID&:studentID')
     async deleteStudents (@Request() req, @Param('eventID') eventID: string, @Param('studentID') studentID: string, @Res() res: Response) {
-        const responseData = await this.eventPointService.deleteStudents(eventID, studentID, req.user.role, req.user.userID);
+        const responseData = await this.eventPointService.deleteStudents(eventID, studentID, req.user.role, req.user.userID, req.user.organizationID);
         if (responseData === 0) {
             return res.status(400).json(new ApiResponseDto(null, 'Delete student fail'));
         } else {

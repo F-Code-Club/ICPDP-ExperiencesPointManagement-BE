@@ -207,7 +207,7 @@ export class EventPointService {
     /* 
     [DELETE]: /eventpoint/{eventID&studentID}
     */
-    async deleteStudents (eventID: string, studentID: string, userRole: string, userId: string) {
+    async deleteStudents (eventID: string, studentID: string, userRole: string, userId: string, organizationID: string) {
         const checkRoleForDelete = await this.checkRole(eventID, userRole, userId);
         if (!checkRoleForDelete) {
             throw new ForbiddenException('You do not have right to delete students on this event');
@@ -216,7 +216,10 @@ export class EventPointService {
         const checkEvent = await this.eventService.findById(eventID);
         if (!checkEvent) {
             throw new ForbiddenException('This event is not exist');
-        } 
+        }
+        
+        // check if the studentIDFromParam is exist on organization or not
+        await this.checkStudentOnOrganization(organizationID, userRole, studentID);
 
         const checkDelEvent = await this.findByStudentIDnEventID(eventID, studentID);
         if (!checkDelEvent) {
