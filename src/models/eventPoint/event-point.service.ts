@@ -139,7 +139,7 @@ export class EventPointService {
     /*
     [PATCH]: /eventpoint/{eventID&studentID}
     */
-    async updateStudents (eventID: string, studentIDFromParam: string, updateDto: EventPointUpdateRequestDto, userRole: string, userId: string) {
+    async updateStudents (eventID: string, studentIDFromParam: string, updateDto: EventPointUpdateRequestDto, userRole: string, userId: string, organizationID: string) {
         const checkRoleForUpdate = await this.checkRole(eventID, userRole, userId);
         if (!checkRoleForUpdate) {
             throw new ForbiddenException('You do not have right to update student on this event');
@@ -151,6 +151,9 @@ export class EventPointService {
         if (!checkUpStudentEventPoint) {
             throw new ForbiddenException('This event or this student is not valid');
         }
+
+        // check if the studentIDFromParam is exist on organization or not
+        await this.checkStudentOnOrganization(organizationID, userRole, studentIDFromParam);
 
         // update studentID
         if (updateDto.studentID && updateDto.studentID !== studentIDFromParam) {

@@ -45,7 +45,7 @@ export class EventPointController {
     @Roles(Role.Clb, Role.Dept)
     @Patch('/:eventID&:studentID')
     async updateStudents (@Request() req, @Body() updateDto: EventPointUpdateRequestDto, @Param('eventID') eventID: string, @Param('studentID') studentIDFromParam: string, @Res() res: Response) {
-        const responseData = await this.eventPointService.updateStudents(eventID, studentIDFromParam, updateDto, req.user.role, req.user.userID);
+        const responseData = await this.eventPointService.updateStudents(eventID, studentIDFromParam, updateDto, req.user.role, req.user.userID, req.user.organizationID);
         if (responseData === 'Nothing changed') {
             return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
         } else {
