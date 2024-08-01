@@ -4,9 +4,9 @@ import { Clbs } from '../clbs/clbs.entity';
 import { Repository } from 'typeorm';
 import { Students } from '../students/students.entity';
 import { StudentsService } from '../students/students.service';
-import { AddClubMemberDto } from './dto/club-meber-post-request.dto';
 import { UpdateClubMemberDto } from './dto/club-member-patch-request.dto';
 import { GetClubMemberDto } from './dto/club-member-get-request.dto';
+import { AddMemberDto } from 'src/dto/addMember.dto';
 
 @Injectable()
 export class ClubMemberService {
@@ -43,7 +43,7 @@ export class ClubMemberService {
     /*
     [POST]: club-member
     */
-    async addMember(clubID: string, addMemberDto: AddClubMemberDto) {
+    async addMember(clubID: string, addMemberDto: AddMemberDto) {
         // check valid of studentID
         const checkStudentID = await this.studentService.checkValidId(addMemberDto.studentID);
         if (!checkStudentID) {
@@ -80,6 +80,57 @@ export class ClubMemberService {
 
         const responseData = {
             students: addMemberDto.students
+        }
+        return responseData;
+    }
+
+    /*
+    [POST]: club-member/import
+    */
+    async importStudentsFromExcel(addMemberDto: AddMemberDto[], clubID: string) {
+        const importedStudents: Students[] = [];
+        const addMemberToClub = await this.clubRepository.findOne({
+            where: {
+                clubID: clubID
+            },
+            relations: ['students']
+        });
+
+        if (!addMemberToClub.students) {
+            addMemberToClub.students = [];
+        }
+
+        // Filter and validate each student
+        await Promise.all(
+            addMemberDto.map(async (dto) => {
+                const isValidId = await this.studentService.checkValidId(dto.studentID);
+                const existStudent = await this.studentService.findByID(dto.studentID);
+                const existOnClub = await this.findByStudentID(clubID, dto.studentID);
+
+                if (!isValidId) {
+                    throw new ForbiddenException(`Invalid student ID: ${dto.studentID}`);
+                }
+
+                if (!existStudent) {
+                    throw new ForbiddenException(`student ID ${dto.studentID} have not existed on this application`);
+                } else {
+                    dto.students = existStudent;
+                }
+
+                if (existOnClub) {
+                    throw new ForbiddenException(`studentID ${dto.studentID} already exist on this club`);
+                }
+
+                addMemberToClub.students.push(dto.students);
+
+                importedStudents.push(dto.students);
+            })      
+        );
+
+        await this.clubRepository.save(addMemberToClub);
+
+        const responseData = {
+            students: importedStudents
         }
         return responseData;
     }
