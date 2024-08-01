@@ -1,10 +1,9 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { DepartmentMemberService } from './department-member.service';
 import { Role } from 'src/enum/roles/role.enum';
 import { Roles } from 'src/enum/roles/role.decorator';
-import { AddDepartmentMemberDto } from './dto/department-member-post-request.dto';
 import { ApiResponseDto } from 'src/utils/api-response.dto';
 import { updateDepartmentMemberDto } from './dto/department-member-patch-request.dto';
 import { Response } from 'express';
@@ -12,6 +11,10 @@ import { GetDepartmentMemberDto } from './dto/department-member-get-request.dto'
 import { DepartmentMemberResponseDto } from './dto/department-member-response.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
+import { AddMemberDto } from 'src/dto/addMember.dto';
+import { LocalFilesService } from 'src/local-files/local-files.service';
+import { UploadFileDto } from 'src/local-files/dto/upload-file.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('DepartmentMember')
 @Controller('department-member')
@@ -20,6 +23,7 @@ import { DtoMapper } from 'src/utils/dto-mapper.dto';
 export class DepartmentMemberController {
     constructor (
         private readonly deptMemberService: DepartmentMemberService,
+        private readonly localFilesService: LocalFilesService,
     ) {};
 
     @Roles(Role.Dept)
@@ -38,9 +42,23 @@ export class DepartmentMemberController {
 
     @Roles(Role.Dept)
     @Post()
-    async addDepartmentMember (@Request() req, @Body() dto: AddDepartmentMemberDto) {
+    async addDepartmentMember (@Request() req, @Body() dto: AddMemberDto) {
         const responseData = await this.deptMemberService.addDepartmentMember(req.user.organizationID, dto);
         return new ApiResponseDto(responseData, 'Add member to department successfully');
+    }
+
+    @Roles(Role.Dept)
+    @Post('/import')
+    @ApiConsumes("multipart/form-data")
+    @ApiBody({
+        type: UploadFileDto
+    })
+    @UseInterceptors(FileInterceptor("file"))
+    async importStudentsFromExcel (@Request() req, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+        const infoExcelFile = await this.localFilesService.createExcelFile(file.filename, file.path);
+        const readExcelFile = await this.localFilesService.readExcelFileForImportMember(infoExcelFile.localFileID);
+        const responseData = await this.deptMemberService.importStudentsFromExcel(readExcelFile, req.user.organizationID);
+        return res.status(201).json(new ApiResponseDto(responseData, 'Import member to club successfully'));
     }
 
     @Roles(Role.Dept)
