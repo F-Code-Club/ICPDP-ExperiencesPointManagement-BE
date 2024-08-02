@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Students } from "src/models/students/students.entity";
 
-export class AddDepartmentMemberDto {
+export class AddMemberDto {
     @ApiProperty({
         example: 'SE180123'
     })

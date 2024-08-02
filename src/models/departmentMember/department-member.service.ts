@@ -4,9 +4,9 @@ import { Students } from '../students/students.entity';
 import { StudentsService } from '../students/students.service';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AddDepartmentMemberDto } from './dto/department-member-post-request.dto';
 import { updateDepartmentMemberDto } from './dto/department-member-patch-request.dto';
 import { GetDepartmentMemberDto } from './dto/department-member-get-request.dto';
+import { AddMemberDto } from 'src/dto/addMember.dto';
 
 @Injectable()
 export class DepartmentMemberService {
@@ -43,7 +43,7 @@ export class DepartmentMemberService {
     /*
     [POST]: department-member
     */
-    async addDepartmentMember(deptID: string, addMemberDto: AddDepartmentMemberDto) {
+    async addDepartmentMember(deptID: string, addMemberDto: AddMemberDto) {
         // check valid of studentID
         const checkStudentID = await this.studentService.checkValidId(addMemberDto.studentID);
         if (!checkStudentID) {
@@ -81,6 +81,57 @@ export class DepartmentMemberService {
         const responseData = {
             students: addMemberDto.students
         };
+        return responseData;
+    }
+
+    /* 
+    [POST]: department-member/import
+    */
+    async importStudentsFromExcel(addMemberDto: AddMemberDto[], departmentID: string) {
+        const importedStudents: Students[] = [];
+        const addMemberToDept = await this.deptRepository.findOne({
+            where: {
+                departmentID: departmentID
+            },
+            relations: ['students']
+        });
+
+        if (!addMemberToDept.students) {
+            addMemberToDept.students = [];
+        }
+
+        // Filter and validate each student
+        await Promise.all(
+            addMemberDto.map(async (dto) => {
+                const isValidId = await this.studentService.checkValidId(dto.studentID);
+                const existStudent = await this.studentService.findByID(dto.studentID);
+                const existOnDepartment = await this.findByStudentID(departmentID, dto.studentID);
+
+                if (!isValidId) {
+                    throw new ForbiddenException(`Invalid student ID: ${dto.studentID}`);
+                }
+
+                if (!existStudent) {
+                    throw new ForbiddenException(`student ID ${dto.studentID} have not existed on this application`);
+                } else {
+                    dto.students = existStudent;
+                }
+
+                if (existOnDepartment) {
+                    throw new ForbiddenException(`studentID ${dto.studentID} already exist on this department`);
+                }
+
+                addMemberToDept.students.push(dto.students);
+
+                importedStudents.push(dto.students);
+            })      
+        );
+
+        await this.deptRepository.save(addMemberToDept);
+
+        const responseData = {
+            students: importedStudents
+        }
         return responseData;
     }
 
