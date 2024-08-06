@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FinalPointService } from './final-point.service';
@@ -8,6 +8,9 @@ import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { PaginationDto } from 'src/utils/pagination.dto';
 import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { FinalPointResponseDto } from './dto/final-point-response.dto';
+import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
+import { Response } from 'express';
+import { ApiResponseDto } from 'src/utils/api-response.dto';
 
 @ApiTags('FinalPoint')
 @Controller('final-point')
@@ -30,5 +33,16 @@ export class FinalPointController {
             message = 'Get final points fail';
         }
         return PaginationDto.from(DtoMapper.mapMany(finalPoints, FinalPointResponseDto), filter, count, message);
+    }
+
+    @Roles(Role.Admin)
+    @Patch('/:year&:semester&:studentID')
+    async updateFinalPoint (@Param('year') year: number, @Param('semester') semester: string, @Param('studentID') studentID: string, @Body() updateDto: FinalPointUpdateDto, @Res() res: Response) {
+        const responseData = await this.finalPointService.updateFinalPoints(updateDto, year, semester, studentID);
+        if (responseData === 'Nothing changed') {
+            return res.status(200).json(new ApiResponseDto(null, 'Nothing changed'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseData, 'Update final point successfully'));
+        }
     }
 }

@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 import { Semesters } from "../semesters/semesters.entity";
 import { Students } from "../students/students.entity";
 
-class StudyPoint {
+export class StudyPoint {
     @Column({ default: 0 })
     extraPoint: number;
 
@@ -10,7 +10,7 @@ class StudyPoint {
     comment: string;
 }
 
-class ActivityPoint {
+export class ActivityPoint {
     @Column({ default: 0 })
     extraPoint1: number;
 
@@ -27,7 +27,7 @@ class ActivityPoint {
     extraPoint5: number;
 }
 
-class CitizenshipPoint {
+export class CitizenshipPoint {
     @Column({ default: 0 })
     extraPoint: number;
 
@@ -35,7 +35,7 @@ class CitizenshipPoint {
     comment: string;
 }
 
-class OrganizationPoint {
+export class OrganizationPoint {
     @Column({ default: 0 })
     extraPoint: number;
 
@@ -66,5 +66,5 @@ export class FinalPoint {
 
     @ManyToOne(() => Students, (student) => student.finalPoint)
     @JoinColumn({ name: "studentID" })
-    student: Students[]
+    student: Students;
 };

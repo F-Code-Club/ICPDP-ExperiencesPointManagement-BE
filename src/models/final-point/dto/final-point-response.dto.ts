@@ -1,45 +1,6 @@
 import { Expose, Type } from "class-transformer";
+import { ActivityPoint, CitizenshipPoint, OrganizationPoint, StudyPoint } from "../final-point.entity";
 
-class StudyPoint {
-    @Expose()
-    extraPoint: number;
-
-    @Expose()
-    comment: string;
-}
-
-class ActivityPoint {
-    @Expose()
-    extraPoint1: number;
-
-    @Expose()
-    extraPoint2: number;
-
-    @Expose()
-    extraPoint3: number;
-
-    @Expose()
-    extraPoint4: number;
-
-    @Expose()
-    extraPoint5: number;
-}
-
-class CitizenshipPoint {
-    @Expose()
-    extraPoint: number;
-
-    @Expose()
-    comment: string;
-}
-
-class OrganizationPoint {
-    @Expose()
-    extraPoint: number;
-
-    @Expose()
-    comment: string;
-}
 
 export class FinalPointResponseDto {
     @Expose()
