@@ -1,5 +1,6 @@
 import { BeforeInsert, Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { PointBoard } from "../point-board/pointBoard.entity";
+import { FinalPoint } from "../final-point/final-point.entity";
 
 @Entity()
 export class Semesters {
@@ -25,4 +26,7 @@ export class Semesters {
     setSemesterID() {
         this.semesterID = `${this.semester}${this.year}`;
     }
+
+    @OneToMany(() => FinalPoint, (finalPoint) => finalPoint.semester)
+    finalPoint?: FinalPoint[]
 }
