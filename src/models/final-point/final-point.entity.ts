@@ -3,7 +3,7 @@ import { Semesters } from "../semesters/semesters.entity";
 import { Students } from "../students/students.entity";
 
 @Entity()
-export class FinalBoard {
+export class FinalPoint {
     @PrimaryGeneratedColumn()
     id: string;
 

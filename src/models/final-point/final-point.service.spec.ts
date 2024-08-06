@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FinalBoardService } from './final-board.service';
+import { FinalPointService } from './final-point.service';
 
 describe('FinalBoardService', () => {
-  let service: FinalBoardService;
+  let service: FinalPointService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FinalBoardService],
+      providers: [FinalPointService],
     }).compile();
 
-    service = module.get<FinalBoardService>(FinalBoardService);
+    service = module.get<FinalPointService>(FinalPointService);
   });
 
   it('should be defined', () => {
