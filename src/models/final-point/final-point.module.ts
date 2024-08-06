@@ -11,4 +11,4 @@ import { FinalPointService } from './final-point.service';
   controllers: [FinalPointController],
   providers: [FinalPointService]
 })
-export class FinalBoardModule {}
+export class FinalPointModule {}

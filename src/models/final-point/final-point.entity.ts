@@ -45,7 +45,7 @@ class OrganizationPoint {
 
 @Entity()
 export class FinalPoint {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @Column(type => StudyPoint)
