@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Query, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FinalPointService } from './final-point.service';
@@ -33,6 +33,13 @@ export class FinalPointController {
             message = 'Get final points fail';
         }
         return PaginationDto.from(DtoMapper.mapMany(finalPoints, FinalPointResponseDto), filter, count, message);
+    }
+
+    @Roles(Role.Admin)
+    @Post('/:year&:semester')
+    async calculateFinalPoint (@Param('year') year: number, @Param('semester') semester: string) {
+        const responseData = await this.finalPointService.findBySemester(year, semester);
+        return new ApiResponseDto(responseData, 'Calculate final point successfully');
     }
 
     @Roles(Role.Admin)

@@ -123,6 +123,9 @@ export class FinalPointService {
         return existFinalPoint;
     }
 
+    /*
+    [POST]: /final-point/{year}&{semester}
+    */
     async findBySemester(year: number, semester: string) {
         const semesterID = `${semester}${year}`;
         
@@ -135,6 +138,13 @@ export class FinalPointService {
             relations: ['student']
         });
 
-        return existFinalPoints;
+        return existFinalPoints.map(fp => ({
+            studentID: fp.student.studentID,
+            studentName: fp.student.name,
+            studyPoint: fp.studyPoint,
+            activityPoint: fp.activityPoint,
+            citizenshipPoint: fp.citizenshipPoint,
+            organizationPoint: fp.organizationPoint
+        }));
     }
 }
