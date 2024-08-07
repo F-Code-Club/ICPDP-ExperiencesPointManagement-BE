@@ -6,6 +6,7 @@ import { LocalFilesModule } from "src/local-files/local-files.module";
 import * as fs from "fs";
 import * as multer from "multer";
 import { MulterModule } from "@nestjs/platform-express";
+import { FinalPointHttpModule } from "../final-point/final-point-http.module";
 
 const uploadsFolder = 'uploads';
 
@@ -31,7 +32,7 @@ const storage = multer.diskStorage({
 });
 
 @Module({
-    imports: [MulterModule.register({ storage, limits: { fileSize: 25 * 1024 * 1024 } }), StudentsModule, LocalFilesModule],
+    imports: [MulterModule.register({ storage, limits: { fileSize: 25 * 1024 * 1024 } }), StudentsModule, LocalFilesModule, FinalPointHttpModule],
     controllers: [StudentsController],
     providers: [StudentsService],
     exports: [StudentsService]

@@ -1,9 +1,10 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FinalPoint, OrganizationPoint } from './final-point.entity';
+import { FinalPoint } from './final-point.entity';
 import { Repository } from 'typeorm';
 import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
+import { FinalPointAddDto } from './dto/final-point-add.dto';
 
 @Injectable()
 export class FinalPointService {
@@ -146,6 +147,50 @@ export class FinalPointService {
             activityPoint: fp.activityPoint,
             citizenshipPoint: fp.citizenshipPoint,
             organizationPoint: fp.organizationPoint
+        }));
+    }
+
+    async addFinalPoints (dto: FinalPointAddDto[] | FinalPointAddDto) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        let currentSemester: string;
+
+        const currentMonth = now.getMonth() + 1;
+
+        if (currentMonth >= 1 && currentMonth <= 4) {
+            currentSemester = 'spring';
+        } else if (currentMonth >= 5 && currentMonth <= 8) {
+            currentSemester = 'summer';
+        } else if (currentMonth >= 9 && currentMonth <= 12) {
+            currentSemester = 'fall';
+        }
+
+        const semesterID = `${currentSemester}${currentYear}`;
+        if (!Array.isArray(dto)) {
+            dto = [dto];
+        }
+
+        const finalPoints = dto.map(item => {
+            const newFinalPoint = this.finalPointRepository.create({
+                student: { studentID: item.studentID },
+                semester: { semesterID },
+                studyPoint: item.studyPoint,
+                activityPoint: item.activityPoint,
+                citizenshipPoint: item.citizenshipPoint,
+                organizationPoint: item.organizationPoint,
+            });
+            return newFinalPoint;
+        });
+
+        const savedFinalPoints = await this.finalPointRepository.save(finalPoints);
+
+        return savedFinalPoints.map(fp => ({
+            studentID: fp.student.studentID,
+            studentName: fp.student.name,
+            studyPoint: fp.studyPoint,
+            activityPoint: fp.activityPoint,
+            citizenshipPoint: fp.citizenshipPoint,
+            organizationPoint: fp.organizationPoint,
         }));
     }
 }

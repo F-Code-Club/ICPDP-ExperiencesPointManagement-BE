@@ -5,12 +5,15 @@ import { Repository } from 'typeorm';
 import { StudentsDto } from 'src/dto/students.dto';
 import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
 import { StudentsFilterDto } from './dto/students-filter.dto';
+import { FinalPointService } from '../final-point/final-point.service';
+import { FinalPointAddDto } from '../final-point/dto/final-point-add.dto';
 
 @Injectable()
 export class StudentsService {
     constructor (
         @InjectRepository(Students)
         private studentsRepository: Repository<Students>,
+        private readonly finalPointService: FinalPointService,
     ) {};
 
     /*
@@ -63,7 +66,15 @@ export class StudentsService {
 
         const newStudent = this.studentsRepository.create(studentDto);
 
-        return await this.studentsRepository.save(newStudent);
+        const responseData = await this.studentsRepository.save(newStudent);
+
+        const addDtoForFinalPoint: FinalPointAddDto = {
+            studentID: responseData.studentID,
+            student: responseData
+        };
+        await this.finalPointService.addFinalPoints(addDtoForFinalPoint);
+
+        return responseData;
     }
 
     /* 
@@ -90,6 +101,12 @@ export class StudentsService {
         );
 
         const newStudents = await this.studentsRepository.save(importedStudents);
+
+        const addDtoForFinalPoints: FinalPointAddDto[] = newStudents.map((student) => ({
+            studentID: student.studentID,
+            student: student
+        }));
+        await this.finalPointService.addFinalPoints(addDtoForFinalPoints);
 
         return newStudents;
     }
