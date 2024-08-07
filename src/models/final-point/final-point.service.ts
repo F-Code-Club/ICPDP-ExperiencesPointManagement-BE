@@ -33,7 +33,8 @@ export class FinalPointService {
                 semester: {
                     semesterID: semesterIDToFound.toLowerCase().trim(),
                 }
-            }
+            },
+            order: { createdAt: 'ASC' }
         });
     }
 

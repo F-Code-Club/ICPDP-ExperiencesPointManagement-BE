@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Semesters } from "../semesters/semesters.entity";
 import { Students } from "../students/students.entity";
 
@@ -59,6 +59,9 @@ export class FinalPoint {
 
     @Column(type => OrganizationPoint)
     organizationPoint: OrganizationPoint;
+
+    @CreateDateColumn()
+    createdAt?: Date;
 
     @ManyToOne(() => Semesters, (semester) => semester.finalPoint)
     @JoinColumn({ name: "semesterID" })
