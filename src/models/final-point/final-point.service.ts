@@ -6,7 +6,6 @@ import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
 import { FinalPointAddDto } from './dto/final-point-add.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
-import { Events } from '../event/event.entity';
 
 @Injectable()
 export class FinalPointService {
@@ -101,13 +100,34 @@ export class FinalPointService {
 
         const updatedFinalPoint = await this.finalPointRepository.save(checkExistFinalPoint);
 
+        const totalStudyPoint = updatedFinalPoint.studyPoint.extraPoint;
+        const totalActivityPoint = updatedFinalPoint.activityPoint.extraPoint1 + updatedFinalPoint.activityPoint.extraPoint2 + updatedFinalPoint.activityPoint.extraPoint3 + updatedFinalPoint.activityPoint.extraPoint4 + updatedFinalPoint.activityPoint.extraPoint5;
+        const totalCitizenshipPoint = updatedFinalPoint.citizenshipPoint.extraPoint;
+        const totalOrganizationPoint = updatedFinalPoint.organizationPoint.extraPoint;
+        const totalFinalPoint = totalStudyPoint + totalActivityPoint + totalCitizenshipPoint + totalOrganizationPoint;
+        let classification: string = "";
+
+        if (totalFinalPoint < 80) {
+            classification = "Khá";
+        } else if (totalFinalPoint >= 80 && totalFinalPoint <= 90) {
+            classification = "Giỏi";
+        } else {
+            classification = "Xuất sắc";
+        }
+
         const responseData = {
             studentID: updatedFinalPoint.student.studentID,
             studentName: updatedFinalPoint.student.name,
             studyPoint: updatedFinalPoint.studyPoint,
+            totalStudyPoint: totalStudyPoint,
             activityPoint: updatedFinalPoint.activityPoint,
+            totalActivityPoint: totalActivityPoint,
             citizenshipPoint: updatedFinalPoint.citizenshipPoint,
+            totalCitizenshipPoint: totalCitizenshipPoint,
             organizationPoint: updatedFinalPoint.organizationPoint,
+            totalOrganizationPoint: totalOrganizationPoint,
+            totalFinalPoint: totalFinalPoint,
+            classification: classification,
         };
 
         return responseData;
@@ -154,14 +174,37 @@ export class FinalPointService {
             })
         );
 
-        return existFinalPoints.map(fp => ({
-            studentID: fp.student.studentID,
-            studentName: fp.student.name,
-            studyPoint: fp.studyPoint,
-            activityPoint: fp.activityPoint,
-            citizenshipPoint: fp.citizenshipPoint,
-            organizationPoint: fp.organizationPoint
-        }));
+        return existFinalPoints.map(fp => {
+            const totalStudyPoint = fp.studyPoint.extraPoint;
+            const totalActivityPoint = fp.activityPoint.extraPoint1 + fp.activityPoint.extraPoint2 + fp.activityPoint.extraPoint3 + fp.activityPoint.extraPoint4 + fp.activityPoint.extraPoint5;
+            const totalCitizenshipPoint = fp.citizenshipPoint.extraPoint;
+            const totalOrganizationPoint = fp.organizationPoint.extraPoint;
+            const totalFinalPoint = totalStudyPoint + totalActivityPoint + totalCitizenshipPoint + totalOrganizationPoint;
+            let classification: string = "";
+    
+            if (totalFinalPoint < 80) {
+                classification = "Khá";
+            } else if (totalFinalPoint >= 80 && totalFinalPoint <= 90) {
+                classification = "Giỏi";
+            } else {
+                classification = "Xuất sắc";
+            }
+    
+            return {
+                studentID: fp.student.studentID,
+                studentName: fp.student.name,
+                studyPoint: fp.studyPoint,
+                totalStudyPoint: totalStudyPoint,
+                activityPoint: fp.activityPoint,
+                totalActivityPoint: totalActivityPoint,
+                citizenshipPoint: fp.citizenshipPoint,
+                totalCitizenshipPoint: totalCitizenshipPoint,
+                organizationPoint: fp.organizationPoint,
+                totalOrganizationPoint: totalOrganizationPoint,
+                totalFinalPoint: totalFinalPoint,
+                classification: classification,
+            };
+        });
     }
 
     async addFinalPoints (dto: FinalPointAddDto[] | FinalPointAddDto) {
