@@ -5,12 +5,16 @@ import { Repository } from 'typeorm';
 import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
 import { FinalPointAddDto } from './dto/final-point-add.dto';
+import { EventPoint } from '../eventPoint/event-point.entity';
+import { Events } from '../event/event.entity';
 
 @Injectable()
 export class FinalPointService {
     constructor (
         @InjectRepository(FinalPoint)
         private finalPointRepository: Repository<FinalPoint>,
+        @InjectRepository(EventPoint)
+        private eventPointRepository: Repository<EventPoint>,
     ) {};
 
     /*
@@ -140,6 +144,16 @@ export class FinalPointService {
             relations: ['student']
         });
 
+        await Promise.all(
+            existFinalPoints.map(async (fp) => {
+                const totalPersonalPoint = await this.takeActivePointFromEventPoint(fp.student.studentID, year, semester);
+
+                fp.activityPoint.extraPoint1 = totalPersonalPoint;
+
+                await this.finalPointRepository.save(fp);
+            })
+        );
+
         return existFinalPoints.map(fp => ({
             studentID: fp.student.studentID,
             studentName: fp.student.name,
@@ -192,5 +206,28 @@ export class FinalPointService {
             citizenshipPoint: fp.citizenshipPoint,
             organizationPoint: fp.organizationPoint,
         }));
+    }
+
+    async takeActivePointFromEventPoint (studentID: string, year: number, semester: string) {
+        const eventPoints = await this.eventPointRepository.find({
+            where: {
+                student: {
+                    studentID: studentID
+                },
+                event: {
+                    year: year,
+                    semester: semester
+                }
+            },
+            relations: ['student', 'event']
+        });
+
+        if (eventPoints.length === 0) {
+            return 0;
+        }
+
+        const totalPoints = eventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
+
+        return totalPoints;
     }
 }
