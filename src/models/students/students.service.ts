@@ -187,7 +187,7 @@ export class StudentsService {
     }
 
     async checkValidId(id: string): Promise<boolean> {
-        const regex = /^[A-Z]{2}\d{6}$/;
+        const regex = /^[A-Z]{2}\d{5,6}$/;
 
         return regex.test(id);
     }
