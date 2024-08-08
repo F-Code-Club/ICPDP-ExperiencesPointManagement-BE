@@ -5,6 +5,7 @@ import { Repository } from "typeorm";
 import * as XLSX from 'xlsx';
 import { StudentsDto } from "src/dto/students.dto";
 import { AddMemberDto } from "src/dto/addMember.dto";
+import { EventPointCreateRequestDto } from "src/models/eventPoint/dto/event-point-create-request.dto";
 
 @Injectable()
 export class LocalFilesService {
@@ -41,6 +42,8 @@ export class LocalFilesService {
     [POST]: /students/import
 
     [POST]: /club-member/import
+
+    [POST]: /event-point/import
     */
     async createExcelFile(fileName: string, path: string): Promise<LocalFile> {
         const localFile = this.localFileRepo.create({
@@ -100,6 +103,27 @@ export class LocalFilesService {
         return responseData;
     }
 
+    /*
+    [POST]: /event-point/import
+    */
+    async readExcelFileForImportToEventPoint(id: string) {
+        const existFile = await this.localFileRepo.findOne({
+            where: {
+                localFileID: id,
+            }
+        });
+
+        if (!existFile) {
+            return null;
+        }
+        const checkExcelFile = await this.isExcelFile(existFile.fileName);
+        if (!checkExcelFile) {
+            throw new BadRequestException('This file is not an excel file');
+        }
+        const responseData = await this.readExcelFileForEventPoint(existFile.diskPath);
+        return responseData;
+    }
+
     async isExcelFile(fileName: string): Promise<boolean> {
         const check = fileName.split('.').pop().toLowerCase();
         return check === 'xlsx' || check === 'xls'; 
@@ -124,6 +148,17 @@ export class LocalFilesService {
         const sheetName = workBook.SheetNames[0];
         const workSheet = workBook.Sheets[sheetName];
         const jsonData: AddMemberDto[] = XLSX.utils.sheet_to_json(workSheet);
+        return jsonData;
+    }
+
+    /*
+    this readExcelFileForEventPoint return EventPointCreateRequestDto[] for [POST]: event-point/import
+    */
+    async readExcelFileForEventPoint(filePath: string): Promise<EventPointCreateRequestDto[]> {
+        const workBook = XLSX.readFile(filePath);
+        const sheetName = workBook.SheetNames[0];
+        const workSheet = workBook.Sheets[sheetName];
+        const jsonData: EventPointCreateRequestDto[] = XLSX.utils.sheet_to_json(workSheet);
         return jsonData;
     }
 }

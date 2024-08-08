@@ -136,6 +136,82 @@ export class EventPointService {
         return responseData;
     }
 
+    /* 
+    [POST]: /event-point/import
+    */
+    async importStudents (eventID: string, addStudentDto: EventPointCreateRequestDto[], userRole: string, userID: string, organizationID: string) {
+        const importedStudents: EventPointCreateRequestDto[] = [];
+
+        const checkRoleForAddStudents = await this.checkRole(eventID, userRole, userID);
+        if (!checkRoleForAddStudents) {
+            throw new ForbiddenException('You do not have right to add students on this event');
+        }
+
+        await Promise.all(
+            addStudentDto.map(async (dto) => {
+                // check valid of studentID
+                const checkStudentID = await this.studentService.checkValidId(dto.studentID);
+                if (!checkStudentID) {
+                    throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+                }
+
+                // check if this studentID is exist on organization
+                await this.checkStudentOnOrganization(organizationID, userRole, dto.studentID);
+        
+                // check if this studentID is exist on this eventID or not
+                const checkExistStudentOnThisEvent = await this.findByStudentIDnEventID(eventID, dto.studentID);
+                if (checkExistStudentOnThisEvent) {
+                    throw new ForbiddenException(`This student ${dto.studentID} is already exist on this event`);
+                }
+
+                // check if this studentID is exist on this application or not
+                const checkExistStudentOnSystem = await this.studentService.findByID(dto.studentID);
+                if (!checkExistStudentOnSystem) {
+                    throw new ForbiddenException(`This student ${dto.studentID} is not exist on this application`);
+                }
+                dto.student = checkExistStudentOnSystem;
+
+                // check if this eventID is exist or not
+                const checkEvent = await this.eventService.findById(eventID);
+                if (!checkEvent) {
+                    throw new ForbiddenException('This event is not exist');
+                }
+                dto.event = checkEvent;
+
+                // check the role of that student in the event to take the point
+                let checkRole = null;
+                if (userRole === Role.Clb) {
+                    checkRole = await this.roleClubService.findByName(dto.role);
+                    if (!checkRole) {
+                        throw new ForbiddenException(`This role ${dto.role} is not valid`);
+                    }
+                    dto.point = checkRole.point;
+                } else if (userRole === Role.Dept) {
+                    checkRole = await this.roleDepartmentService.findByName(dto.role);
+                    if (!checkRole) {
+                        throw new ForbiddenException(`This role ${dto.role} is not valid`);
+                    }
+                    dto.point = checkRole.point;
+                }
+
+                importedStudents.push(dto);
+            })
+        );
+
+        const newStudents = await this.eventPointRepository.save(importedStudents);
+
+        const responseData = newStudents.map(res => {
+            return {
+                studentID: res.student.studentID,
+                studentName: res.student.name,
+                point: res.point,
+                role: res.role
+            }
+        });
+
+        return responseData;
+    }
+
     /*
     [PATCH]: /eventpoint/{eventID&studentID}
     */

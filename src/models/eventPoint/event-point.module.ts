@@ -16,9 +16,10 @@ import { RoleClbsHttpModule } from '../roleClbs/role-clbs-http.module';
 import { RoleDeparmentsHttpModule } from '../roleDepartments/role-departments-http.module';
 import { ClubMemberHttpModule } from '../clubMember/club-member-http.module';
 import { DepartmentMemberHttpModule } from '../departmentMember/department-member-http.module';
+import { LocalFilesModule } from 'src/local-files/local-files.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EventPoint]), EventHttpModule, ClbsHttpModule, DepartmentsHttpModule, StudentsHttpModule, RoleClbsHttpModule, RoleDeparmentsHttpModule, ClubMemberHttpModule, DepartmentMemberHttpModule],
+  imports: [TypeOrmModule.forFeature([EventPoint]), EventHttpModule, ClbsHttpModule, DepartmentsHttpModule, StudentsHttpModule, RoleClbsHttpModule, RoleDeparmentsHttpModule, ClubMemberHttpModule, DepartmentMemberHttpModule, LocalFilesModule],
   exports: [TypeOrmModule],
   controllers: [EventPointController],
   providers: [EventPointService,

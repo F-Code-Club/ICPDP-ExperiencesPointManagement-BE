@@ -1,5 +1,5 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { EventPointService } from './event-point.service';
 import { Roles } from 'src/enum/roles/role.decorator';
@@ -12,6 +12,9 @@ import { DtoMapper } from 'src/utils/dto-mapper.dto';
 import { EventPointResponseDto } from './dto/event-point-response.dto';
 import { Response } from 'express';
 import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto';
+import { UploadFileDto } from 'src/local-files/dto/upload-file.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { LocalFilesService } from 'src/local-files/local-files.service';
 
 @ApiTags('EventPoint')
 @Controller('event-point')
@@ -20,6 +23,7 @@ import { EventPointUpdateRequestDto } from './dto/event-point-update-request.dto
 export class EventPointController {
     constructor (
         private readonly eventPointService: EventPointService,
+        private readonly localFilesService: LocalFilesService,
     ) {};
 
     @Get('/:eventID')
@@ -40,6 +44,20 @@ export class EventPointController {
     async addStudents (@Request() req, @Body() addStudentDto: EventPointCreateRequestDto, @Param('eventID') id: string) {
         const responseData = await this.eventPointService.addStudents(id, addStudentDto, req.user.role, req.user.userID, req.user.organizationID);
         return new ApiResponseDto(responseData, 'Add student successfully');
+    }
+
+    @Roles(Role.Clb)
+    @Post('/:eventID/import')
+    @ApiConsumes("multipart/form-data")
+    @ApiBody({
+        type: UploadFileDto
+    })
+    @UseInterceptors(FileInterceptor("file"))
+    async importStudentsFromExcel (@Request() req, @Param('eventID') eventID: string, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+        const infoExcelFile = await this.localFilesService.createExcelFile(file.filename, file.path);
+        const readExcelFile = await this.localFilesService.readExcelFileForImportToEventPoint(infoExcelFile.localFileID);
+        const responseData = await this.eventPointService.importStudents(eventID, readExcelFile, req.user.role, req.user.userID, req.user.organizationID);
+        return res.status(201).json(new ApiResponseDto(responseData, 'Import member to club successfully'));
     }
 
     @Roles(Role.Clb, Role.Dept)

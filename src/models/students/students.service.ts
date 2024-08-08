@@ -7,6 +7,7 @@ import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
 import { StudentsFilterDto } from './dto/students-filter.dto';
 import { FinalPointService } from '../final-point/final-point.service';
 import { FinalPointAddDto } from '../final-point/dto/final-point-add.dto';
+import { EventPoint } from '../eventPoint/event-point.entity';
 
 @Injectable()
 export class StudentsService {
@@ -14,6 +15,8 @@ export class StudentsService {
         @InjectRepository(Students)
         private studentsRepository: Repository<Students>,
         private readonly finalPointService: FinalPointService,
+        @InjectRepository(EventPoint)
+        private eventPointRepository: Repository<EventPoint>,
     ) {};
 
     /*
@@ -172,6 +175,17 @@ export class StudentsService {
         if (!checkStudent) {
             return null;
         }
+
+        await this.finalPointService.deleteByStudentID(id);
+
+        const existStudentsOnEventPoint = await this.eventPointRepository.find({
+            where: {
+                student: {
+                    studentID: id
+                }
+            }
+        });
+        await this.eventPointRepository.remove(existStudentsOnEventPoint);
 
         const res = await this.studentsRepository.delete(id);
         return res.affected;

@@ -10,9 +10,10 @@ import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.fi
 import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-exception.filter';
 import { LocalFilesModule } from 'src/local-files/local-files.module';
 import { FinalPointHttpModule } from '../final-point/final-point-http.module';
+import { EventPoint } from '../eventPoint/event-point.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Students]), LocalFilesModule, FinalPointHttpModule],
+  imports: [TypeOrmModule.forFeature([Students, EventPoint]), LocalFilesModule, FinalPointHttpModule],
   exports: [TypeOrmModule],
   controllers: [StudentsController],
   providers: [StudentsService,
