@@ -6,6 +6,7 @@ import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
 import { FinalPointAddDto } from './dto/final-point-add.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
+import { Students } from '../students/students.entity';
 
 @Injectable()
 export class FinalPointService {
@@ -14,6 +15,8 @@ export class FinalPointService {
         private finalPointRepository: Repository<FinalPoint>,
         @InjectRepository(EventPoint)
         private eventPointRepository: Repository<EventPoint>,
+        @InjectRepository(Students)
+        private studentsRepository: Repository<Students>,
     ) {};
 
     /*
@@ -155,7 +158,7 @@ export class FinalPointService {
     async findBySemester(year: number, semester: string) {
         const semesterID = `${semester}${year}`;
         
-        const existFinalPoints = await this.finalPointRepository.find({
+        let existFinalPoints = await this.finalPointRepository.find({
             where: {
                 semester: {
                     semesterID: semesterID.toLowerCase(),
@@ -163,6 +166,41 @@ export class FinalPointService {
             },
             relations: ['student']
         });
+
+        // check the current year and current semester
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        let currentSemester: string;
+        const currentMonth = now.getMonth() + 1;
+        if (currentMonth >= 1 && currentMonth <= 4) {
+            currentSemester = 'spring';
+        } else if (currentMonth >= 5 && currentMonth <= 8) {
+            currentSemester = 'summer';
+        } else if (currentMonth >= 9 && currentMonth <= 12) {
+            currentSemester = 'fall';
+        }
+        
+        // Check conditions and throw errors if necessary
+        if (existFinalPoints.length === 0) {
+            if (currentYear === Number(year)) {
+                if (currentSemester === semester) {                
+                    // take all students on this application and create with them a new final point for the current semester 
+                    const allStudents = await this.studentsRepository.find({
+                        order: { studentID: 'ASC' }
+                    });
+
+                    const addToFinalPoint: FinalPointAddDto[] = allStudents.map((student) => ({
+                        studentID: student.studentID,
+                        student: student
+                    }));
+                    existFinalPoints = await this.addFinalPoints(addToFinalPoint);
+                } else {
+                    throw new ForbiddenException(`This ${semester} semester has not been started yet`);
+                }
+            } else {
+                throw new ForbiddenException(`The year ${year} is not valid`);
+            }
+        }
 
         await Promise.all(
             existFinalPoints.map(async (fp) => {
@@ -240,16 +278,7 @@ export class FinalPointService {
             return newFinalPoint;
         });
 
-        const savedFinalPoints = await this.finalPointRepository.save(finalPoints);
-
-        return savedFinalPoints.map(fp => ({
-            studentID: fp.student.studentID,
-            studentName: fp.student.name,
-            studyPoint: fp.studyPoint,
-            activityPoint: fp.activityPoint,
-            citizenshipPoint: fp.citizenshipPoint,
-            organizationPoint: fp.organizationPoint,
-        }));
+        return await this.finalPointRepository.save(finalPoints);
     }
 
     async takeActivePointFromEventPoint (studentID: string, year: number, semester: string) {
