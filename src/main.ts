@@ -24,7 +24,8 @@ async function bootstrap() {
       "http://localhost:5173/",
       "http://localhost:5174",
       "http://localhost:5174/",
-      "https://epm-fe-dev.f-code.tech"
+      "https://epm-fe-dev.f-code.tech",
+      "https://epm-fe-dev.f-code.tech/"
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     // allowed headers
