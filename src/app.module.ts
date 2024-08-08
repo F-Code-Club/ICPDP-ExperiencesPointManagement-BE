@@ -15,8 +15,8 @@ import { StudentsHttpModule } from './models/students/students-http.module';
 import { Students } from './models/students/students.entity';
 import { PointBoard } from './models/point-board/pointBoard.entity';
 import { PointBoardHttpModule } from './models/point-board/point-board-http.module';
-import { FinalBoard } from './models/final-board/final-board.entity';
-import { FinalBoardHttpModule } from './models/final-board/final-board-http.module';
+import { FinalPoint } from './models/final-point/final-point.entity';
+import { FinalPointHttpModule } from './models/final-point/final-point-http.module';
 import { Clbs } from './models/clbs/clbs.entity';
 import { ClbsHttpModule } from './models/clbs/clbs-http.module';
 import { Departments } from './models/departments/departments.entity';
@@ -49,7 +49,7 @@ dotenv.config();
                  Semesters,
                  Students,
                  PointBoard,
-                 FinalBoard,
+                 FinalPoint,
                  Clbs,
                  Departments,
                  Events,
@@ -63,7 +63,7 @@ dotenv.config();
     SemestersHttpModule,
     StudentsHttpModule,
     PointBoardHttpModule,
-    FinalBoardHttpModule,
+    FinalPointHttpModule,
     ClbsHttpModule,
     DepartmentsHttpModule,
     EventHttpModule,

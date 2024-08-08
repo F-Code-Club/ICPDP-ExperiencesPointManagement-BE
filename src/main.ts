@@ -24,6 +24,7 @@ async function bootstrap() {
       "http://localhost:5173/",
       "http://localhost:5174",
       "http://localhost:5174/",
+      "https://epm-fe-dev.f-code.tech"
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     // allowed headers
@@ -51,6 +52,7 @@ async function bootstrap() {
     .addTag('RoleDepartments')
     .addTag('ClubMember')
     .addTag('DepartmentMember')
+    .addTag('FinalPoint')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

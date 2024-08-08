@@ -1,15 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FinalBoardController } from './final-board.controller';
+import { FinalPointController } from './final-point.controller';
+
 
 describe('FinalBoardController', () => {
-  let controller: FinalBoardController;
+  let controller: FinalPointController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [FinalBoardController],
+      controllers: [FinalPointController],
     }).compile();
 
-    controller = module.get<FinalBoardController>(FinalBoardController);
+    controller = module.get<FinalPointController>(FinalPointController);
   });
 
   it('should be defined', () => {
