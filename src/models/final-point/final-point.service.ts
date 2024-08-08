@@ -109,8 +109,8 @@ export class FinalPointService {
 
         if (totalFinalPoint < 80) {
             classification = "Khá";
-        } else if (totalFinalPoint >= 80 && totalFinalPoint <= 90) {
-            classification = "Giỏi";
+        } else if (totalFinalPoint >= 80 && totalFinalPoint < 90) {
+            classification = "Tốt";
         } else {
             classification = "Xuất sắc";
         }
@@ -167,7 +167,7 @@ export class FinalPointService {
         await Promise.all(
             existFinalPoints.map(async (fp) => {
                 const totalPersonalPoint = await this.takeActivePointFromEventPoint(fp.student.studentID, year, semester);
-
+                
                 fp.activityPoint.extraPoint1 = totalPersonalPoint;
 
                 await this.finalPointRepository.save(fp);
@@ -175,17 +175,18 @@ export class FinalPointService {
         );
 
         return existFinalPoints.map(fp => {
-            const totalStudyPoint = fp.studyPoint.extraPoint;
-            const totalActivityPoint = fp.activityPoint.extraPoint1 + fp.activityPoint.extraPoint2 + fp.activityPoint.extraPoint3 + fp.activityPoint.extraPoint4 + fp.activityPoint.extraPoint5;
-            const totalCitizenshipPoint = fp.citizenshipPoint.extraPoint;
-            const totalOrganizationPoint = fp.organizationPoint.extraPoint;
+            // total = extra + default
+            const totalStudyPoint = fp.studyPoint.extraPoint + 20;
+            const totalActivityPoint = fp.activityPoint.extraPoint1 + fp.activityPoint.extraPoint2 + fp.activityPoint.extraPoint3 + fp.activityPoint.extraPoint4 + fp.activityPoint.extraPoint5 + 15;
+            const totalCitizenshipPoint = fp.citizenshipPoint.extraPoint + 15;
+            const totalOrganizationPoint = fp.organizationPoint.extraPoint + 10;
             const totalFinalPoint = totalStudyPoint + totalActivityPoint + totalCitizenshipPoint + totalOrganizationPoint;
             let classification: string = "";
     
             if (totalFinalPoint < 80) {
                 classification = "Khá";
-            } else if (totalFinalPoint >= 80 && totalFinalPoint <= 90) {
-                classification = "Giỏi";
+            } else if (totalFinalPoint >= 80 && totalFinalPoint < 90) {
+                classification = "Tốt";
             } else {
                 classification = "Xuất sắc";
             }
@@ -194,13 +195,13 @@ export class FinalPointService {
                 studentID: fp.student.studentID,
                 studentName: fp.student.name,
                 studyPoint: fp.studyPoint,
-                totalStudyPoint: totalStudyPoint,
+                totalStudyPoint: totalStudyPoint > 35 ? 35 : totalStudyPoint, // max of totalStudyPoint is 35
                 activityPoint: fp.activityPoint,
-                totalActivityPoint: totalActivityPoint,
+                totalActivityPoint: totalActivityPoint > 50 ? 50 : totalActivityPoint, // max of totalActivityPoint is 50
                 citizenshipPoint: fp.citizenshipPoint,
-                totalCitizenshipPoint: totalCitizenshipPoint,
+                totalCitizenshipPoint: totalCitizenshipPoint > 25 ? 25 : totalCitizenshipPoint, // max of totalCitizenshipPoint is 25
                 organizationPoint: fp.organizationPoint,
-                totalOrganizationPoint: totalOrganizationPoint,
+                totalOrganizationPoint: totalOrganizationPoint > 30 ? 30 : totalOrganizationPoint, // max of totalOrganizationPoint is 30
                 totalFinalPoint: totalFinalPoint,
                 classification: classification,
             };
