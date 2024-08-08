@@ -11,14 +11,32 @@ export class FinalPointResponseDto {
     studyPoint: StudyPoint;
 
     @Expose()
+    totalStudyPoint: number;
+
+    @Expose()
     @Type(() => ActivityPoint)
     activityPoint: ActivityPoint;
+
+    @Expose()
+    totalActivityPoint: number;
 
     @Expose()
     @Type(() => CitizenshipPoint)
     citizenshipPoint: CitizenshipPoint;
 
     @Expose()
+    totalCitizenshipPoint: number;
+
+    @Expose()
     @Type(() => OrganizationPoint)
     organizationPoint: OrganizationPoint;
+
+    @Expose()
+    totalOrganizationPoint: number;
+
+    @Expose()
+    totalFinalPoint: number;
+
+    @Expose()
+    classification: string;
 }

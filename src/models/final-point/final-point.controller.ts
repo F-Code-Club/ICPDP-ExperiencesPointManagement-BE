@@ -32,7 +32,40 @@ export class FinalPointController {
         if (!finalPoints || count == 0) {  
             message = 'Get final points fail';
         }
-        return PaginationDto.from(DtoMapper.mapMany(finalPoints, FinalPointResponseDto), filter, count, message);
+
+        const responseData = finalPoints.map(fp => {
+            const totalStudyPoint = fp.studyPoint.extraPoint + 20;
+            const totalActivityPoint = fp.activityPoint.extraPoint1 + fp.activityPoint.extraPoint2 + fp.activityPoint.extraPoint3 + fp.activityPoint.extraPoint4 + fp.activityPoint.extraPoint5 + 15;
+            const totalCitizenshipPoint = fp.citizenshipPoint.extraPoint + 15;
+            const totalOrganizationPoint = fp.organizationPoint.extraPoint + 10;
+            const totalFinalPoint = totalStudyPoint + totalActivityPoint + totalCitizenshipPoint + totalOrganizationPoint;
+            let classification: string = "";
+    
+            if (totalFinalPoint < 80) {
+                classification = "Khá";
+            } else if (totalFinalPoint >= 80 && totalFinalPoint < 90) {
+                classification = "Tốt";
+            } else {
+                classification = "Xuất sắc";
+            }
+
+            return {
+                studentID: fp.student.studentID,
+                studentName: fp.student.name,
+                studyPoint: fp.studyPoint,
+                totalStudyPoint: totalStudyPoint > 35 ? 35 : totalStudyPoint, // max of totalStudyPoint is 35
+                activityPoint: fp.activityPoint,
+                totalActivityPoint: totalActivityPoint > 50 ? 50 : totalActivityPoint, // max of totalActivityPoint is 50
+                citizenshipPoint: fp.citizenshipPoint,
+                totalCitizenshipPoint: totalCitizenshipPoint > 25 ? 25 : totalCitizenshipPoint, // max of totalCitizenshipPoint is 25
+                organizationPoint: fp.organizationPoint,
+                totalOrganizationPoint: totalOrganizationPoint > 30 ? 30 : totalOrganizationPoint, // max of totalOrganizationPoint is 30
+                totalFinalPoint: totalFinalPoint,
+                classification: classification,
+            };
+        });
+
+        return PaginationDto.from(DtoMapper.mapMany(responseData, FinalPointResponseDto), filter, count, message);
     }
 
     @Roles(Role.Admin)
