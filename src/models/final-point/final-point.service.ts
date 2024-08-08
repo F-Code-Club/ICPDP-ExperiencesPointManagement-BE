@@ -303,4 +303,16 @@ export class FinalPointService {
 
         return totalPoints;
     }
+
+    async deleteByStudentID (studentID: string) {
+        const existStudents = await this.finalPointRepository.find({
+            where: {
+                student: {
+                    studentID: studentID
+                }
+            }
+        });
+
+        return await this.finalPointRepository.remove(existStudents);
+    }
 }
