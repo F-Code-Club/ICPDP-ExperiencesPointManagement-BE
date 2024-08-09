@@ -200,6 +200,25 @@ export class FinalPointService {
             } else {
                 throw new ForbiddenException(`The year ${year} is not valid`);
             }
+        } else {
+            // Fetch all students on this application
+            const allStudents = await this.studentsRepository.find({
+                order: { studentID: 'ASC' }
+            });
+
+            const existingStudentIDs = existFinalPoints.map(fp => fp.student.studentID);
+
+            // Add missing students to Final Points
+            const missingStudents = allStudents.filter(student => !existingStudentIDs.includes(student.studentID));
+
+            if (missingStudents.length > 0) {
+                const addToFinalPoint: FinalPointAddDto[] = missingStudents.map((student) => ({
+                    studentID: student.studentID,
+                    student: student
+                }));
+                const newFinalPoints = await this.addFinalPoints(addToFinalPoint);
+                existFinalPoints = [...existFinalPoints, ...newFinalPoints];
+            }
         }
 
         await Promise.all(

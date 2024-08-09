@@ -7,7 +7,7 @@ export class StudentsDto {
         description: "ID must follow the standards of FPT University's student code"
     })
     @IsNotEmpty()
-    @MinLength(8, {
+    @MinLength(7, {
         message: 'This id is not valid'
     })
     @MaxLength(8, {
