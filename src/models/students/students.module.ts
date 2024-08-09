@@ -11,9 +11,11 @@ import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-excepti
 import { LocalFilesModule } from 'src/local-files/local-files.module';
 import { FinalPointHttpModule } from '../final-point/final-point-http.module';
 import { EventPoint } from '../eventPoint/event-point.entity';
+import { Clbs } from '../clbs/clbs.entity';
+import { Departments } from '../departments/departments.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Students, EventPoint]), LocalFilesModule, FinalPointHttpModule],
+  imports: [TypeOrmModule.forFeature([Students, EventPoint, Clbs, Departments]), LocalFilesModule, FinalPointHttpModule],
   exports: [TypeOrmModule],
   controllers: [StudentsController],
   providers: [StudentsService,
