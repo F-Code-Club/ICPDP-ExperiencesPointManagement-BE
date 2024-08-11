@@ -72,7 +72,7 @@ export class FinalPointController {
     @Post('/:year&:semester')
     async calculateFinalPoint (@Param('year') year: number, @Param('semester') semester: string) {
         const responseData = await this.finalPointService.findBySemester(year, semester);
-        return new ApiResponseDto(responseData, 'Calculate final point successfully');
+        return new ApiResponseDto(null, 'Calculate final point successfully');
     }
 
     @Roles(Role.Admin)
