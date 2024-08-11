@@ -49,6 +49,7 @@ export class DepartmentMemberService {
         if (!checkStudentID) {
             throw new ForbiddenException("ID must follow the standards of FPT University's student code");
         }
+        addMemberDto.studentID = await this.studentService.capitalizeFirstTwoLetters(addMemberDto.studentID);
 
         // check if this studentID is exist on this department or not
         const checkExistStudentIDOnDept = await this.findByStudentID(deptID, addMemberDto.studentID);
@@ -104,6 +105,8 @@ export class DepartmentMemberService {
         await Promise.all(
             addMemberDto.map(async (dto) => {
                 const isValidId = await this.studentService.checkValidId(dto.studentID);
+                dto.studentID = await this.studentService.capitalizeFirstTwoLetters(dto.studentID);
+                
                 const existStudent = await this.studentService.findByID(dto.studentID);
                 const existOnDepartment = await this.findByStudentID(departmentID, dto.studentID);
 

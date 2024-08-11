@@ -62,6 +62,7 @@ export class StudentsService {
     */
     async createStudents(studentDto: StudentsDto) {
         const checkValid = await this.checkValidId(studentDto.studentID);
+        studentDto.studentID = await this.capitalizeFirstTwoLetters(studentDto.studentID);
 
         if (!checkValid) {
             throw new ForbiddenException("ID must follow the standards of FPT University's student code");
@@ -96,6 +97,8 @@ export class StudentsService {
         await Promise.all(
             studentsDto.map(async (studentDto) => {
                 const isValidId = await this.checkValidId(studentDto.studentID);
+                studentDto.studentID = await this.capitalizeFirstTwoLetters(studentDto.studentID);
+                
                 const existStudent = await this.findByID(studentDto.studentID);
 
                 if (!isValidId) {
@@ -220,8 +223,15 @@ export class StudentsService {
     }
 
     async checkValidId(id: string): Promise<boolean> {
-        const regex = /^[A-Z]{2}\d{5,6}$/;
+        const regex = /^[a-zA-Z]{2}\d{5,6}$/;
 
         return regex.test(id);
+    }
+
+    async capitalizeFirstTwoLetters(id: string) {
+        const firstTwoLettersUppercase = id.slice(0, 2).toUpperCase();
+        const remainingPart = id.slice(2);
+
+        return firstTwoLettersUppercase + remainingPart;
     }
 }
