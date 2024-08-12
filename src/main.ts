@@ -59,7 +59,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Set server timeout to 5 minutes
-  app.getHttpAdapter().getInstance().server.setTimeout(300000);
+  const server = app.getHttpServer();
+  server.timeout = 300000;
 
   await app.listen(3000);
 
