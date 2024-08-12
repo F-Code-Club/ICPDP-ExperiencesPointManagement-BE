@@ -76,6 +76,7 @@ export class EventPointService {
         if (!checkStudentID) {
             throw new ForbiddenException("ID must follow the standards of FPT University's student code");
         }
+        addStudentDto.studentID = await this.studentService.capitalizeFirstTwoLetters(addStudentDto.studentID);
 
         // check if this studentID is exist on organization
         await this.checkStudentOnOrganization(organizationID, userRole, addStudentDto.studentID);
@@ -154,6 +155,7 @@ export class EventPointService {
                 if (!checkStudentID) {
                     throw new ForbiddenException("ID must follow the standards of FPT University's student code");
                 }
+                dto.studentID = await this.studentService.capitalizeFirstTwoLetters(dto.studentID);
 
                 // check if this studentID is exist on organization
                 await this.checkStudentOnOrganization(organizationID, userRole, dto.studentID);

@@ -5,12 +5,19 @@ import { Repository } from 'typeorm';
 import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { UsersDto } from 'src/dto/users.dto';
+import { Role } from 'src/enum/roles/role.enum';
+import { Clbs } from '../clbs/clbs.entity';
+import { Departments } from '../departments/departments.entity';
 
 @Injectable()
 export class UsersService {
     constructor (
         @InjectRepository(Users)
         private userRepository: Repository<Users>,
+        @InjectRepository(Clbs)
+        private clbsRepository: Repository<Clbs>,
+        @InjectRepository(Departments)
+        private deptsRepository: Repository<Departments>
     ) {};
 
     /*
@@ -58,6 +65,32 @@ export class UsersService {
                 username: username,
             }
         });
+
+        if (foundUser.role === Role.Clb) {
+            const checkClbByUserID = await this.clbsRepository.findOne({ 
+                where: {
+                    user: {
+                        userID: foundUser.userID
+                    }
+                }
+            }); 
+
+            if (!checkClbByUserID.active) {
+                throw new ForbiddenException("Club is not active");
+            }
+        } else if (foundUser.role === Role.Dept) {
+            const checkDeptByUserID = await this.deptsRepository.findOne({
+                where: {
+                    user: {
+                        userID: foundUser.userID
+                    }
+                }
+            });
+
+            if (!checkDeptByUserID.active) {
+                throw new ForbiddenException("Department is not active");
+            }
+        }
 
         if (foundUser) {
             const key = (await promisify(scrypt)(password, 'salt', 32)) as Buffer;

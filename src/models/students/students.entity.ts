@@ -7,7 +7,7 @@ export class Students {
     @PrimaryColumn({ unique: true })
     studentID: string;
 
-    @Column()
+    @Column({ default: '' })
     name: string;
 
     @OneToMany(() => EventPoint, (eventPoint) => eventPoint.student)
