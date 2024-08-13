@@ -114,12 +114,6 @@ export class StudentsService {
 
         const newStudents = await this.studentsRepository.save(importedStudents);
 
-        const addDtoForFinalPoints: FinalPointAddDto[] = newStudents.map((student) => ({
-            studentID: student.studentID,
-            student: student
-        }));
-        await this.finalPointService.addFinalPoints(addDtoForFinalPoints);
-
         return newStudents;
     }
 
