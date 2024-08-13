@@ -98,6 +98,10 @@ export class StudentsService {
             studentsDto.map(async (studentDto) => {
                 const isValidId = await this.checkValidId(studentDto.studentID);
                 studentDto.studentID = await this.capitalizeFirstTwoLetters(studentDto.studentID);
+
+                if (!studentDto.name || studentDto.name === undefined) {
+                    throw new ForbiddenException(`${studentDto.studentID} does not have name`);
+                }
                 
                 const existStudent = await this.findByID(studentDto.studentID);
 
