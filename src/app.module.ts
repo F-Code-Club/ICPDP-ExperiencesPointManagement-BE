@@ -31,6 +31,8 @@ import { LocalFilesModule } from './local-files/local-files.module';
 import { LocalFile } from './local-files/local-file.entity';
 import { ClubMemberHttpModule } from './models/clubMember/club-member-http.module';
 import { DepartmentMemberHttpModule } from './models/departmentMember/department-member-http.module';
+import { EventDashBoardHttpModule } from './models/event-dash-board/event-dash-board-http.module';
+
 dotenv.config();
 
 @Module({
@@ -70,7 +72,8 @@ dotenv.config();
     EventPointHttpModule,
     AuthModule,
     ClubMemberHttpModule,
-    DepartmentMemberHttpModule
+    DepartmentMemberHttpModule,
+    EventDashBoardHttpModule
   ],
   controllers: [AppController],
   providers: [AppService],
