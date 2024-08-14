@@ -39,10 +39,15 @@ export class EventDashBoardController {
                 organizationID,
                 organizationName,
                 eventCount: 0,
+                status: true
               };
             }
       
             acc[organizationID].eventCount += 1;
+
+            if (!event.status) {
+                acc[organizationID].status = false;
+            }
       
             return acc;
         }, {});

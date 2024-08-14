@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Events } from '../event/event.entity';
 import { Repository } from 'typeorm';
 import { GetEventDashBoardAdmin } from './dto/event-dash-board-get-admin.dto';
-import { Semesters } from '../semesters/semesters.entity';
 import { SemestersService } from '../semesters/semesters.service';
 
 @Injectable()
@@ -11,8 +10,6 @@ export class EventDashBoardService {
     constructor (
         @InjectRepository(Events)
         private eventRepository: Repository<Events>,
-        @InjectRepository(Semesters)
-        private semesterRepository: Repository<Semesters>,
         private readonly semesterService: SemestersService
     ) {};
 
@@ -46,7 +43,8 @@ export class EventDashBoardService {
                 'club.clubID',
                 'club.name',
                 'department.departmentID',
-                'department.name'
+                'department.name',
+                'event.status'
             ])
             .orderBy('event.createdAt', 'ASC')
             .skip(dto.take * (dto.page - 1))

@@ -17,6 +17,9 @@ export class Events {
     @Column()
     year: number;
 
+    @Column({ default: false })
+    status: boolean;
+
     @ManyToOne(() => Clbs, (clb) => clb.event)
     @JoinColumn({ name: "clubID" })
     club: Clbs
