@@ -44,7 +44,7 @@ export class EventDashBoardService {
                 'club.name',
                 'department.departmentID',
                 'department.name',
-                'event.status'
+                'event.statusFillPoint'
             ])
             .orderBy('event.createdAt', 'ASC')
             .skip(dto.take * (dto.page - 1))

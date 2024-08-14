@@ -212,7 +212,7 @@ export class FinalPointService {
 
                     fp.activityPoint.extraPoint1 = totalPoints;
 
-                    await this.eventsRepository.update({ eventID: In(eventIDs) }, { status: true });
+                    await this.eventsRepository.update({ eventID: In(eventIDs) }, { statusFillPoint: true });
                 }
 
                 await this.finalPointRepository.save(fp);

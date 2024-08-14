@@ -45,7 +45,7 @@ export class EventDashBoardController {
       
             acc[organizationID].eventCount += 1;
 
-            if (!event.status) {
+            if (!event.statusFillPoint) {
                 acc[organizationID].status = false;
             }
       

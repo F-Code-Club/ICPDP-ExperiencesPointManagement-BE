@@ -9,6 +9,7 @@ import { Role } from 'src/enum/roles/role.enum';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
+import { GrantPermissionDto } from './dto/event-grant-permission.dto';
 
 @Injectable()
 export class EventService {
@@ -205,6 +206,43 @@ export class EventService {
         }
 
         return deleteEvent.affected;
+    }
+
+    /*
+    [PATCH]: /events/grant-permission
+    */
+    async grantPermission (grantDto: GrantPermissionDto, id: string) {
+        const checkExistEvent = await this.findById(id);
+        if (!checkExistEvent) {
+            return null;
+        }
+
+        let isChanged = false;
+
+        if (grantDto.note !== checkExistEvent.adminPermission.note) {
+            checkExistEvent.adminPermission.note = grantDto.note;
+            isChanged = true;
+        }
+        if (grantDto.status !== checkExistEvent.adminPermission.status) {
+            checkExistEvent.adminPermission.status = grantDto.status;
+            isChanged = true;
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const grantedEvent = await this.eventsRepository.save(checkExistEvent);
+
+        const responseData = {
+            eventID: grantedEvent.eventID,
+            eventName: grantedEvent.eventName,
+            semester: grantedEvent.semester,
+            year: grantedEvent.year,
+            adminPermission: grantedEvent.adminPermission
+        };
+
+        return responseData;
     }
 
     async findById (id: string) {
