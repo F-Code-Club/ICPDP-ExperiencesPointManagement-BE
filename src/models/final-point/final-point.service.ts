@@ -8,7 +8,7 @@ import { FinalPointAddDto } from './dto/final-point-add.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
 import { Students } from '../students/students.entity';
 import { Semesters } from '../semesters/semesters.entity';
-import { Events } from '../event/event.entity';
+import { Events, StatusPermission } from '../event/event.entity';
 
 @Injectable()
 export class FinalPointService {
@@ -311,12 +311,15 @@ export class FinalPointService {
             relations: ['student', 'event']
         });
 
-        if (eventPoints.length === 0) {
+        // filter to only take Approved event point
+        const approvedEventPoints = eventPoints.filter(eventPoint => eventPoint.event.adminPermission.status === StatusPermission.Approved);
+
+        if (approvedEventPoints.length === 0) {
             return 0;
         }
 
-        const totalPoints = eventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
-        const eventIDs = eventPoints.map(eventPoint => eventPoint.event.eventID); 
+        const totalPoints = approvedEventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
+        const eventIDs = approvedEventPoints.map(eventPoint => eventPoint.event.eventID); 
 
         return { totalPoints, eventIDs };
     }
