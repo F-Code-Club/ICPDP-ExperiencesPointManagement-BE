@@ -10,6 +10,7 @@ import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
 import { GrantPermissionDto } from './dto/event-grant-permission.dto';
+import { SemestersService } from '../semesters/semesters.service';
 
 @Injectable()
 export class EventService {
@@ -20,6 +21,7 @@ export class EventService {
         private eventPointRepository: Repository<EventPoint>,
         private readonly clbsService: ClbsService,
         private readonly departmentSerivce: DepartmentsService,
+        private readonly semesterService: SemestersService
     ) {};
 
     /* 
@@ -42,6 +44,40 @@ export class EventService {
             organization = await this.departmentSerivce.findByUserId(userId);
 
             if (!organization || organization.departmentID !== dto.organization) {
+                throw new ForbiddenException('You do not have right to get event');
+            }
+
+        }
+
+        // Remove ID and createdAt from responseData
+        const formattedData = responseData.map(event => {
+            const { createdAt, ...rest } = event;
+            return rest;
+        })
+
+        return formattedData;
+    }
+
+    /* 
+    [GET]: /events/current-semester
+    */
+    async getAllEventsInCurrentSemester (organizationID: string, userRole: string, userId: string) {
+        const currentSemester = await this.semesterService.getCurrentSemester();
+
+        let responseData = await this.getByOrganization(organizationID, currentSemester.semester, currentSemester.year);
+        let organization = null;
+
+        if (userRole === Role.Clb) {
+            organization = await this.clbsService.findByUserId(userId);
+
+            if (!organization || organization.clubID !== organizationID) {
+                throw new ForbiddenException('You do not have right to get event');
+            }
+
+        } else if (userRole === Role.Dept) {
+            organization = await this.departmentSerivce.findByUserId(userId);
+
+            if (!organization || organization.departmentID !== organizationID) {
                 throw new ForbiddenException('You do not have right to get event');
             }
 

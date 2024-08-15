@@ -32,6 +32,17 @@ export class EventController {
     }
 
     @Roles(Role.Clb, Role.Dept)
+    @Get('/current-semester')
+    async getAllEventsInCurrentSemester (@Request() req, @Res() res: Response) {
+        const responseData = await this.eventsService.getAllEventsInCurrentSemester(req.user.organizationID, req.user.role, req.user.userID);
+        if (responseData.length === 0) {
+            return res.status(404).json(new ApiResponseDto(null, 'Empty page'));
+        } else {
+            return res.status(200).json(new ApiResponseDto(responseData, 'Get events successfully'));
+        }
+    }
+
+    @Roles(Role.Clb, Role.Dept)
     @Post()
     async createEvents (@Request() req, @Body() eventDto: EventDto) {
         const responseData = await this.eventsService.createEvents(eventDto, req.user.role, req.user.userID);
