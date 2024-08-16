@@ -1,13 +1,14 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FinalPoint } from './final-point.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
 import { FinalPointAddDto } from './dto/final-point-add.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
 import { Students } from '../students/students.entity';
 import { Semesters } from '../semesters/semesters.entity';
+import { Events, StatusPermission } from '../event/event.entity';
 
 @Injectable()
 export class FinalPointService {
@@ -19,7 +20,9 @@ export class FinalPointService {
         @InjectRepository(Students)
         private studentsRepository: Repository<Students>,
         @InjectRepository(Semesters)
-        private semesterRepository: Repository<Semesters>
+        private semesterRepository: Repository<Semesters>,
+        @InjectRepository(Events)
+        private eventsRepository: Repository<Events>
     ) {};
 
     /*
@@ -202,9 +205,15 @@ export class FinalPointService {
 
         await Promise.all(
             existFinalPoints.map(async (fp) => {
-                const totalPersonalPoint = await this.takeActivePointFromEventPoint(fp.student.studentID, year, semester);
-                
-                fp.activityPoint.extraPoint1 = totalPersonalPoint;
+                const result = await this.takeActivePointFromEventPoint(fp.student.studentID, year, semester);
+
+                if (typeof result === 'object' && 'eventIDs' in result) {
+                    const { totalPoints, eventIDs } = result;
+
+                    fp.activityPoint.extraPoint1 = totalPoints;
+
+                    await this.eventsRepository.update({ eventID: In(eventIDs) }, { statusFillPoint: true });
+                }
 
                 await this.finalPointRepository.save(fp);
             })
@@ -302,13 +311,17 @@ export class FinalPointService {
             relations: ['student', 'event']
         });
 
-        if (eventPoints.length === 0) {
+        // filter to only take Approved event point
+        const approvedEventPoints = eventPoints.filter(eventPoint => eventPoint.event.adminPermission.status === StatusPermission.Approved);
+
+        if (approvedEventPoints.length === 0) {
             return 0;
         }
 
-        const totalPoints = eventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
+        const totalPoints = approvedEventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
+        const eventIDs = approvedEventPoints.map(eventPoint => eventPoint.event.eventID); 
 
-        return totalPoints;
+        return { totalPoints, eventIDs };
     }
 
     async deleteByStudentID (studentID: string) {

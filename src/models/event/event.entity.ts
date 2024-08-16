@@ -3,6 +3,20 @@ import { Clbs } from "../clbs/clbs.entity";
 import { Departments } from "../departments/departments.entity";
 import { EventPoint } from "../eventPoint/event-point.entity";
 
+export enum StatusPermission {
+    Approved = 'approved',
+    Pending = 'pending',
+    Denied = 'denied',
+}
+
+export class AdminPermission {
+    @Column({ default: '' })
+    note: string;
+
+    @Column({ default: StatusPermission.Pending })
+    status: StatusPermission;
+}
+
 @Entity()
 export class Events {
     @PrimaryGeneratedColumn("uuid")
@@ -16,6 +30,15 @@ export class Events {
 
     @Column()
     year: number;
+
+    @Column({ 
+        default: false,
+        name: "statusFillPoint"
+    })
+    statusFillPoint: boolean;
+
+    @Column(type => AdminPermission)
+    adminPermission: AdminPermission;
 
     @ManyToOne(() => Clbs, (clb) => clb.event)
     @JoinColumn({ name: "clubID" })

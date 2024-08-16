@@ -9,6 +9,8 @@ import { Role } from 'src/enum/roles/role.enum';
 import { EventUpdateRequestDto } from './dto/event-update-request.dto';
 import { EventFilterDto } from './dto/event-filter.dto';
 import { EventPoint } from '../eventPoint/event-point.entity';
+import { GrantPermissionDto } from './dto/event-grant-permission.dto';
+import { SemestersService } from '../semesters/semesters.service';
 
 @Injectable()
 export class EventService {
@@ -19,6 +21,7 @@ export class EventService {
         private eventPointRepository: Repository<EventPoint>,
         private readonly clbsService: ClbsService,
         private readonly departmentSerivce: DepartmentsService,
+        private readonly semesterService: SemestersService
     ) {};
 
     /* 
@@ -41,6 +44,40 @@ export class EventService {
             organization = await this.departmentSerivce.findByUserId(userId);
 
             if (!organization || organization.departmentID !== dto.organization) {
+                throw new ForbiddenException('You do not have right to get event');
+            }
+
+        }
+
+        // Remove ID and createdAt from responseData
+        const formattedData = responseData.map(event => {
+            const { createdAt, ...rest } = event;
+            return rest;
+        })
+
+        return formattedData;
+    }
+
+    /* 
+    [GET]: /events/current-semester
+    */
+    async getAllEventsInCurrentSemester (organizationID: string, userRole: string, userId: string) {
+        const currentSemester = await this.semesterService.getCurrentSemester();
+
+        let responseData = await this.getByOrganization(organizationID, currentSemester.semester, currentSemester.year);
+        let organization = null;
+
+        if (userRole === Role.Clb) {
+            organization = await this.clbsService.findByUserId(userId);
+
+            if (!organization || organization.clubID !== organizationID) {
+                throw new ForbiddenException('You do not have right to get event');
+            }
+
+        } else if (userRole === Role.Dept) {
+            organization = await this.departmentSerivce.findByUserId(userId);
+
+            if (!organization || organization.departmentID !== organizationID) {
                 throw new ForbiddenException('You do not have right to get event');
             }
 
@@ -205,6 +242,43 @@ export class EventService {
         }
 
         return deleteEvent.affected;
+    }
+
+    /*
+    [PATCH]: /events/grant-permission
+    */
+    async grantPermission (grantDto: GrantPermissionDto, id: string) {
+        const checkExistEvent = await this.findById(id);
+        if (!checkExistEvent) {
+            return null;
+        }
+
+        let isChanged = false;
+
+        if (grantDto.note !== checkExistEvent.adminPermission.note) {
+            checkExistEvent.adminPermission.note = grantDto.note;
+            isChanged = true;
+        }
+        if (grantDto.status !== checkExistEvent.adminPermission.status) {
+            checkExistEvent.adminPermission.status = grantDto.status;
+            isChanged = true;
+        }
+
+        if (!isChanged) {
+            return 'Nothing changed';
+        }
+
+        const grantedEvent = await this.eventsRepository.save(checkExistEvent);
+
+        const responseData = {
+            eventID: grantedEvent.eventID,
+            eventName: grantedEvent.eventName,
+            semester: grantedEvent.semester,
+            year: grantedEvent.year,
+            adminPermission: grantedEvent.adminPermission
+        };
+
+        return responseData;
     }
 
     async findById (id: string) {

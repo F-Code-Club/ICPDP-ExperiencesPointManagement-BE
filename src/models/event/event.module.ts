@@ -11,9 +11,10 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { BadRequestExceptionExceptionFilter } from 'src/utils/badrequest-exception.filter';
 import { UnauthorizedExceptionFilter } from 'src/utils/unauthorized-exception.filter';
 import { EventPoint } from '../eventPoint/event-point.entity';
+import { SemestersHttpModule } from '../semesters/semesters-http.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Events]), TypeOrmModule.forFeature([EventPoint]), ClbsHttpModule, DepartmentsHttpModule],
+  imports: [TypeOrmModule.forFeature([Events]), TypeOrmModule.forFeature([EventPoint]), ClbsHttpModule, DepartmentsHttpModule, SemestersHttpModule],
   exports: [TypeOrmModule],
   controllers: [EventController],
   providers: [EventService,
