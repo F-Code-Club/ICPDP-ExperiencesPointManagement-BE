@@ -4,12 +4,18 @@ import { Events } from '../event/event.entity';
 import { Repository } from 'typeorm';
 import { GetEventDashBoardAdmin } from './dto/event-dash-board-get-admin.dto';
 import { SemestersService } from '../semesters/semesters.service';
+import { Clbs } from '../clbs/clbs.entity';
+import { Departments } from '../departments/departments.entity';
 
 @Injectable()
 export class EventDashBoardService {
     constructor (
         @InjectRepository(Events)
         private eventRepository: Repository<Events>,
+        @InjectRepository(Clbs)
+        private clbRepository: Repository<Clbs>,
+        @InjectRepository(Departments)
+        private departmentRepository: Repository<Departments>,
         private readonly semesterService: SemestersService
     ) {};
 
@@ -30,25 +36,53 @@ export class EventDashBoardService {
             throw new ForbiddenException('The current semester is not exist on this application');
         }
 
-        return await this.eventRepository.createQueryBuilder('event')
-            .leftJoinAndSelect('event.club', 'club')
-            .leftJoinAndSelect('event.department', 'department')
-            .where('event.semester = :semester', { semester: currentSemester.semester })
-            .andWhere('event.year = :year', { year: currentSemester.year })
-            .select([
-                'event.eventID',
-                'event.eventName',
-                'event.semester',
-                'event.year',
-                'club.clubID',
-                'club.name',
-                'department.departmentID',
-                'department.name',
-                'event.statusFillPoint'
-            ])
-            .orderBy('event.createdAt', 'ASC')
-            .skip(dto.take * (dto.page - 1))
-            .take(dto.take)
-            .getManyAndCount();        
+        const [clubs, departments] = await Promise.all([
+            this.clbRepository.find({
+                skip: (dto.page - 1) * dto.take,
+                take: dto.take,
+            }),
+            this.departmentRepository.find({
+                skip: (dto.page - 1) * dto.take,
+                take: dto.take,
+            }),
+        ]);
+
+        const organizations = await Promise.all([...clubs, ...departments].map(async (org) => {
+            let events: Events[];
+            let organizationID: string;
+
+            if ('clubID' in org) {
+                organizationID = org.clubID;
+                events = await this.eventRepository.find({
+                    where: {
+                        club: { clubID: org.clubID },
+                        semester: currentSemester.semester,
+                        year: currentSemester.year
+                    }
+                });
+            } else if ('departmentID' in org) {
+                organizationID = org.departmentID;
+                events = await this.eventRepository.find({
+                    where: {
+                        department: { departmentID: org.departmentID },
+                        semester: currentSemester.semester,
+                        year: currentSemester.year
+                    }
+                });
+            }
+
+            const eventCount = events.length;
+            const status = events.every(event => event.statusFillPoint);
+
+            return {
+                organizationID: organizationID,
+                organizationName: org.name,
+                eventCount,
+                status
+            };
+        }));
+
+        return {events: organizations, count: clubs.length + departments.length};
+    
     }
 }

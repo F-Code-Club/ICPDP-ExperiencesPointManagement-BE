@@ -24,36 +24,13 @@ export class EventDashBoardController {
         if (!filter) {
             throw new BadRequestException('Lacked of request param');
         }
-        const [events, count] = await this.eventDbService.getAllEventForAdmin(filter);
+        const result = await this.eventDbService.getAllEventForAdmin(filter);
+        const {events, count} = result;
         let message = 'Get event dash board successfully';
         if (!events || count == 0) {
             message = 'Get event dash board fail';
         }   
-        // count event for each organization
-        const groupedEvents = events.reduce((acc, event) => {
-            const organizationID = event.club?.clubID || event.department?.departmentID;
-            const organizationName = event.club?.name || event.department?.name;
-      
-            if (!acc[organizationID]) {
-              acc[organizationID] = {
-                organizationID,
-                organizationName,
-                eventCount: 0,
-                status: true
-              };
-            }
-      
-            acc[organizationID].eventCount += 1;
-
-            if (!event.statusFillPoint) {
-                acc[organizationID].status = false;
-            }
-      
-            return acc;
-        }, {});
-      
-        const responseData = Object.values(groupedEvents);
-
-        return PaginationDto.from(DtoMapper.mapMany(responseData, GetAllEventAdminResponseDto), filter, count, message);
+    
+        return PaginationDto.from(DtoMapper.mapMany(events, GetAllEventAdminResponseDto), filter, count, message);
     }
 }
