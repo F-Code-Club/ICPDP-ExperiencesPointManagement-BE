@@ -56,7 +56,7 @@ export class RoleClbsService {
 
         // check if the new role is exist or not
         const checkExistName = await this.findByName(updateDto.role);
-        if (checkExistName.roleClubID !== checkExistRole.roleClubID) {
+        if (checkExistName !== null && (checkExistName.roleClubID !== checkExistRole.roleClubID)) {
             throw new ForbiddenException(`This role ${updateDto.role} is already exist`);
         }
 
