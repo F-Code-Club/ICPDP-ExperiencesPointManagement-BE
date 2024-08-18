@@ -185,6 +185,8 @@ export class EventService {
 
         const updatedEvent = await this.eventsRepository.save(checkExistEventByEventID);
 
+        await this.resetAdminPermission(checkExistEventByEventID);
+
         const responseData = {
             eventID: updatedEvent.eventID,
             eventName: updatedEvent.eventName,
