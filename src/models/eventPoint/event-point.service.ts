@@ -14,6 +14,7 @@ import { RoleClbsService } from '../roleClbs/role-clbs.service';
 import { RoleDepartmentsService } from '../roleDepartments/role-departments.service';
 import { ClubMemberService } from '../clubMember/club-member.service';
 import { DepartmentMemberService } from '../departmentMember/department-member.service';
+import { Events } from '../event/event.entity';
 
 @Injectable()
 export class EventPointService {
@@ -127,6 +128,8 @@ export class EventPointService {
 
         const newStudent = await this.eventPointRepository.save(createdStudents);
 
+        await this.eventService.resetAdminPermission(checkEvent);
+
         const responseData = {
             studentID: newStudent.student.studentID,
             studentName: newStudent.student.name,
@@ -147,6 +150,8 @@ export class EventPointService {
         if (!checkRoleForAddStudents) {
             throw new ForbiddenException('You do not have right to add students on this event');
         }
+
+        let checkEvent: Events;
 
         await Promise.all(
             addStudentDto.map(async (dto) => {
@@ -174,7 +179,7 @@ export class EventPointService {
                 dto.student = checkExistStudentOnSystem;
 
                 // check if this eventID is exist or not
-                const checkEvent = await this.eventService.findById(eventID);
+                checkEvent = await this.eventService.findById(eventID);
                 if (!checkEvent) {
                     throw new ForbiddenException('This event is not exist');
                 }
@@ -202,6 +207,8 @@ export class EventPointService {
 
         const newStudents = await this.eventPointRepository.save(importedStudents);
 
+        await this.eventService.resetAdminPermission(checkEvent);
+
         const responseData = newStudents.map(res => {
             return {
                 studentID: res.student.studentID,
@@ -221,6 +228,11 @@ export class EventPointService {
         const checkRoleForUpdate = await this.checkRole(eventID, userRole, userId);
         if (!checkRoleForUpdate) {
             throw new ForbiddenException('You do not have right to update student on this event');
+        }
+
+        const checkEvent = await this.eventService.findById(eventID);
+        if (!checkEvent) {
+            throw new ForbiddenException('This event is not exist');
         }
 
         let isChanged = false;
@@ -272,6 +284,8 @@ export class EventPointService {
 
         const updatedStudentOnEventPoint = await this.eventPointRepository.save(checkUpStudentEventPoint);
 
+        await this.eventService.resetAdminPermission(checkEvent);
+
         const responseData = {
             studentID: updatedStudentOnEventPoint.student.studentID,
             studentName: updatedStudentOnEventPoint.student.name,
@@ -309,6 +323,9 @@ export class EventPointService {
         }
 
         const res = await this.eventPointRepository.delete(checkDelEvent.id);
+
+        await this.eventService.resetAdminPermission(checkEvent);
+
         return res.affected;
     }
 
