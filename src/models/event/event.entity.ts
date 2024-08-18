@@ -10,7 +10,7 @@ export enum StatusPermission {
 }
 
 export class AdminPermission {
-    @Column({ default: '' })
+    @Column({ type: 'text', nullable: true })
     note: string;
 
     @Column({ default: StatusPermission.Pending })
