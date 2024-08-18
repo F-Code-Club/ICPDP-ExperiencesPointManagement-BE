@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Events } from '../event/event.entity';
-import { Repository } from 'typeorm';
+import { CustomRepositoryNotFoundError, Repository } from 'typeorm';
 import { GetEventDashBoardAdmin } from './dto/event-dash-board-get-admin.dto';
 import { SemestersService } from '../semesters/semesters.service';
 import { Clbs } from '../clbs/clbs.entity';
@@ -36,20 +36,35 @@ export class EventDashBoardService {
             throw new ForbiddenException('The current semester is not exist on this application');
         }
 
-        const [clubs, departments] = await Promise.all([
-            this.clbRepository.find({
-                skip: (dto.page - 1) * dto.take,
+        let clubs = [];
+        let departments = [];
+        let countClub: number, countDept: number;
+
+        if (dto.take > 0) {
+            [clubs, countClub] = await this.clbRepository.findAndCount({
+                skip: dto.take * (dto.page - 1),
                 take: dto.take,
-            }),
-            this.departmentRepository.find({
-                skip: (dto.page - 1) * dto.take,
-                take: dto.take,
-            }),
-        ]);
+            });
+    
+            // If slots available, take department
+            if (clubs.length <= dto.take) {
+                const remainingTake = dto.take - clubs.length;
+                [departments, countDept] = await this.departmentRepository.findAndCount({
+                    skip: (dto.page - 1) * dto.take,
+                    take: remainingTake,
+                });
+                if (remainingTake === 0) {
+                    departments = [];
+                }
+            }
+        } else {
+            [clubs, countClub] = await this.clbRepository.findAndCount();
+            [departments, countDept] = await this.departmentRepository.findAndCount();
+        }
 
         const organizations = await Promise.all([...clubs, ...departments].map(async (org) => {
             let events: Events[];
-            let organizationID: string;
+            let organizationID: string;            
 
             if ('clubID' in org) {
                 organizationID = org.clubID;
@@ -82,7 +97,10 @@ export class EventDashBoardService {
             };
         }));
 
-        return {events: organizations, count: clubs.length + departments.length};
+        countClub = countClub ? countClub : 0;
+        countDept = countDept ? countDept: 0;
+
+        return {events: organizations, count: countClub + countDept};
     
     }
 }
