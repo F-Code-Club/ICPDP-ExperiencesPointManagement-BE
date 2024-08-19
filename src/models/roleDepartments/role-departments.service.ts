@@ -56,7 +56,7 @@ export class RoleDepartmentsService {
 
         // check if the new role is exist or not
         const checkExistName = await this.findByName(updateDto.role);
-        if (checkExistName.roleDepartmentID !== checkExistRole.roleDepartmentID) {
+        if (checkExistName !== null && (checkExistName.roleDepartmentID !== checkExistRole.roleDepartmentID)) {
             throw new ForbiddenException(`This role ${updateDto.role} is already exist`);
         }
 

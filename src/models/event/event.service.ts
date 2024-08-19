@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Events } from './event.entity';
+import { Events, StatusPermission } from './event.entity';
 import { Repository } from 'typeorm';
 import { EventDto } from 'src/dto/event.dto';
 import { ClbsService } from '../clbs/clbs.service';
@@ -185,6 +185,8 @@ export class EventService {
 
         const updatedEvent = await this.eventsRepository.save(checkExistEventByEventID);
 
+        await this.resetAdminPermission(checkExistEventByEventID);
+
         const responseData = {
             eventID: updatedEvent.eventID,
             eventName: updatedEvent.eventName,
@@ -330,5 +332,13 @@ export class EventService {
         if (!validSemesters.includes(semester.toLowerCase())) {
             throw new ForbiddenException(`This semester ${semester} is not valid`);
         }
+    }
+
+    async resetAdminPermission (event: Events) {
+        if (event.adminPermission.status !== StatusPermission.Pending) {
+            event.adminPermission.note = '';
+            event.adminPermission.status = StatusPermission.Pending;
+        }
+        return await this.eventsRepository.save(event);
     }
 }
