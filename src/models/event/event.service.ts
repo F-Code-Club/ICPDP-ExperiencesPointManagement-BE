@@ -64,6 +64,10 @@ export class EventService {
     async getAllEventsInCurrentSemester (organizationID: string, userRole: string, userId: string) {
         const currentSemester = await this.semesterService.getCurrentSemester();
 
+        if (!currentSemester) {
+            throw new ForbiddenException(`The current semester is out of date or has not been created`);
+        }
+
         let responseData = await this.getByOrganization(organizationID, currentSemester.semester, currentSemester.year);
         let organization = null;
 

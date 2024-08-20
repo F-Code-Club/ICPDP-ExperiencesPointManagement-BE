@@ -33,7 +33,7 @@ export class EventDashBoardService {
         const currentSemester = await this.semesterService.getCurrentSemester();
 
         if (!currentSemester) {
-            throw new ForbiddenException('The current semester is not exist on this application');
+            throw new ForbiddenException(`The current semester is out of date or has not been created`);
         }
 
         let clubs = [];
