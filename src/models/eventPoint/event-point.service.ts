@@ -154,22 +154,22 @@ export class EventPointService {
             addStudentDto.map(async (dto) => {
                 // check valid of studentID
                 const checkStudentID = await this.studentService.checkValidId(dto.studentID);
-                if (!checkStudentID) {
-                    throw new ForbiddenException("ID must follow the standards of FPT University's student code");
-                }
+                // if (!checkStudentID) {
+                //     throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+                // }
                 dto.studentID = await this.studentService.capitalizeFirstTwoLetters(dto.studentID);
         
                 // check if this studentID is exist on this eventID or not
                 const checkExistStudentOnThisEvent = await this.findByStudentIDnEventID(eventID, dto.studentID);
-                if (checkExistStudentOnThisEvent) {
-                    throw new ForbiddenException(`This student ${dto.studentID} is already exist on this event`);
-                }
+                // if (checkExistStudentOnThisEvent) {
+                //     throw new ForbiddenException(`This student ${dto.studentID} is already exist on this event`);
+                // }
 
                 // check if this studentID is exist on this application or not
                 const checkExistStudentOnSystem = await this.studentService.findByID(dto.studentID);
-                if (!checkExistStudentOnSystem) {
-                    throw new ForbiddenException(`This student ${dto.studentID} is not exist on this application`);
-                }
+                // if (!checkExistStudentOnSystem) {
+                //     throw new ForbiddenException(`This student ${dto.studentID} is not exist on this application`);
+                // }
                 dto.student = checkExistStudentOnSystem;
 
                 // check if this eventID is exist or not
@@ -195,7 +195,9 @@ export class EventPointService {
                     dto.point = checkRole.point;
                 }
 
-                importedStudents.push(dto);
+                if (checkStudentID && checkExistStudentOnThisEvent && checkExistStudentOnSystem) {
+                    importedStudents.push(dto);                    
+                }
             })
         );
 
