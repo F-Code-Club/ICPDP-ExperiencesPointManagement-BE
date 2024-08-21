@@ -238,8 +238,8 @@ export class EventPointService {
             throw new ForbiddenException('This event or this student is not valid');
         }
 
-        // check if the studentIDFromParam is exist on organization or not
-        await this.checkStudentOnOrganization(organizationID, userRole, studentIDFromParam);
+        // // check if the studentIDFromParam is exist on organization or not
+        // await this.checkStudentOnOrganization(organizationID, userRole, studentIDFromParam);
 
         // update studentID
         if (updateDto.studentID && updateDto.studentID !== studentIDFromParam) {
