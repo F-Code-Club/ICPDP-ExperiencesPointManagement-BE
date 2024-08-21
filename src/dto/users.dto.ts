@@ -7,7 +7,7 @@ export class UsersDto {
     description: 'Username must be unique'
    })
    @IsNotEmpty()
-   @MinLength(5, {
+   @MinLength(2, {
     message: 'This username is too short'
    })
    @MaxLength(20, {
