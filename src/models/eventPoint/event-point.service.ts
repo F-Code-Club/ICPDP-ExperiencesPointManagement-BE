@@ -195,7 +195,7 @@ export class EventPointService {
                     dto.point = checkRole.point;
                 }
 
-                if (checkStudentID && checkExistStudentOnThisEvent && checkExistStudentOnSystem) {
+                if ((checkStudentID && !checkExistStudentOnThisEvent) && checkExistStudentOnSystem) {
                     importedStudents.push(dto);                    
                 }
             })
