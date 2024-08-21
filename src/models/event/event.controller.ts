@@ -45,7 +45,7 @@ export class EventController {
     @Roles(Role.Clb, Role.Dept)
     @Post()
     async createEvents (@Request() req, @Body() eventDto: EventDto) {
-        const responseData = await this.eventsService.createEvents(eventDto, req.user.role, req.user.userID);
+        const responseData = await this.eventsService.createEvents(eventDto, req.user.role, req.user.userID, req.user.organizationID);
         return new ApiResponseDto(responseData, 'Create event successfully');
     }   
 

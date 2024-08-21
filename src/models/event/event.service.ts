@@ -100,10 +100,10 @@ export class EventService {
     /*
     [POST]: /events
     */
-    async createEvents (eventDto: EventDto, userRole: string, userID: string) {
+    async createEvents (eventDto: EventDto, userRole: string, userID: string, organizationID: string) {
         await this.validateSemester(eventDto.semester);
 
-        const checkDuplicate = await this.checkDuplicateEvent(eventDto.eventName, eventDto.semester, eventDto.year);
+        const checkDuplicate = await this.checkDuplicateEvent(eventDto.eventName, eventDto.semester, eventDto.year, organizationID);
 
         if (checkDuplicate) {
             throw new ForbiddenException('This event is already exist in this semester');
@@ -297,13 +297,27 @@ export class EventService {
         return existEvent;
     }
 
-    async checkDuplicateEvent (eventName: string, semester: string, year: number) {
+    async checkDuplicateEvent (eventName: string, semester: string, year: number, organizationID: string) {
         const existEvent = await this.eventsRepository.findOne({
-            where: {
-                eventName: eventName,
-                semester: semester,
-                year: year
-            }
+            where: [
+                {
+                    eventName: eventName,
+                    semester: semester,
+                    year: year,
+                    club: {
+                        clubID: organizationID
+                    }
+                },
+                {
+                    eventName: eventName,
+                    semester: semester,
+                    year: year,
+                    department:  {
+                        departmentID: organizationID
+                    }
+                }
+            ],
+            relations: ['club', 'department']
         });
         return existEvent;
     }
