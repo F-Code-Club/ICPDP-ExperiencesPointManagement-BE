@@ -227,8 +227,9 @@ export class StudentsService {
     }
 
     async capitalizeFirstTwoLetters(id: string) {
-        const firstTwoLettersUppercase = id.slice(0, 2).toUpperCase();
-        const remainingPart = id.slice(2);
+        const idString = id.toString(); // to string the id
+        const firstTwoLettersUppercase = idString.slice(0, 2).toUpperCase();
+        const remainingPart = idString.slice(2);
 
         return firstTwoLettersUppercase + remainingPart;
     }
