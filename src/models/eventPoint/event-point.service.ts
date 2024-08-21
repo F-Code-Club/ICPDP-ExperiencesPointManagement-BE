@@ -152,13 +152,16 @@ export class EventPointService {
 
         await Promise.all(
             addStudentDto.map(async (dto) => {
-                // check valid of studentID
-                const checkStudentID = await this.studentService.checkValidId(dto.studentID);
-                // if (!checkStudentID) {
-                //     throw new ForbiddenException("ID must follow the standards of FPT University's student code");
-                // }
-                dto.studentID = await this.studentService.capitalizeFirstTwoLetters(dto.studentID);
-        
+                let checkStudentID;
+                if ((dto.studentID !== '' || dto.studentID !== null) || !dto.studentID) {
+                    // check valid of studentID
+                    checkStudentID = await this.studentService.checkValidId(dto.studentID);
+                    // if (!checkStudentID) {
+                    //     throw new ForbiddenException("ID must follow the standards of FPT University's student code");
+                    // }
+                    dto.studentID = await this.studentService.capitalizeFirstTwoLetters(dto.studentID);
+                }
+                
                 // check if this studentID is exist on this eventID or not
                 const checkExistStudentOnThisEvent = await this.findByStudentIDnEventID(eventID, dto.studentID);
                 // if (checkExistStudentOnThisEvent) {
