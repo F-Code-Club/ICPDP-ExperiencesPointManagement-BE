@@ -306,21 +306,21 @@ export class FinalPointService {
                 },
                 event: {
                     year: year,
-                    semester: semester
+                    semester: semester,
+                    adminPermission: {
+                        status: StatusPermission.Approved
+                    }
                 }
             },
             relations: ['student', 'event']
         });
 
-        // filter to only take Approved event point
-        const approvedEventPoints = eventPoints.filter(eventPoint => eventPoint.event.adminPermission.status === StatusPermission.Approved);
-
-        if (approvedEventPoints.length === 0) {
+        if (eventPoints.length === 0) {
             return 0;
         }
 
-        const totalPoints = approvedEventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
-        const eventIDs = approvedEventPoints.map(eventPoint => eventPoint.event.eventID); 
+        const totalPoints = eventPoints.reduce((sum, eventPoint) => sum + eventPoint.point, 0);
+        const eventIDs = eventPoints.map(eventPoint => eventPoint.event.eventID); 
 
         return { totalPoints, eventIDs };
     }
