@@ -3,7 +3,7 @@ import { Semesters } from "../semesters/semesters.entity";
 import { Students } from "../students/students.entity";
 
 export class StudyPoint {
-    @Column({ default: 0 })
+    @Column({ default: 15 })
     extraPoint: number;
 
     @Column({ default: '' })
