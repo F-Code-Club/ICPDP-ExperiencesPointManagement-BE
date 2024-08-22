@@ -183,15 +183,18 @@ export class FinalPointService {
         if (existFinalPoints.length === 0 && !existSemester) {        
             throw new ForbiddenException(`This ${semesterID} is not exist on this application`);
         } else if (existSemester && existFinalPoints.length === 0) {
-            // Fetch all students on this application
-            const allStudents = await this.studentsRepository.find({
-                order: { studentID: 'ASC' }
-            });
-
-            const existingStudentIDs = existFinalPoints.map(fp => fp.student.studentID);
-
-            // Add missing students to Final Points
-            const missingStudents = allStudents.filter(student => !existingStudentIDs.includes(student.studentID));
+            // Using QueryBuilder to find missing students directly
+            const missingStudents = await this.studentsRepository.createQueryBuilder('student')
+            .where(
+                `NOT EXISTS (
+                    SELECT 1 FROM final_point fp
+                    WHERE fp.studentID = student.studentID
+                    AND fp.semesterID = :semesterID
+                )`,
+                { semesterID: semesterID.toLowerCase() }
+            )
+            .orderBy('student.studentID', 'ASC')
+            .getMany();
 
             if (missingStudents.length > 0) {
                 const addToFinalPoint: FinalPointAddDto[] = missingStudents.map((student) => ({
@@ -203,21 +206,19 @@ export class FinalPointService {
             }
         }
 
-        await Promise.all(
-            existFinalPoints.map(async (fp) => {
-                const result = await this.takeActivePointFromEventPoint(fp.student.studentID, year, semester);
-
-                if (typeof result === 'object' && 'eventIDs' in result) {
-                    const { totalPoints, eventIDs } = result;
-
-                    fp.activityPoint.extraPoint1 = totalPoints;
-
-                    await this.eventsRepository.update({ eventID: In(eventIDs) }, { statusFillPoint: true });
-                }
-
-                await this.finalPointRepository.save(fp);
-            })
-        );
+        for (const fp of existFinalPoints) {
+            const result = await this.takeActivePointFromEventPoint(fp.student.studentID, year, semester);
+    
+            if (typeof result === 'object' && 'eventIDs' in result) {
+                const { totalPoints, eventIDs } = result;
+    
+                fp.activityPoint.extraPoint1 = totalPoints;
+    
+                await this.eventsRepository.update({ eventID: In(eventIDs) }, { statusFillPoint: true });
+            }
+    
+            await this.finalPointRepository.save(fp);
+        }
 
         return existFinalPoints.map(fp => {
             // total = extra + default
