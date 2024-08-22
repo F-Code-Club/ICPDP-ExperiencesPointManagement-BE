@@ -28,7 +28,7 @@ export class FinalPointService {
     /*
     [GET]: /final-point/{year}&{semester}
     */
-    async getFinalPoints(dto: FinalPointFilterDto, year: number, semester: string) {
+    async getFinalPoints(dto: FinalPointFilterDto, year: number, semester: string, orderBy: string, order: string) {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -37,6 +37,8 @@ export class FinalPointService {
         }
 
         const semesterIDToFound = `${semester}${year}`;
+
+        orderBy = this.asignedValueToOrderBy(orderBy);
 
         return await this.finalPointRepository.findAndCount({
             relations: ['student'],
@@ -47,7 +49,9 @@ export class FinalPointService {
                     semesterID: semesterIDToFound.toLowerCase().trim(),
                 }
             },
-            order: { createdAt: 'ASC' }
+            order: { 
+                [orderBy]: order
+            }
         });
     }
 
@@ -335,5 +339,20 @@ export class FinalPointService {
         });
 
         return await this.finalPointRepository.remove(existStudents);
+    }
+
+    asignedValueToOrderBy (orderBy: string) {
+        if (orderBy === 'studentID') {
+            orderBy = 'student.studentID';
+        } else if (orderBy === 'studyPoint') {
+            orderBy = 'studyPoint.extraPoint';
+        } else if (orderBy === 'activityPoint') {
+            orderBy = 'activityPoint.extraPoint1';
+        } else if (orderBy === 'citizenshipPoint') {
+            orderBy = 'citizenshipPoint.extraPoint';
+        } else if (orderBy === 'organizationPoint') {
+            orderBy = 'organization.extraPoint';
+        }
+        return orderBy;
     }
 }
