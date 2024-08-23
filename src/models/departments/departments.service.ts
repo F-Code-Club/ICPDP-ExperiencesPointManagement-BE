@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Departments } from './departments.entity';
 import { DepartmentsDto } from 'src/dto/departments.dto';
 import { Users } from '../users/users.entity';
@@ -35,11 +35,17 @@ export class DepartmentsService {
         if (dto.take < 0) {
             throw new ForbiddenException('take must greater than or equal to 0');
         }
+
+        const searchCondition = dto.searchValue ? { name: Like(`%${dto.searchValue}%`) } : {};
+
         return await this.deptsRepository.findAndCount({ 
             relations: ['user'], 
             take: dto.take, 
             skip: dto.take*(dto.page - 1),
-            order: { createdAt: 'ASC' } 
+            where: searchCondition,
+            order: { 
+                [dto.orderBy]: dto.order
+            } 
         });
     }
 
