@@ -28,7 +28,7 @@ export class StudentsService {
     /*
     [GET]: /students/page?&&take?
     */
-    async getStudents(dto: StudentsFilterDto) {
+    async getStudents(dto: StudentsFilterDto, orderBy: string, order: string, searchValue: string) {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -38,7 +38,17 @@ export class StudentsService {
         return await this.studentsRepository.findAndCount({
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            order: { studentID: 'ASC' }
+            where: [
+                {
+                    studentID: searchValue,
+                },
+                {
+                    name: searchValue
+                }
+            ],
+            order: { 
+                [orderBy]: order 
+            }
         });
     }
 
