@@ -31,7 +31,7 @@ export class EventPointController {
         if (!filter) {
             throw new BadRequestException('Lacked of request param');
         }
-        const [students, count] = await this.eventPointService.getStudents(filter, id, req.user.role, req.user.userID);
+        const [students, count] = await this.eventPointService.getStudents(filter, id, req.user.role, req.user.userID, filter.orderBy, filter.order, filter.searchValue);
         let message = 'Get students successfully';
         if (!students || count == 0) {  
             message = 'Get students fail';

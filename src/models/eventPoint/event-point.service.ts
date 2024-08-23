@@ -34,7 +34,7 @@ export class EventPointService {
     /* 
     [GET]: /eventpoint/{eventID}
     */
-    async getStudents(dto: EventPointFilterDto, eventID: string, userRole: string, userID: string) {
+    async getStudents(dto: EventPointFilterDto, eventID: string, userRole: string, userID: string, orderBy: string, order: string, searchValue: string) {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -56,13 +56,26 @@ export class EventPointService {
             relations: ['event', 'student'],
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            where: {
-                event: {
-                    eventID: checkEvent.eventID
+            where: [
+                {
+                    event: {
+                        eventID: checkEvent.eventID
+                    },
+                    student: {
+                        studentID: searchValue,
+                    }
+                },
+                { 
+                    event: {
+                        eventID: checkEvent.eventID
+                    },
+                    student: {
+                        name: searchValue,
+                    }
                 }
-            },
+            ],
             order: {
-                createdAt: 'ASC'
+                [orderBy]: order
             }
         });
     }
