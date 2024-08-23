@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clbs } from './clbs.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { ClbsDto } from 'src/dto/clbs.dto';
 import { Users } from '../users/users.entity';
 import { UsersService } from '../users/users.service';
@@ -35,11 +35,17 @@ export class ClbsService {
         if (dto.take < 0) {
             throw new ForbiddenException('take must greater than or equal to 0');
         }
+
+        const searchCondition = dto.searchValue ? { name: Like(`%${dto.searchValue}%`) } : {};
+
         return await this.clbsRepository.findAndCount({ 
             relations: ['user'], 
             take: dto.take, 
             skip: dto.take*(dto.page - 1),
-            order: { createdAt: 'ASC' } 
+            where: searchCondition,
+            order: { 
+                [dto.orderBy]: dto.order 
+            } 
         });
     }
 
