@@ -28,7 +28,7 @@ export class FinalPointService {
     /*
     [GET]: /final-point/{year}&{semester}
     */
-    async getFinalPoints(dto: FinalPointFilterDto, year: number, semester: string, orderBy: string, order: string) {
+    async getFinalPoints(dto: FinalPointFilterDto, year: number, semester: string, orderBy: string, order: string, searchValue: string) {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -44,11 +44,24 @@ export class FinalPointService {
             relations: ['student'],
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            where: {
-                semester: {
-                    semesterID: semesterIDToFound.toLowerCase().trim(),
+            where: [
+                {
+                    semester: {
+                        semesterID: semesterIDToFound.toLowerCase().trim(),
+                    },
+                    student: {
+                        studentID: searchValue
+                    }
+                },
+                {
+                    semester: {
+                        semesterID: semesterIDToFound.toLowerCase().trim(),
+                    },
+                    student: {
+                        name: searchValue
+                    }
                 }
-            },
+            ],
             order: { 
                 [orderBy]: order
             }

@@ -22,12 +22,12 @@ export class FinalPointController {
     ) {};
 
     @Roles(Role.Admin)
-    @Get('/:year&:semester&:orderBy&:order')
-    async getFinalPoints (@Param('year') year: number, @Param('semester') semester: string, @Param('orderBy') orderBy: string, @Param('order') order: string, @Query() filter: FinalPointFilterDto) {
-        if (!filter) {
+    @Get('/:year&:semester')
+    async getFinalPoints (@Param('year') year: number, @Param('semester') semester: string ,@Query() filter: FinalPointFilterDto) {
+        if (!filter) { 
             throw new BadRequestException('Lacked of request param');
         }
-        const [finalPoints, count] = await this.finalPointService.getFinalPoints(filter, year, semester, orderBy, order);
+        const [finalPoints, count] = await this.finalPointService.getFinalPoints(filter, year, semester, filter.orderBy, filter.order, filter.searchValue);
         let message = 'Get final points successfully';
         if (!finalPoints || count == 0) {  
             message = 'Get final points fail';
