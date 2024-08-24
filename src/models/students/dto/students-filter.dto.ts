@@ -8,6 +8,8 @@ export class StudentsFilterDto extends BaseFilterDto {
     @ApiPropertyOptional()    
     order?: string;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({
+        default: ''
+    })
     searchValue?: string;
 }
