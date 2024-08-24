@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EventPoint } from './event-point.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { EventPointCreateRequestDto } from './dto/event-point-create-request.dto';
 import { EventService } from '../event/event.service';
 import { DepartmentsService } from '../departments/departments.service';
@@ -34,7 +34,7 @@ export class EventPointService {
     /* 
     [GET]: /eventpoint/{eventID}
     */
-    async getStudents(dto: EventPointFilterDto, eventID: string, userRole: string, userID: string, orderBy: string, order: string, searchValue: string) {
+    async getStudents(dto: EventPointFilterDto, eventID: string, userRole: string, userID: string) {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -52,30 +52,32 @@ export class EventPointService {
             throw new ForbiddenException('You do not have right to get student on this event');
         }
 
-        return await this.eventPointRepository.findAndCount({
-            relations: ['event', 'student'],
-            take: dto.take,
-            skip: dto.take*(dto.page - 1),
-            where: [
+        const searchCondition = dto.searchValue ? [
+                { 
+                    event: { 
+                        eventID: checkEvent.eventID
+                    }, 
+                    student: {
+                        studentID: Like(`%${dto.searchValue}%`)
+                    }
+                },
                 {
                     event: {
                         eventID: checkEvent.eventID
                     },
                     student: {
-                        studentID: searchValue,
-                    }
-                },
-                { 
-                    event: {
-                        eventID: checkEvent.eventID
-                    },
-                    student: {
-                        name: searchValue,
+                        name: Like(`%${dto.searchValue}%`),
                     }
                 }
-            ],
+            ] : [];
+
+        return await this.eventPointRepository.findAndCount({
+            relations: ['event', 'student'],
+            take: dto.take,
+            skip: dto.take*(dto.page - 1),
+            where: searchCondition,
             order: {
-                [orderBy]: order
+                [dto.orderBy]: dto.order
             }
         });
     }
