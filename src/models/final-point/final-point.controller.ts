@@ -27,7 +27,7 @@ export class FinalPointController {
         if (!filter) { 
             throw new BadRequestException('Lacked of request param');
         }
-        const [finalPoints, count] = await this.finalPointService.getFinalPoints(filter, year, semester, filter.orderBy, filter.order, filter.searchValue);
+        const [finalPoints, count] = await this.finalPointService.getFinalPoints(filter, year, semester);
         let message = 'Get final points successfully';
         if (!finalPoints || count == 0) {  
             message = 'Get final points fail';

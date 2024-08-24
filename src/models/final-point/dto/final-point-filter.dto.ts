@@ -9,6 +9,8 @@ export class FinalPointFilterDto extends BaseFilterDto {
     @ApiPropertyOptional()    
     order?: string;
 
-    @ApiPropertyOptional()
+    @ApiPropertyOptional({
+        default: ''
+    })
     searchValue?: string;
 }

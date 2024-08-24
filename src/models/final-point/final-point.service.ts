@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FinalPoint } from './final-point.entity';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
 import { FinalPointAddDto } from './dto/final-point-add.dto';
@@ -28,7 +28,7 @@ export class FinalPointService {
     /*
     [GET]: /final-point/{year}&{semester}
     */
-    async getFinalPoints(dto: FinalPointFilterDto, year: number, semester: string, orderBy: string, order: string, searchValue: string) {
+    async getFinalPoints(dto: FinalPointFilterDto, year: number, semester: string) {
         if (dto.page < 1) {
             throw new ForbiddenException('page must greater than or equal to 1');
         }
@@ -38,32 +38,34 @@ export class FinalPointService {
 
         const semesterIDToFound = `${semester}${year}`;
 
-        orderBy = this.asignedValueToOrderBy(orderBy);
+        dto.orderBy = this.asignedValueToOrderBy(dto.orderBy);
+
+        const searchCondition = dto.searchValue ? [
+                {
+                    semester: {
+                        semesterID: semesterIDToFound.toLowerCase().trim(),
+                    },
+                    student: {
+                        studentID: Like(`%${dto.searchValue}%`)
+                    }
+                }, 
+                {
+                    semester: {
+                        semesterID: semesterIDToFound.toLowerCase().trim(),
+                    },
+                    student: {
+                        name: Like(`%${dto.searchValue}%`)
+                    }
+                }
+            ] : [];
 
         return await this.finalPointRepository.findAndCount({
             relations: ['student'],
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            where: [
-                {
-                    semester: {
-                        semesterID: semesterIDToFound.toLowerCase().trim(),
-                    },
-                    student: {
-                        studentID: searchValue
-                    }
-                },
-                {
-                    semester: {
-                        semesterID: semesterIDToFound.toLowerCase().trim(),
-                    },
-                    student: {
-                        name: searchValue
-                    }
-                }
-            ],
+            where: searchCondition,
             order: { 
-                [orderBy]: order
+                [dto.orderBy]: dto.order
             }
         });
     }
