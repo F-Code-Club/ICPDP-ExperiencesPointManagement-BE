@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Events } from '../event/event.entity';
-import { CustomRepositoryNotFoundError, Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { GetEventDashBoardAdmin } from './dto/event-dash-board-get-admin.dto';
 import { SemestersService } from '../semesters/semesters.service';
 import { Clbs } from '../clbs/clbs.entity';
@@ -39,9 +39,16 @@ export class EventDashBoardService {
         let clubs = [];
         let departments = [];
         let countClub: number, countDept: number;
+        const searchCondition = dto.searchValue ? {
+            name: Like(`%${dto.searchValue}%`)
+        } : {};
 
         if (dto.take > 0) {
             [clubs, countClub] = await this.clbRepository.findAndCount({
+                where: searchCondition,
+                order: {
+                    [dto.orderBy]: dto.order
+                },
                 skip: dto.take * (dto.page - 1),
                 take: dto.take,
             });
@@ -50,6 +57,10 @@ export class EventDashBoardService {
             if (clubs.length <= dto.take) {
                 const remainingTake = dto.take - clubs.length;
                 [departments, countDept] = await this.departmentRepository.findAndCount({
+                    where: searchCondition,
+                    order: {
+                        [dto.orderBy]: dto.order
+                    },
                     skip: (dto.page - 1) * dto.take,
                     take: remainingTake,
                 });
@@ -58,8 +69,18 @@ export class EventDashBoardService {
                 }
             }
         } else {
-            [clubs, countClub] = await this.clbRepository.findAndCount();
-            [departments, countDept] = await this.departmentRepository.findAndCount();
+            [clubs, countClub] = await this.clbRepository.findAndCount({
+                where: searchCondition,
+                order: {
+                    [dto.orderBy]: dto.order
+                }
+            });
+            [departments, countDept] = await this.departmentRepository.findAndCount({
+                where: searchCondition,
+                order: {
+                    [dto.orderBy]: dto.order
+                }
+            });
         }
 
         const organizations = await Promise.all([...clubs, ...departments].map(async (org) => {
