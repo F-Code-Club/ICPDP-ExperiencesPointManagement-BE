@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
 
@@ -15,4 +15,15 @@ export class EventFilterDto {
     @ApiProperty()
     @IsString()
     semester: string;
+
+    @ApiPropertyOptional()
+    orderBy?: string;
+
+    @ApiPropertyOptional()    
+    order?: string;
+
+    @ApiPropertyOptional({
+        default: ''
+    })
+    searchValue?: string;
 }

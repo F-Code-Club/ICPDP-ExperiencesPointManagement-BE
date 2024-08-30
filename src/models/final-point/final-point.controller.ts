@@ -23,8 +23,8 @@ export class FinalPointController {
 
     @Roles(Role.Admin)
     @Get('/:year&:semester')
-    async getFinalPoints (@Param('year') year: number, @Param('semester') semester: string, @Query() filter: FinalPointFilterDto) {
-        if (!filter) {
+    async getFinalPoints (@Param('year') year: number, @Param('semester') semester: string ,@Query() filter: FinalPointFilterDto) {
+        if (!filter) { 
             throw new BadRequestException('Lacked of request param');
         }
         const [finalPoints, count] = await this.finalPointService.getFinalPoints(filter, year, semester);

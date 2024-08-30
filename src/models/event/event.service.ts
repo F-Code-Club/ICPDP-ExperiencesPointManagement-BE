@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Events, StatusPermission } from './event.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { EventDto } from 'src/dto/event.dto';
 import { ClbsService } from '../clbs/clbs.service';
 import { DepartmentsService } from '../departments/departments.service';
@@ -30,7 +30,7 @@ export class EventService {
     async getAllEvents (dto: EventFilterDto, userRole: string, userId: string) {
         await this.validateSemester(dto.semester);
 
-        let responseData = await this.getByOrganization(dto.organization, dto.semester, dto.year);
+        let responseData = await this.getByOrganization(dto.organization, dto.semester, dto.year, dto.orderBy, dto.order, dto.searchValue);
         let organization = null;
 
         if (userRole === Role.Clb) {
@@ -322,25 +322,46 @@ export class EventService {
         return existEvent;
     }
 
-    async getByOrganization (organization: string, semester: string, year: number) {
-        const existEvent = await this.eventsRepository.find({
-            where: [
-                {
-                    semester: semester,
-                    year: year,
-                    club: {
-                        clubID: organization
-                    }
-                },
-                {
-                    semester: semester,
-                    year: year,
-                    department: {
-                        departmentID: organization
-                    }
+    async getByOrganization (organization: string, semester: string, year: number, orderBy?: string, order?: string, searchValue?: string) {
+        const searchCondition = searchValue ? [
+            {
+                eventName: Like(`%${searchValue}%`),
+                semester: semester,
+                year: year,
+                club: {
+                    clubID: organization,
                 }
-            ],
-            order: { createdAt: 'ASC' }
+            },
+            {
+                eventName: Like(`%${searchValue}%`),
+                semester: semester,
+                year: year,
+                department: {
+                    departmentID: organization,
+                }
+            }
+        ] : [
+            {
+                semester: semester,
+                year: year,
+                club: {
+                    clubID: organization,
+                }
+            },
+            {
+                semester: semester,
+                year: year,
+                department: {
+                    departmentID: organization,
+                }
+            }
+        ];
+
+        const existEvent = await this.eventsRepository.find({
+            where: searchCondition,
+            order: { 
+                [orderBy]: order 
+            }
         });
         return existEvent;
     }

@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FinalPoint } from './final-point.entity';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { FinalPointFilterDto } from './dto/final-point-filter.dto';
 import { FinalPointUpdateDto } from './dto/final-point-patch-request.dto';
 import { FinalPointAddDto } from './dto/final-point-add.dto';
@@ -38,16 +38,35 @@ export class FinalPointService {
 
         const semesterIDToFound = `${semester}${year}`;
 
+        dto.orderBy = this.asignedValueToOrderBy(dto.orderBy);
+
+        const searchCondition = dto.searchValue ? [
+                {
+                    semester: {
+                        semesterID: semesterIDToFound.toLowerCase().trim(),
+                    },
+                    student: {
+                        studentID: Like(`%${dto.searchValue}%`)
+                    }
+                }, 
+                {
+                    semester: {
+                        semesterID: semesterIDToFound.toLowerCase().trim(),
+                    },
+                    student: {
+                        name: Like(`%${dto.searchValue}%`)
+                    }
+                }
+            ] : [];
+
         return await this.finalPointRepository.findAndCount({
             relations: ['student'],
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            where: {
-                semester: {
-                    semesterID: semesterIDToFound.toLowerCase().trim(),
-                }
-            },
-            order: { createdAt: 'ASC' }
+            where: searchCondition,
+            order: { 
+                [dto.orderBy]: dto.order
+            }
         });
     }
 
@@ -335,5 +354,20 @@ export class FinalPointService {
         });
 
         return await this.finalPointRepository.remove(existStudents);
+    }
+
+    asignedValueToOrderBy (orderBy: string) {
+        if (orderBy === 'studentID') {
+            orderBy = 'student.studentID';
+        } else if (orderBy === 'studyPoint') {
+            orderBy = 'studyPoint.extraPoint';
+        } else if (orderBy === 'activityPoint') {
+            orderBy = 'activityPoint.extraPoint1';
+        } else if (orderBy === 'citizenshipPoint') {
+            orderBy = 'citizenshipPoint.extraPoint';
+        } else if (orderBy === 'organizationPoint') {
+            orderBy = 'organization.extraPoint';
+        }
+        return orderBy;
     }
 }

@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Students } from './students.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { StudentsDto } from 'src/dto/students.dto';
 import { UpdateStudentRequestDto } from './dto/students-update-request.dto';
 import { StudentsFilterDto } from './dto/students-filter.dto';
@@ -35,10 +35,16 @@ export class StudentsService {
         if (dto.take < 0) {
             throw new ForbiddenException('take must greater than or equal to 0');
         }
+
+        const searchCondition = dto.searchValue ? [{ studentID: Like(`%${dto.searchValue}%`) }, { name: Like(`%${dto.searchValue}%`) }] : [];
+
         return await this.studentsRepository.findAndCount({
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            order: { studentID: 'ASC' }
+            where: searchCondition,
+            order: { 
+                [dto.orderBy]: dto.order 
+            }
         });
     }
 

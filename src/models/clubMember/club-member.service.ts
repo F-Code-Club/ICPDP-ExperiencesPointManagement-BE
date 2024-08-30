@@ -35,6 +35,17 @@ export class ClubMemberService {
             .skip(dto.take * (dto.page - 1))
             .take(dto.take);
 
+        if (dto.searchValue) {
+            queryBuilder.andWhere(
+                'student.studentID LIKE :search OR student.name LIKE :search', 
+                { search: `%${dto.searchValue}%` }
+            );
+        }
+
+        if (dto.orderBy && (dto.order === 'ASC' || dto.order === 'DESC')) {
+            queryBuilder.orderBy(`student.${dto.orderBy}`, dto.order as 'ASC' | 'DESC');
+        }
+
         const [students, total] = await queryBuilder.getManyAndCount();
 
         return [students, total];

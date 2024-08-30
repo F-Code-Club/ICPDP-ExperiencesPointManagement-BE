@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EventPoint } from './event-point.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { EventPointCreateRequestDto } from './dto/event-point-create-request.dto';
 import { EventService } from '../event/event.service';
 import { DepartmentsService } from '../departments/departments.service';
@@ -52,17 +52,32 @@ export class EventPointService {
             throw new ForbiddenException('You do not have right to get student on this event');
         }
 
+        const searchCondition = dto.searchValue ? [
+                { 
+                    event: { 
+                        eventID: checkEvent.eventID
+                    }, 
+                    student: {
+                        studentID: Like(`%${dto.searchValue}%`)
+                    }
+                },
+                {
+                    event: {
+                        eventID: checkEvent.eventID
+                    },
+                    student: {
+                        name: Like(`%${dto.searchValue}%`),
+                    }
+                }
+            ] : [];
+
         return await this.eventPointRepository.findAndCount({
             relations: ['event', 'student'],
             take: dto.take,
             skip: dto.take*(dto.page - 1),
-            where: {
-                event: {
-                    eventID: checkEvent.eventID
-                }
-            },
+            where: searchCondition,
             order: {
-                createdAt: 'ASC'
+                [dto.orderBy]: dto.order
             }
         });
     }
